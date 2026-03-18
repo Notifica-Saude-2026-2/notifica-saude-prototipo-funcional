@@ -21,7 +21,6 @@
 - [Descrição do projeto](#descrição-do-projeto)
 - [Funcionalidades](#funcionalidades)
 - [Arquitetura](#arquitetura)
-- [Requisitos](#requisitos)
 - [Instalação e configuração](#instalação-e-configuração)
 - [Primeiros passos](#primeiros-passos)
 - [Estrutura de diretórios](#estrutura-de-diretórios)
@@ -88,13 +87,8 @@ contexts/      → contextos globais (autenticação, tenant)
 routes/        → definição de rotas e proteção por perfil
 ```
 
-> Decisões arquiteturais completas disponíveis em [`docs/decisions/`](docs/decisions/).
-
 ---
 
-## Requisitos
-
-Este sistema foi desenvolvido e testado em ambientes **Unix (Linux/macOS)**. O uso em Windows é possível via WSL2.
 
 ### Dependências obrigatórias
 
@@ -119,53 +113,9 @@ cp .env.example .env
 
 ---
 
-## Instalação e configuração
 
-```sh
-# 1. Clone o repositório
-git clone https://github.com/Notifica-Saude/notifica-saude-frontend.git
-cd notifica-saude-frontend
 
-# 2. Configure as variáveis de ambiente
-cp .env.example .env
 
-# 3. Instale as dependências
-npm install
-
-# 4. Inicie o servidor de desenvolvimento
-npm run dev
-```
-
-A aplicação estará disponível em `http://localhost:5173`.
-
----
-
-### Scripts disponíveis
-
-| Comando | Descrição |
-|---|---|
-| `npm run dev` | Inicia o servidor de desenvolvimento com hot-reload |
-| `npm run build` | Gera o bundle de produção em `dist/` |
-| `npm run preview` | Pré-visualiza o build de produção localmente |
-| `npm test` | Executa os testes automatizados |
-| `npm run lint` | Verifica o código com ESLint |
-
----
-
-## Primeiros passos
-
-Com o backend em execução e o seed aplicado, acesse `http://localhost:5173` e utilize as credenciais do administrador para o primeiro acesso:
-
-| Campo | Valor |
-|---|---|
-| E-mail | `admin@notificasaude.local` |
-| Senha | `Admin@1234` |
-
-> ⚠️ Altere a senha do administrador imediatamente após o primeiro acesso em ambiente de produção.
-
-A partir do painel do administrador é possível cadastrar unidades de saúde, setores e demais usuários do sistema.
-
----
 
 ## Estrutura de diretórios
 
