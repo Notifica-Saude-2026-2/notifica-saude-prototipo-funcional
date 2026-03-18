@@ -212,5 +212,4 @@ Proponentes:
 ---
 
 ## Licença
-
-Este sistema está disponível sob a licença [MIT](LICENSE).
+Inserir
