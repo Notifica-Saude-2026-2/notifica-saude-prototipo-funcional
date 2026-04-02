@@ -1,6 +1,6 @@
 import styles from "./Header.module.css";
 import logo from "../../../../assets/logo_azul.svg";
-import { Button } from "../../ui"; // usa seu botão
+import { Button } from "../../ui";
 
 type HeaderProps = {
   isAdmin?: boolean;
