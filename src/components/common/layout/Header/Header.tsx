@@ -1,6 +1,6 @@
 import styles from "./Header.module.css";
 import logo from "../../../../assets/logo_azul.svg";
-import { Button } from "../../ui";
+import { Link } from "react-router-dom"; // 👈 IMPORTANTE
 
 type HeaderProps = {
   isAdmin?: boolean;
@@ -9,19 +9,17 @@ type HeaderProps = {
 export function Header({ isAdmin = false }: HeaderProps) {
   return (
     <header className={styles.header}>
-      <div className={styles.logo}>
+      
+      <Link to="/" className={styles.logo}>
         <img src={logo} alt="Logo Notifica Saúde" />
-      </div>
+      </Link>
 
       <nav className={styles.nav}>
         {isAdmin && (
-          <>
-            <Button variant="text">Dashboard</Button>
-            <Button variant="text">Usuários</Button>
-            <Button variant="text">Relatórios</Button>
-          </>
+          <> </>
         )}
       </nav>
+
     </header>
   );
 }
