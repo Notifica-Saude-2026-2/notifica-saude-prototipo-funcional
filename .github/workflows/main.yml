@@ -1,0 +1,24 @@
+name: Notify Discord on PR
+
+on:
+  pull_request:
+    types: [opened, reopened, closed]
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Send message to Discord
+        run: |
+          curl -H "Content-Type: application/json" \
+          -d "{
+            \"content\": \"🚀 Atualização de PR!\",
+            \"embeds\": [{
+              \"title\": \"${{ github.event.pull_request.title }}\",
+              \"url\": \"${{ github.event.pull_request.html_url }}\",
+              \"description\": \"Autor: ${{ github.event.pull_request.user.login }}\",
+              \"color\": 5814783
+            }]
+          }" \
+          ${{ secrets.DISCORD_WEBHOOK_FRONT }}
