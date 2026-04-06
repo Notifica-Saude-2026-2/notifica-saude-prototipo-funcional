@@ -1,0 +1,72 @@
+.container {
+  display: flex;
+  justify-content: center;
+  padding: 24px 16px;
+}
+
+.content {
+  max-width: 900px;
+  width: 100%;
+}
+
+.title {
+  font-size: 22px;
+  margin-bottom: 16px;
+  color: #183EFF;
+}
+
+.text {
+  font-size: 14px;
+  line-height: 1.6;
+  margin-bottom: 16px;
+}
+
+.subtext {
+  font-size: 12px;
+  margin-top: 4px;
+  opacity: 0.8;
+  text-align: center;
+}
+
+/* AÇÕES */
+.actionsContainer {
+  margin-top: 32px;
+}
+
+.actionsTitle {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.actionsSubtitle {
+  display: block;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+/* BOTÕES */
+.buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* DESKTOP */
+@media (min-width: 768px) {
+  .title {
+    font-size: 28px;
+  }
+
+  .text {
+    font-size: 16px;
+  }
+
+  .buttons {
+    flex-direction: row;
+  }
+
+  .buttons > * {
+    flex: 1;
+  }
+}
