@@ -1,12 +1,12 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { TestPage } from "../pages/TestPage/TestPage";
+import { Routes, Route } from "react-router-dom";
+import Home from "../pages/Home/Home";
+import Teste from "../pages/Notificacao/Teste";
 
 export function AppRoutes() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<TestPage />} />
-      </Routes>
-    </BrowserRouter>
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/teste" element={<Teste />} />
+    </Routes>
   );
 }
