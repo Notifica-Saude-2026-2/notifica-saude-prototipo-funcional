@@ -5,15 +5,28 @@
   margin-top: 40px;
 }
 
+/* 🔥 CONTAINER CENTRALIZADO */
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+/* topo */
 .top {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
+/* título */
 .title {
   font-size: 18px;
-  font-weight: bold;
+  font-weight: 400; /* normal */
+}
+
+/* 🔥 negrito só no "Saúde" */
+.bold {
+  font-weight: 700;
 }
 
 .email {
@@ -21,18 +34,21 @@
   color: #cccccc;
 }
 
+/* divisor */
 .divider {
   margin: 16px 0;
   height: 1px;
   background-color: #2a2a2a;
 }
 
+/* bottom */
 .bottom {
   text-align: center;
   font-size: 12px;
   color: #aaaaaa;
 }
 
+/* responsivo */
 @media (min-width: 768px) {
   .top {
     flex-direction: row;
