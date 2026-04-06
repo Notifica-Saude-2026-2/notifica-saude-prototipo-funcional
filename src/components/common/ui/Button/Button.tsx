@@ -2,10 +2,13 @@ import React from "react";
 import styles from "./Button.module.css";
 
 type ButtonVariant = "outlined" | "contained" | "text";
+type ButtonColor = "orange" | "green";
 
 type ButtonProps = {
-  children: React.ReactNode;
+  title: string;
+  subtitle?: string;
   variant?: ButtonVariant;
+  color?: ButtonColor;
   disabled?: boolean;
   onClick?: () => void;
   href?: string;
@@ -15,8 +18,10 @@ type ButtonProps = {
 };
 
 export const Button: React.FC<ButtonProps> = ({
-  children,
+  title,
+  subtitle,
   variant = "outlined",
+  color,
   disabled = false,
   onClick,
   href,
@@ -27,16 +32,24 @@ export const Button: React.FC<ButtonProps> = ({
   const classNames = [
     styles.button,
     styles[variant],
+    color ? styles[color] : "",
     fullWidth ? styles.fullWidth : "",
     disabled ? styles.disabled : "",
   ].join(" ");
 
   const content = (
-    <>
+    <span className={styles.content}>
       {startIcon && <span className={styles.icon}>{startIcon}</span>}
-      <span>{children}</span>
+
+      <span className={styles.textWrapper}>
+        <span className={styles.title}>{title}</span>
+        {subtitle && (
+          <span className={styles.subtitle}>{subtitle}</span>
+        )}
+      </span>
+
       {endIcon && <span className={styles.icon}>{endIcon}</span>}
-    </>
+    </span>
   );
 
   if (href) {

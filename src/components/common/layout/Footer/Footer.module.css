@@ -5,6 +5,12 @@
   margin-top: 40px;
 }
 
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+
 .top {
   display: flex;
   flex-direction: column;
@@ -13,7 +19,11 @@
 
 .title {
   font-size: 18px;
-  font-weight: bold;
+  font-weight: 400;
+}
+
+.bold {
+  font-weight: 700;
 }
 
 .email {
