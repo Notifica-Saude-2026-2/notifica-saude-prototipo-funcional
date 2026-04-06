@@ -1,0 +1,11 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.select {
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
