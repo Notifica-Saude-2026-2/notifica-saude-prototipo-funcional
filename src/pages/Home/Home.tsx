@@ -33,7 +33,7 @@ export default function Home() {
               variant="outlined"
               color="orange"
               fullWidth
-              onClick={() => navigate("/teste")}
+              onClick={() => navigate("/notificacao")}
               title="Registrar incidente"
               subtitle="Não é necessário login. Leva menos de 3 minutos."
             />
