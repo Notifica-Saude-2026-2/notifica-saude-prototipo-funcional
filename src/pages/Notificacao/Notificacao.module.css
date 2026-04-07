@@ -1,0 +1,188 @@
+.pageContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 16px 48px;
+  gap: 20px;
+}
+
+.pageHeader {
+  width: 100%;
+  max-width: 900px;
+}
+
+.pageTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-h);
+  margin-bottom: 4px;
+}
+
+.pageSubtitle {
+  font-size: 13px;
+  color: var(--text);
+}
+
+/* FORM WRAPPER */
+.pageContainer > :not(.pageHeader) {
+  width: 100%;
+  max-width: 900px;
+}
+
+/* FIELD GROUP */
+.fieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.fieldLabel {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.asterisk {
+  color: #d32f2f;
+  margin-left: 2px;
+}
+
+.requiredHint {
+  font-size: 11px;
+  color: #d32f2f;
+  margin-top: -4px;
+}
+
+/* DATE INPUT */
+.dateInput {
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 14px;
+  color: var(--text-h);
+  width: 100%;
+  max-width: 240px;
+  cursor: pointer;
+}
+
+.dateInput:focus {
+  outline: none;
+  border-color: #183EFF;
+}
+
+/* TEXTAREA */
+.textarea {
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  color: var(--text-h);
+  resize: none;
+  overflow: hidden;
+  width: 100%;
+  line-height: 1.5;
+  min-height: 80px;
+}
+
+.textarea:focus {
+  outline: none;
+  border-color: #183EFF;
+}
+
+/* OUTRO INPUT */
+.outroInput {
+  margin-top: 8px;
+  padding-left: 26px;
+}
+
+/* OPTIONAL IDENTIFICATION */
+.optionalLabel {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.optionalFields {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 4px;
+}
+
+/* SUCCESS */
+.successCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  padding: 48px 24px;
+  width: 100%;
+  max-width: 900px;
+  text-align: center;
+}
+
+.successIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #183EFF;
+  color: #fff;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.successTitle {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-h);
+}
+
+.successText {
+  font-size: 14px;
+  color: var(--text);
+  max-width: 480px;
+  line-height: 1.6;
+}
+
+/* DESKTOP */
+@media (min-width: 768px) {
+  .pageContainer {
+    padding: 32px 24px 64px;
+  }
+
+  .pageTitle {
+    font-size: 22px;
+  }
+
+  .pageSubtitle {
+    font-size: 14px;
+  }
+
+  .fieldLabel {
+    font-size: 15px;
+  }
+
+  .dateInput {
+    font-size: 15px;
+  }
+
+  .textarea {
+    font-size: 15px;
+  }
+
+  .optionalFields {
+    flex-direction: row;
+    gap: 20px;
+  }
+
+  .optionalFields > * {
+    flex: 1;
+  }
+}
