@@ -47,6 +47,10 @@
   --btn-color: #2e7d32;
 }
 
+.primary {
+  --btn-color: #183EFF;
+}
+
 .outlined {
   background-color: transparent;
   color: #000;
