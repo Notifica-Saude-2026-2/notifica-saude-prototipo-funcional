@@ -1,6 +1,8 @@
 import { useState, useRef } from "react";
-import { BsChatSquareTextFill } from "react-icons/bs";
+import { useNavigate } from "react-router-dom";
+import { BsChatSquareTextFill, BsCheckCircle } from "react-icons/bs";
 import { FaUser, FaMapMarkerAlt, FaClipboardList } from "react-icons/fa";
+import { Button } from "../../components/common/ui/Button";
 import { StepForm } from "../../components/form/StepForm";
 import { RadioGroup } from "../../components/form/RadioGroup";
 import { Input } from "../../components/common/ui/Input";
@@ -54,6 +56,7 @@ function getTotalSteps(envolvePackiente: string): number {
 }
 
 export default function Notificacao() {
+  const navigate = useNavigate();
   const [screen, setScreen] = useState<Screen>("tela1");
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [submitted, setSubmitted] = useState(false);
@@ -72,8 +75,10 @@ export default function Notificacao() {
     formData.idade !== "" &&
     formData.sexo !== "" &&
     (formData.sexo !== "outro" || formData.sexoOutro.trim() !== "");
+  const today = new Date().toISOString().split("T")[0];
   const canAdvanceTela3 =
     formData.dataIncidente !== "" &&
+    formData.dataIncidente <= today &&
     formData.turno !== "" &&
     formData.setor !== "" &&
     (formData.setor !== "outro" || formData.setorOutro.trim() !== "");
@@ -108,12 +113,30 @@ export default function Notificacao() {
     return (
       <div className={styles.pageContainer}>
         <div className={styles.successCard}>
-          <span className={styles.successIcon}>✓</span>
-          <h2 className={styles.successTitle}>Notificação registrada!</h2>
+          <BsCheckCircle className={styles.successIcon} />
+          <h2 className={styles.successTitle}>Notificação enviada com sucesso!</h2>
           <p className={styles.successText}>
-            Sua notificação de incidente foi enviada com sucesso. Obrigado por
-            contribuir com a segurança do paciente.
+            Agradecemos o tempo dedicado para registrar o incidente. Sua contribuição
+            é muito importante para melhorar a segurança do paciente.
           </p>
+          <div className={styles.successActions}>
+            <Button
+              title="Voltar ao início"
+              variant="outlined"
+              color="gray"
+              onClick={() => navigate("/")}
+            />
+            <Button
+              title="Nova notificação"
+              variant="contained"
+              color="primary"
+              onClick={() => {
+                setFormData(initialFormData);
+                setScreen("tela1");
+                setSubmitted(false);
+              }}
+            />
+          </div>
         </div>
       </div>
     );
@@ -260,8 +283,12 @@ export default function Notificacao() {
               type="date"
               className={styles.dateInput}
               value={formData.dataIncidente}
+              max={new Date().toISOString().split("T")[0]}
               onChange={(e) => set("dataIncidente", e.target.value)}
             />
+            {formData.dataIncidente !== "" && formData.dataIncidente > today && (
+              <span className={styles.dateError}>Data inválida</span>
+            )}
           </div>
 
           <RadioGroup

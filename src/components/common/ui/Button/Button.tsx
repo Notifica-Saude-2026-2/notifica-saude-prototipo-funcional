@@ -2,7 +2,7 @@ import React from "react";
 import styles from "./Button.module.css";
 
 type ButtonVariant = "outlined" | "contained" | "text";
-type ButtonColor = "orange" | "green" | "primary";
+type ButtonColor = "orange" | "green" | "primary" | "gray";
 
 type ButtonProps = {
   title: string;

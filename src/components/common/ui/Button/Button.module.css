@@ -64,6 +64,7 @@
 
 .contained {
   color: #fff;
+  border: 2px solid transparent;
 }
 
 .orange.contained {
@@ -72,6 +73,29 @@
 
 .green.contained {
   background-color: #2e7d32;
+}
+
+.primary.contained {
+  background-color: #183EFF;
+}
+
+.gray {
+  --btn-color: #bdbdbd;
+}
+
+.gray.contained {
+  background-color: #757575;
+}
+
+.gray.outlined {
+  border-color: #bdbdbd;
+  color: #000;
+  background-color: #fff;
+}
+
+.gray.outlined:hover {
+  background-color: #fff;
+  color: #000;
 }
 
 .text {
