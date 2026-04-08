@@ -53,14 +53,14 @@ export const StepForm: React.FC<StepFormProps> = ({
           <Button
             title="Voltar"
             variant="outlined"
-            color="primary"
+            color="gray"
             onClick={onPrev}
           />
         )}
         <Button
-          title={isLastStep ? "Salvar e enviar" : "Próximo"}
-          variant="outlined"
-          color="primary"
+          title={isLastStep ? "Enviar notificação" : "Próximo"}
+          variant="contained"
+          color={isLastStep ? "green" : "primary"}
           onClick={onNext}
           disabled={!canAdvance}
         />
