@@ -1,0 +1,88 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.required {
+  color: #d32f2f;
+  margin-left: 2px;
+}
+
+.requiredHint {
+  font-size: 11px;
+  color: #d32f2f;
+  margin-top: -4px;
+}
+
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.optionLabel {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--text-h);
+}
+
+.checkbox {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  min-width: 16px;
+  border: 2px solid #bbb;
+  border-radius: 3px;
+  cursor: pointer;
+  position: relative;
+  transition: border-color 0.15s, background-color 0.15s;
+}
+
+.checkbox:checked {
+  background-color: #183EFF;
+  border-color: #183EFF;
+}
+
+.checkbox:checked::after {
+  content: '';
+  position: absolute;
+  top: 1px;
+  left: 4px;
+  width: 4px;
+  height: 8px;
+  border: 2px solid #fff;
+  border-top: none;
+  border-left: none;
+  transform: rotate(45deg);
+}
+
+.optionText {
+  line-height: 1.4;
+}
+
+.errorMessage {
+  font-size: 12px;
+  color: #d32f2f;
+}
+
+@media (min-width: 768px) {
+  .label {
+    font-size: 15px;
+  }
+
+  .optionLabel {
+    font-size: 15px;
+  }
+}

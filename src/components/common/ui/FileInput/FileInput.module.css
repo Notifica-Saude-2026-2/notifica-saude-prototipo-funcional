@@ -1,0 +1,50 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+
+.label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.required {
+  color: #d32f2f;
+  margin-left: 2px;
+}
+
+.requiredHint {
+  font-size: 11px;
+  color: #d32f2f;
+  margin-top: -2px;
+}
+
+.input {
+  font-size: 14px;
+  font-family: inherit;
+  cursor: pointer;
+  padding: 8px 0;
+}
+
+.input::file-selector-button {
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  background-color: #f5f5f5;
+  font-size: 13px;
+  cursor: pointer;
+  margin-right: 12px;
+  transition: background-color 0.2s ease;
+}
+
+.input::file-selector-button:hover {
+  background-color: #e8e8e8;
+}
+
+.errorMessage {
+  font-size: 12px;
+  color: #d32f2f;
+}
