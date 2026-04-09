@@ -23,13 +23,11 @@
   color: var(--text);
 }
 
-/* FORM WRAPPER */
 .pageContainer > :not(.pageHeader) {
   width: 100%;
   max-width: 900px;
 }
 
-/* FIELD GROUP */
 .fieldGroup {
   display: flex;
   flex-direction: column;
@@ -53,7 +51,6 @@
   margin-top: -4px;
 }
 
-/* DATE INPUT */
 .dateInput {
   padding: 10px 12px;
   border: 1px solid var(--border);
@@ -76,7 +73,6 @@
   margin-top: -4px;
 }
 
-/* TEXTAREA */
 .textarea {
   padding: 12px;
   border: 1px solid var(--border);
@@ -96,13 +92,11 @@
   border-color: #183EFF;
 }
 
-/* OUTRO INPUT */
 .outroInput {
   margin-top: 8px;
   padding-left: 26px;
 }
 
-/* OPTIONAL IDENTIFICATION */
 .optionalLabel {
   font-size: 14px;
   font-weight: 600;
@@ -116,7 +110,13 @@
   margin-top: 4px;
 }
 
-/* SUCCESS */
+.submitError {
+  font-size: 13px;
+  color: #d32f2f;
+  text-align: center;
+  margin-top: 4px;
+}
+
 .successCard {
   display: flex;
   flex-direction: column;
@@ -157,7 +157,6 @@
   justify-content: center;
 }
 
-/* DESKTOP */
 @media (min-width: 768px) {
   .pageContainer {
     padding: 32px 24px 64px;
