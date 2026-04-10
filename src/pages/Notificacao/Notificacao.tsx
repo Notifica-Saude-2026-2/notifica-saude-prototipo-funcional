@@ -9,6 +9,8 @@ import { useNotificacao } from "../../hooks/useNotificacao";
 import type { CampoDinamico } from "../../types/formulario";
 import styles from "./Notificacao.module.css";
 
+const SECAO_PACIENTE = "Tela 2 - Informações sobre o Paciente";
+
 /**
  * Agrupa campos por secao (string vinda do backend).
  * Retorna um Map ordenado pela primeira aparição de cada secao.
@@ -21,6 +23,22 @@ function groupBySecao(campos: CampoDinamico[]): Map<string, CampoDinamico[]> {
     map.set(secao, [...existing, campo]);
   }
   return map;
+}
+
+/**
+ * Retorna true se o campo "envolve paciente" está respondido com "Sim".
+ * Identifica o campo dinamicamente: é o campo da Tela 1 que tem opção "Sim" e "Não".
+ */
+function pacienteEnvolvido(campos: CampoDinamico[], formValues: Record<string, unknown>): boolean {
+  const campoPaciente = campos.find(
+    (c) =>
+      c.secao === "Tela 1 - Abertura" &&
+      c.opcoes?.some((o) => o.valor === "Sim") &&
+      c.opcoes?.some((o) => o.valor === "Não")
+  );
+  if (!campoPaciente) return true; // sem dado suficiente → exibe a tela por segurança
+  const simOpcao = campoPaciente.opcoes?.find((o) => o.valor === "Sim");
+  return formValues[campoPaciente.id] === simOpcao?.id;
 }
 
 function isStepComplete(
@@ -46,7 +64,13 @@ export default function Notificacao() {
   const [submitted, setSubmitted] = useState(false);
 
   const secaoMap = groupBySecao(campos);
-  const secoes = Array.from(secaoMap.keys());
+  const todasSecoes = Array.from(secaoMap.keys());
+
+  // Tela 2 só aparece se o usuário respondeu "Sim" em "A notificação envolve paciente?"
+  const secoes = todasSecoes.filter(
+    (s) => s !== SECAO_PACIENTE || pacienteEnvolvido(campos, formValues)
+  );
+
   const totalSteps = secoes.length || 1;
   const currentSecao = secoes[currentStepIndex] ?? 'Etapa 1';
   const camposEtapaAtual = secaoMap.get(currentSecao) ?? [];
@@ -56,7 +80,9 @@ export default function Notificacao() {
   async function handleNext() {
     if (isLastStep) {
       try {
-        await submit(campos);
+        // Submete apenas os campos das seções ativas (exclui Tela 2 se não envolveu paciente)
+        const camposAtivos = secoes.flatMap((s) => secaoMap.get(s) ?? []);
+        await submit(camposAtivos);
         setSubmitted(true);
       } catch {
         // submitError is handled by the hook

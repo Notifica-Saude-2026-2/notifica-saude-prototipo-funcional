@@ -56,6 +56,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
           value={(value as string) ?? ''}
           onChange={(e) => onChange(e.target.value)}
           type="date"
+          max={new Date().toISOString().split('T')[0]}
           error={error}
           fullWidth
         />

@@ -10,6 +10,7 @@ type InputProps = {
   disabled?: boolean;
   error?: string;
   fullWidth?: boolean;
+  max?: string;
 };
 
 export const Input: React.FC<InputProps> = ({
@@ -21,6 +22,7 @@ export const Input: React.FC<InputProps> = ({
   disabled = false,
   error,
   fullWidth = false,
+  max,
 }) => {
   const hasError = !!error;
 
@@ -44,6 +46,7 @@ export const Input: React.FC<InputProps> = ({
         onChange={onChange}
         placeholder={placeholder}
         disabled={disabled}
+        max={max}
         className={inputClass}
       />
 
