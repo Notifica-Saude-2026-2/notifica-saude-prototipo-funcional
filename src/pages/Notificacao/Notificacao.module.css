@@ -110,6 +110,20 @@
   margin-top: 4px;
 }
 
+.loadingText {
+  font-size: 14px;
+  color: var(--text);
+  text-align: center;
+  padding: 48px 0;
+}
+
+.errorText {
+  font-size: 14px;
+  color: #d32f2f;
+  text-align: center;
+  padding: 48px 0;
+}
+
 .submitError {
   font-size: 13px;
   color: #d32f2f;
