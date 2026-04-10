@@ -12,6 +12,7 @@ type StepFormProps = {
   onPrev?: () => void;
   isLastStep?: boolean;
   canAdvance?: boolean;
+  optional?: boolean;
 };
 
 export const StepForm: React.FC<StepFormProps> = ({
@@ -24,6 +25,7 @@ export const StepForm: React.FC<StepFormProps> = ({
   onPrev,
   isLastStep = false,
   canAdvance = true,
+  optional = false,
 }) => {
   return (
     <div className={styles.container}>
@@ -44,6 +46,7 @@ export const StepForm: React.FC<StepFormProps> = ({
       <div className={styles.stepHeader}>
         {stepIcon && <span className={styles.stepIcon}>{stepIcon}</span>}
         <span className={styles.stepTitle}>{stepTitle}</span>
+        {optional && <span className={styles.optionalBadge}>Opcional</span>}
       </div>
 
       <div className={styles.content}>{children}</div>

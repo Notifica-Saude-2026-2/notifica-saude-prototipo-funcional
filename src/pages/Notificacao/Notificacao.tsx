@@ -75,6 +75,7 @@ export default function Notificacao() {
   const currentSecao = secoes[currentStepIndex] ?? 'Etapa 1';
   const camposEtapaAtual = secaoMap.get(currentSecao) ?? [];
   const isLastStep = currentStepIndex === totalSteps - 1;
+  const isCurrentStepOptional = camposEtapaAtual.every((c) => !c.obrigatorio);
   const canAdvance = isStepComplete(camposEtapaAtual, formValues) && !submitting;
 
   async function handleNext() {
@@ -155,6 +156,7 @@ export default function Notificacao() {
         onPrev={currentStepIndex > 0 ? handlePrev : undefined}
         isLastStep={isLastStep}
         canAdvance={canAdvance}
+        optional={isCurrentStepOptional}
       >
         {camposEtapaAtual.map((campo) => (
           <FieldRenderer
