@@ -156,8 +156,12 @@ export default function Notificacao() {
         onPrev={currentStepIndex > 0 ? handlePrev : undefined}
         isLastStep={isLastStep}
         canAdvance={canAdvance}
-        optional={isCurrentStepOptional}
       >
+        {isCurrentStepOptional && (
+          <p className={styles.optionalNotice}>
+            Esta etapa é opcional. Você pode enviar a notificação sem preencher os campos abaixo.
+          </p>
+        )}
         {camposEtapaAtual.map((campo) => (
           <FieldRenderer
             key={campo.id}
