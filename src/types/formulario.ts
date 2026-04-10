@@ -24,10 +24,10 @@ export type CampoDinamico = {
   obrigatorio: boolean;
   placeholder?: string;
   opcoes?: OpcaoCampo[];
-  /**
-   * Número da etapa do StepForm onde este campo deve aparecer.
-   * Se não fornecido pelo backend, todos os campos são exibidos na etapa 1.
-   */
+  ordem?: number;
+  /** Agrupamento por tela vindo do backend (ex: "Tela 1 - Abertura") */
+  secao?: string;
+  /** Número da etapa — derivado de secao no frontend se não fornecido diretamente */
   etapa?: number;
 };
 

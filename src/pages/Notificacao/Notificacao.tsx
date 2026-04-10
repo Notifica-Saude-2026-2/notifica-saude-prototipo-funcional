@@ -9,12 +9,16 @@ import { useNotificacao } from "../../hooks/useNotificacao";
 import type { CampoDinamico } from "../../types/formulario";
 import styles from "./Notificacao.module.css";
 
-function groupByEtapa(campos: CampoDinamico[]): Map<number, CampoDinamico[]> {
-  const map = new Map<number, CampoDinamico[]>();
+/**
+ * Agrupa campos por secao (string vinda do backend).
+ * Retorna um Map ordenado pela primeira aparição de cada secao.
+ */
+function groupBySecao(campos: CampoDinamico[]): Map<string, CampoDinamico[]> {
+  const map = new Map<string, CampoDinamico[]>();
   for (const campo of campos) {
-    const etapa = campo.etapa ?? 1;
-    const existing = map.get(etapa) ?? [];
-    map.set(etapa, [...existing, campo]);
+    const secao = campo.secao ?? 'Etapa 1';
+    const existing = map.get(secao) ?? [];
+    map.set(secao, [...existing, campo]);
   }
   return map;
 }
@@ -41,11 +45,11 @@ export default function Notificacao() {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [submitted, setSubmitted] = useState(false);
 
-  const etapaMap = groupByEtapa(campos);
-  const etapas = Array.from(etapaMap.keys()).sort((a, b) => a - b);
-  const totalSteps = etapas.length || 1;
-  const currentEtapa = etapas[currentStepIndex] ?? 1;
-  const camposEtapaAtual = etapaMap.get(currentEtapa) ?? [];
+  const secaoMap = groupBySecao(campos);
+  const secoes = Array.from(secaoMap.keys());
+  const totalSteps = secoes.length || 1;
+  const currentSecao = secoes[currentStepIndex] ?? 'Etapa 1';
+  const camposEtapaAtual = secaoMap.get(currentSecao) ?? [];
   const isLastStep = currentStepIndex === totalSteps - 1;
   const canAdvance = isStepComplete(camposEtapaAtual, formValues) && !submitting;
 
@@ -120,7 +124,7 @@ export default function Notificacao() {
       <StepForm
         currentStep={currentStepIndex + 1}
         totalSteps={totalSteps}
-        stepTitle={`Etapa ${currentEtapa}`}
+        stepTitle={currentSecao}
         onNext={handleNext}
         onPrev={currentStepIndex > 0 ? handlePrev : undefined}
         isLastStep={isLastStep}
