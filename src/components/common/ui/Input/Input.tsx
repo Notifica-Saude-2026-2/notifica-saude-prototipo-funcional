@@ -11,6 +11,7 @@ type InputProps = {
   error?: string;
   fullWidth?: boolean;
   max?: string;
+  required?: boolean;
 };
 
 export const Input: React.FC<InputProps> = ({
@@ -23,6 +24,7 @@ export const Input: React.FC<InputProps> = ({
   error,
   fullWidth = false,
   max,
+  required = false,
 }) => {
   const hasError = !!error;
 
@@ -38,7 +40,15 @@ export const Input: React.FC<InputProps> = ({
 
   return (
     <div className={containerClass}>
-      {label && <label className={styles.label}>{label}</label>}
+      {label && (
+        <span className={styles.label}>
+          {label}
+          {required && <span className={styles.required}>*</span>}
+        </span>
+      )}
+      {required && (
+        <span className={styles.requiredHint}>*Preenchimento obrigatório</span>
+      )}
 
       <input
         type={type}

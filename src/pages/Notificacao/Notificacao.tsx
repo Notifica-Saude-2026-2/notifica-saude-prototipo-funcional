@@ -41,6 +41,15 @@ function pacienteEnvolvido(campos: CampoDinamico[], formValues: Record<string, u
   return formValues[campoPaciente.id] === simOpcao?.id;
 }
 
+function todayStr(): string {
+  const d = new Date();
+  return [
+    d.getFullYear(),
+    String(d.getMonth() + 1).padStart(2, '0'),
+    String(d.getDate()).padStart(2, '0'),
+  ].join('-');
+}
+
 function isStepComplete(
   campos: CampoDinamico[],
   formValues: Record<string, unknown>
@@ -51,6 +60,7 @@ function isStepComplete(
       const v = formValues[c.id];
       if (v === undefined || v === null || v === "") return false;
       if (Array.isArray(v)) return v.length > 0;
+      if (c.tipo === 'DATA') return (v as string) <= todayStr();
       return true;
     });
 }
