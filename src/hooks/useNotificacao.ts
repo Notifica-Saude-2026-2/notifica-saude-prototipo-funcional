@@ -1,12 +1,10 @@
+// src/hooks/useNotificacao.ts
 import { useState } from 'react';
 import type { CampoDinamico, NotificacaoPayload, RespostaCampo } from '../types/formulario';
 import { criarNotificacao } from '../services/notificacao.service';
 
+// 1. Removidos os campos estruturais (unidade_id, setor_id, etc.)
 export type FormMeta = {
-  unidade_id: string;
-  setor_id: string;
-  data_incidente: string;
-  descricao: string;
   anonima: boolean;
 };
 
@@ -46,13 +44,12 @@ function buildRespostas(
 
 export function useNotificacao(): UseNotificacaoReturn {
   const [formValues, setFormValues] = useState<Record<string, unknown>>({});
+  
+  // 2. Estado inicial limpo, mantendo apenas a flag de anonimato
   const [formMeta, setFormMeta] = useState<FormMeta>({
-    unidade_id: '',
-    setor_id: '',
-    data_incidente: '',
-    descricao: '',
-    anonima: true,
+    anonima: true, 
   });
+  
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
@@ -68,14 +65,33 @@ export function useNotificacao(): UseNotificacaoReturn {
     setSubmitting(true);
     setSubmitError(null);
     try {
-      const payload: NotificacaoPayload = {
-        ...formMeta,
+      // 3. Montagem do payload estritamente como o backend espera
+      const payload = {
+        anonima: formMeta.anonima,
         respostas: buildRespostas(campos, formValues),
-      };
+      } as NotificacaoPayload; // Forçamos o tipo temporariamente caso o types/formulario.ts ainda tenha a tipagem antiga
+
+      // LOG PARA DEBUG: Isso vai printar no console do navegador exatamente o que está saindo
+      console.log("🚀 Payload pronto para envio:", JSON.stringify(payload, null, 2));
+
       await criarNotificacao(payload);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Erro ao enviar notificação';
-      setSubmitError(message);
+      
+    } catch (err: any) {
+      console.error("❌ Erro capturado no submit:", err);
+      
+      // 4. Captura inteligente de erro: tenta ler o erro específico do Zod/Backend via Axios
+      const backendError = err?.response?.data;
+      let errorMessage = 'Erro ao enviar notificação. Tente novamente.';
+
+      if (backendError) {
+        // Se o Zod mandar array de erros, ou o seu service mandar uma 'message'
+        errorMessage = backendError.message 
+          || (backendError.errors ? JSON.stringify(backendError.errors) : errorMessage);
+      } else if (err instanceof Error) {
+        errorMessage = err.message;
+      }
+
+      setSubmitError(errorMessage);
       throw err;
     } finally {
       setSubmitting(false);
