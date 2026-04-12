@@ -1,7 +1,9 @@
-import { useState, useCallback } from 'react';
+// src/hooks/useNotificacao.ts
+import { useState } from 'react';
 import type { CampoDinamico, NotificacaoPayload, RespostaCampo } from '../types/formulario';
 import { criarNotificacao } from '../services/notificacao.service';
 
+// 1. Removidos os campos estruturais (unidade_id, setor_id, etc.)
 export type FormMeta = {
   anonima: boolean;
 };
@@ -16,115 +18,85 @@ type UseNotificacaoReturn = {
   submitError: string | null;
 };
 
-/**
- * Constrói o array de respostas no formato exato esperado pelo backend (Zod).
- */
 function buildRespostas(
   campos: CampoDinamico[],
   formValues: Record<string, unknown>
 ): RespostaCampo[] {
-  return campos.reduce<RespostaCampo[]>((acc, campo) => {
+  return campos.flatMap((campo): RespostaCampo[] => {
     const value = formValues[campo.id];
 
-    // Ignora campos vazios, nulos ou indefinidos
-    if (value === undefined || value === null || String(value).trim() === '') {
-      return acc;
-    }
+    if (value === undefined || value === null || value === '') return [];
 
-    // RADIO / SELECT -> Espera valor_opcao_id (string única)
     if (campo.tipo === 'SELECT' || campo.tipo === 'RADIO') {
-      acc.push({ 
-        campo_id: campo.id, 
-        valor_opcao_id: String(value) 
-      });
-      return acc;
+      return [{ campo_id: campo.id, valor_opcao_id: value as string }];
     }
 
-    // MULTISELECT / CHECKBOX -> Espera valores_opcoes_ids (array de strings)
-    // BUG CORRIGIDO: O Zod espera a chave `valores_opcoes_ids`, e não um map fragmentado.
     if (campo.tipo === 'MULTISELECT' || campo.tipo === 'CHECKBOX') {
-      if (Array.isArray(value) && value.length > 0) {
-        acc.push({ 
-          campo_id: campo.id, 
-          valores_opcoes_ids : value.map(String) 
-        });
-      }
-      return acc;
+      return (value as string[]).map((opcaoId) => ({
+        campo_id: campo.id,
+        valor_opcao_id: opcaoId,
+      }));
     }
 
-    // Demais tipos (TEXTO, AREA, DATA, NUMERO) -> Espera valor (texto livre)
-    acc.push({ 
-      campo_id: campo.id, 
-      valor: String(value) 
-    });
-
-    return acc;
-  }, []);
+    return [{ campo_id: campo.id, valor: String(value) }];
+  });
 }
 
 export function useNotificacao(): UseNotificacaoReturn {
   const [formValues, setFormValues] = useState<Record<string, unknown>>({});
-  const [formMeta, setFormMeta] = useState<FormMeta>({ anonima: true });
+  
+  // 2. Estado inicial limpo, mantendo apenas a flag de anonimato
+  const [formMeta, setFormMeta] = useState<FormMeta>({
+    anonima: true, 
+  });
   
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  // useCallback evita re-renderizações desnecessárias em formulários grandes
-  const updateField = useCallback((fieldId: string, value: unknown) => {
+  function updateField(fieldId: string, value: unknown) {
     setFormValues((prev) => ({ ...prev, [fieldId]: value }));
-  }, []);
+  }
 
-  const updateMeta = useCallback(<K extends keyof FormMeta>(key: K, value: FormMeta[K]) => {
+  function updateMeta<K extends keyof FormMeta>(key: K, value: FormMeta[K]) {
     setFormMeta((prev) => ({ ...prev, [key]: value }));
-  }, []);
+  }
 
-  const submit = useCallback(async (campos: CampoDinamico[]) => {
+  async function submit(campos: CampoDinamico[]) {
     setSubmitting(true);
     setSubmitError(null);
-
     try {
-      const payload: NotificacaoPayload = {
+      // 3. Montagem do payload estritamente como o backend espera
+      const payload = {
         anonima: formMeta.anonima,
         respostas: buildRespostas(campos, formValues),
-      };
+      } as NotificacaoPayload; // Forçamos o tipo temporariamente caso o types/formulario.ts ainda tenha a tipagem antiga
 
-      console.debug('[Notificacao] Payload montado:', payload);
+      // LOG PARA DEBUG: Isso vai printar no console do navegador exatamente o que está saindo
+      console.log("🚀 Payload pronto para envio:", JSON.stringify(payload, null, 2));
 
       await criarNotificacao(payload);
       
-    } catch (err: unknown) {
-      console.error('[Notificacao] Erro no submit:', err);
+    } catch (err: any) {
+      console.error("❌ Erro capturado no submit:", err);
       
-      // Tenta extrair a mensagem de erro da resposta (se a função apiFetch não a engoliu)
-      // Fazemos o cast defensivo seguro porque não sabemos como sua apiFetch lança o erro
-      const customErr = err as any;
-      const responseData = customErr?.response?.data || customErr?.data || customErr?.body;
-      
-      let errorMessage = 'Não foi possível registrar a notificação. Verifique os dados.';
+      // 4. Captura inteligente de erro: tenta ler o erro específico do Zod/Backend via Axios
+      const backendError = err?.response?.data;
+      let errorMessage = 'Erro ao enviar notificação. Tente novamente.';
 
-      if (responseData) {
-        // Formata os erros do Zod ou pega a mensagem de erro tratada do backend
-        errorMessage = responseData.message || 
-          (responseData.errors ? JSON.stringify(responseData.errors) : errorMessage);
+      if (backendError) {
+        // Se o Zod mandar array de erros, ou o seu service mandar uma 'message'
+        errorMessage = backendError.message 
+          || (backendError.errors ? JSON.stringify(backendError.errors) : errorMessage);
       } else if (err instanceof Error) {
-        // Fallback: se o apiFetch lançou apenas um Error("422 Unprocessable Entity")
-        errorMessage = err.message; 
+        errorMessage = err.message;
       }
 
-      setSubmitError(`Falha na validação: ${errorMessage}`);
-      throw err; // Repassa o erro para a UI parar o loading se necessário
+      setSubmitError(errorMessage);
+      throw err;
     } finally {
       setSubmitting(false);
     }
-  }, [formValues, formMeta]);
+  }
 
-  return { 
-    formValues, 
-    formMeta, 
-    updateField, 
-    updateMeta, 
-    submit, 
-    submitting, 
-    submitError 
-  };
+  return { formValues, formMeta, updateField, updateMeta, submit, submitting, submitError };
 }
