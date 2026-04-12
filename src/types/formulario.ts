@@ -33,15 +33,20 @@ export type CampoDinamico = {
 
 export type RespostaCampo = {
   campo_id: string;
+  /** Usado para TEXTO, AREA, DATA, NUMERO, BOOLEAN ou especificações de "Outro" */
   valor?: string;
+  /** Usado para RADIO e SELECT */
   valor_opcao_id?: string;
+  /** NOVO: Necessário para MULTISELECT e CHECKBOX conforme o Zod do backend */
+  valores_opcoes_ids?: string[];
 };
 
+/**
+ * REFATORADO: A estrutura agora é focada no anonimato e nas respostas dinâmicas.
+ * As propriedades unidade_id, setor_id, etc., foram removidas pois o backend
+ * as extrai automaticamente do array 'respostas'.
+ */
 export type NotificacaoPayload = {
-  unidade_id: string;
-  setor_id: string;
-  data_incidente: string;
-  descricao: string;
   anonima: boolean;
   respostas: RespostaCampo[];
 };
