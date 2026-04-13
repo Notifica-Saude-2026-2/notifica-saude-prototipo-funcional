@@ -2,10 +2,13 @@
 import { useState, useCallback } from 'react';
 import type { CampoDinamico, NotificacaoPayload, RespostaCampo } from '../types/formulario';
 import { criarNotificacao } from '../services/notificacao.service';
+import { ApiError } from '../services/api';
 
-// Constantes baseadas nos IDs do seu seed.ts
-const CAMPO_NOME_ID = "55555555-5555-4555-b555-000000000006";
-const CAMPO_CONTATO_ID = "55555555-5555-4555-b555-000000000007";
+const CAMPO_UNIDADE_ID    = "55555555-5555-4555-b555-000000000010";
+const CAMPO_SETOR_ID      = "55555555-5555-4555-b555-000000000003";
+const CAMPO_DATA_ID       = "55555555-5555-4555-b555-000000000008";
+const CAMPO_NOME_ID       = "55555555-5555-4555-b555-000000000006";
+const CAMPO_CONTATO_ID    = "55555555-5555-4555-b555-000000000007";
 
 export type FormMeta = {
   anonima: boolean;
@@ -16,6 +19,7 @@ type UseNotificacaoReturn = {
   formMeta: FormMeta;
   updateField: (fieldId: string, value: unknown) => void;
   updateMeta: <K extends keyof FormMeta>(key: K, value: FormMeta[K]) => void;
+  resetForm: () => void;
   submit: (campos: CampoDinamico[]) => Promise<void>;
   submitting: boolean;
   submitError: string | null;
@@ -69,33 +73,33 @@ export function useNotificacao(): UseNotificacaoReturn {
     setSubmitError(null);
 
     try {
-      // REGRA DE NEGÓCIO: Inferir anonimato baseado no preenchimento
       const nomePreenchido = Boolean(formValues[CAMPO_NOME_ID]?.toString().trim());
       const contatoPreenchido = Boolean(formValues[CAMPO_CONTATO_ID]?.toString().trim());
       
-      // Se preencheu Nome OU Contato, a notificação NÃO é anônima.
       const isAnonima = !(nomePreenchido || contatoPreenchido);
 
       const payload: NotificacaoPayload = {
         anonima: isAnonima,
+        unidade_id: String(formValues[CAMPO_UNIDADE_ID] ?? ''),
+        setor_id: String(formValues[CAMPO_SETOR_ID] ?? ''),
+        data_incidente: formValues[CAMPO_DATA_ID]
+          ? new Date(`${formValues[CAMPO_DATA_ID]}T00:00:00.000Z`).toISOString()
+          : '',
         respostas: buildRespostas(campos, formValues),
       };
 
-      console.log("🚀 Payload pronto para envio:", JSON.stringify(payload, null, 2));
-
       await criarNotificacao(payload);
-      
+
     } catch (err: unknown) {
-      console.error("❌ Erro capturado no submit:", err);
-      const customErr = err as any;
-      const responseData = customErr?.response?.data || customErr?.data || customErr?.body;
       let errorMessage = 'Não foi possível registrar a notificação. Verifique os dados.';
 
-      if (responseData) {
-        errorMessage = responseData.message || 
-          (responseData.errors ? JSON.stringify(responseData.errors) : errorMessage);
+      if (err instanceof ApiError) {
+        const body = err.body as Record<string, unknown> | null;
+        errorMessage =
+          (body?.message as string) ||
+          (body?.errors ? JSON.stringify(body.errors) : err.message);
       } else if (err instanceof Error) {
-        errorMessage = err.message; 
+        errorMessage = err.message;
       }
 
       setSubmitError(`Falha na validação: ${errorMessage}`);
@@ -103,7 +107,13 @@ export function useNotificacao(): UseNotificacaoReturn {
     } finally {
       setSubmitting(false);
     }
-  }, [formValues]); // formMeta foi removido da dependência pois 'anonima' agora é inferida no submt.
+  }, [formValues]); 
 
-  return { formValues, formMeta, updateField, updateMeta, submit, submitting, submitError };
+  const resetForm = useCallback(() => {
+    setFormValues({});
+    setFormMeta({ anonima: true });
+    setSubmitError(null);
+  }, []);
+
+  return { formValues, formMeta, updateField, updateMeta, resetForm, submit, submitting, submitError };
 }

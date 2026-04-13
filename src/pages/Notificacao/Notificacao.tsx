@@ -11,10 +11,6 @@ import styles from "./Notificacao.module.css";
 
 const SECAO_PACIENTE = "Tela 2 - Informações sobre o Paciente";
 
-/**
- * Agrupa campos por secao (string vinda do backend).
- * Retorna um Map ordenado pela primeira aparição de cada secao.
- */
 function groupBySecao(campos: CampoDinamico[]): Map<string, CampoDinamico[]> {
   const map = new Map<string, CampoDinamico[]>();
   for (const campo of campos) {
@@ -24,11 +20,6 @@ function groupBySecao(campos: CampoDinamico[]): Map<string, CampoDinamico[]> {
   }
   return map;
 }
-
-/**
- * Retorna true se o campo "envolve paciente" está respondido com "Sim".
- * Identifica o campo dinamicamente: é o campo da Tela 1 que tem opção "Sim" e "Não".
- */
 function pacienteEnvolvido(campos: CampoDinamico[], formValues: Record<string, unknown>): boolean {
   const campoPaciente = campos.find(
     (c) =>
@@ -68,7 +59,7 @@ function isStepComplete(
 export default function Notificacao() {
   const navigate = useNavigate();
   const { campos, loading, error } = useCamposFormulario();
-  const { formValues, updateField, submit, submitting, submitError } =
+  const { formValues, updateField, resetForm, submit, submitting, submitError } =
     useNotificacao();
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [submitted, setSubmitted] = useState(false);
@@ -76,7 +67,6 @@ export default function Notificacao() {
   const secaoMap = groupBySecao(campos);
   const todasSecoes = Array.from(secaoMap.keys());
 
-  // Tela 2 só aparece se o usuário respondeu "Sim" em "A notificação envolve paciente?"
   const secoes = todasSecoes.filter(
     (s) => s !== SECAO_PACIENTE || pacienteEnvolvido(campos, formValues)
   );
@@ -91,7 +81,6 @@ export default function Notificacao() {
   async function handleNext() {
     if (isLastStep) {
       try {
-        // Submete apenas os campos das seções ativas (exclui Tela 2 se não envolveu paciente)
         const camposAtivos = secoes.flatMap((s) => secaoMap.get(s) ?? []);
         await submit(camposAtivos);
         setSubmitted(true);
@@ -142,6 +131,16 @@ export default function Notificacao() {
               variant="outlined"
               color="gray"
               onClick={() => navigate("/")}
+            />
+            <Button
+              title="Enviar outra notificação"
+              variant="contained"
+              color="primary"
+              onClick={() => {
+                resetForm();
+                setSubmitted(false);
+                setCurrentStepIndex(0);
+              }}
             />
           </div>
         </div>
