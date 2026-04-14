@@ -10,7 +10,19 @@
 
 .label {
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.required {
+  color: #d32f2f;
+  margin-left: 2px;
+}
+
+.requiredHint {
+  font-size: 11px;
+  color: #d32f2f;
+  margin-top: -4px;
 }
 
 .input {
@@ -36,6 +48,10 @@
 }
 
 @media (min-width: 768px) {
+  .label {
+    font-size: 15px;
+  }
+
   .input {
     font-size: 15px;
     padding: 12px;

@@ -1,12 +1,16 @@
-import { useState } from 'react';
+// src/hooks/useNotificacao.ts
+import { useState, useCallback } from 'react';
 import type { CampoDinamico, NotificacaoPayload, RespostaCampo } from '../types/formulario';
 import { criarNotificacao } from '../services/notificacao.service';
+import { ApiError } from '../services/api';
+
+const CAMPO_UNIDADE_ID    = "55555555-5555-4555-b555-000000000010";
+const CAMPO_SETOR_ID      = "55555555-5555-4555-b555-000000000003";
+const CAMPO_DATA_ID       = "55555555-5555-4555-b555-000000000008";
+const CAMPO_NOME_ID       = "55555555-5555-4555-b555-000000000006";
+const CAMPO_CONTATO_ID    = "55555555-5555-4555-b555-000000000007";
 
 export type FormMeta = {
-  unidade_id: string;
-  setor_id: string;
-  data_incidente: string;
-  descricao: string;
   anonima: boolean;
 };
 
@@ -15,6 +19,7 @@ type UseNotificacaoReturn = {
   formMeta: FormMeta;
   updateField: (fieldId: string, value: unknown) => void;
   updateMeta: <K extends keyof FormMeta>(key: K, value: FormMeta[K]) => void;
+  resetForm: () => void;
   submit: (campos: CampoDinamico[]) => Promise<void>;
   submitting: boolean;
   submitError: string | null;
@@ -24,63 +29,91 @@ function buildRespostas(
   campos: CampoDinamico[],
   formValues: Record<string, unknown>
 ): RespostaCampo[] {
-  return campos.flatMap((campo): RespostaCampo[] => {
+  return campos.reduce<RespostaCampo[]>((acc, campo) => {
     const value = formValues[campo.id];
 
-    if (value === undefined || value === null || value === '') return [];
+    if (value === undefined || value === null || String(value).trim() === '') {
+      return acc;
+    }
 
     if (campo.tipo === 'SELECT' || campo.tipo === 'RADIO') {
-      return [{ campo_id: campo.id, valor_opcao_id: value as string }];
+      acc.push({ campo_id: campo.id, valor_opcao_id: String(value) });
+      return acc;
     }
 
     if (campo.tipo === 'MULTISELECT' || campo.tipo === 'CHECKBOX') {
-      return (value as string[]).map((opcaoId) => ({
-        campo_id: campo.id,
-        valor_opcao_id: opcaoId,
-      }));
+      if (Array.isArray(value) && value.length > 0) {
+        acc.push({ campo_id: campo.id, valores_opcoes_ids: value.map(String) });
+      }
+      return acc;
     }
 
-    return [{ campo_id: campo.id, valor: String(value) }];
-  });
+    acc.push({ campo_id: campo.id, valor: String(value) });
+    return acc;
+  }, []);
 }
 
 export function useNotificacao(): UseNotificacaoReturn {
   const [formValues, setFormValues] = useState<Record<string, unknown>>({});
-  const [formMeta, setFormMeta] = useState<FormMeta>({
-    unidade_id: '',
-    setor_id: '',
-    data_incidente: '',
-    descricao: '',
-    anonima: true,
-  });
+  const [formMeta, setFormMeta] = useState<FormMeta>({ anonima: true });
+  
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  function updateField(fieldId: string, value: unknown) {
+  const updateField = useCallback((fieldId: string, value: unknown) => {
     setFormValues((prev) => ({ ...prev, [fieldId]: value }));
-  }
+  }, []);
 
-  function updateMeta<K extends keyof FormMeta>(key: K, value: FormMeta[K]) {
+  const updateMeta = useCallback(<K extends keyof FormMeta>(key: K, value: FormMeta[K]) => {
     setFormMeta((prev) => ({ ...prev, [key]: value }));
-  }
+  }, []);
 
-  async function submit(campos: CampoDinamico[]) {
+  const submit = useCallback(async (campos: CampoDinamico[]) => {
     setSubmitting(true);
     setSubmitError(null);
+
     try {
+      const nomePreenchido = Boolean(formValues[CAMPO_NOME_ID]?.toString().trim());
+      const contatoPreenchido = Boolean(formValues[CAMPO_CONTATO_ID]?.toString().trim());
+      
+      const isAnonima = !(nomePreenchido || contatoPreenchido);
+
       const payload: NotificacaoPayload = {
-        ...formMeta,
+        anonima: isAnonima,
+        unidade_id: String(formValues[CAMPO_UNIDADE_ID] ?? ''),
+        setor_id: String(formValues[CAMPO_SETOR_ID] ?? ''),
+        data_incidente: formValues[CAMPO_DATA_ID]
+          ? new Date(`${formValues[CAMPO_DATA_ID]}T00:00:00.000Z`).toISOString()
+          : '',
         respostas: buildRespostas(campos, formValues),
       };
+
       await criarNotificacao(payload);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Erro ao enviar notificação';
-      setSubmitError(message);
+
+    } catch (err: unknown) {
+      let errorMessage = 'Não foi possível registrar a notificação. Verifique os dados.';
+
+      if (err instanceof ApiError) {
+        const body = err.body as Record<string, unknown> | null;
+        errorMessage =
+          (body?.message as string) ||
+          (body?.errors ? JSON.stringify(body.errors) : err.message);
+      } else if (err instanceof Error) {
+        errorMessage = err.message;
+      }
+
+      setSubmitError(`Falha na validação: ${errorMessage}`);
       throw err;
     } finally {
       setSubmitting(false);
     }
-  }
+  }, [formValues]); 
 
-  return { formValues, formMeta, updateField, updateMeta, submit, submitting, submitError };
+  const resetForm = useCallback(() => {
+    setFormValues({});
+    setFormMeta({ anonima: true });
+    setSubmitError(null);
+  }, []);
+
+  return { formValues, formMeta, updateField, updateMeta, resetForm, submit, submitting, submitError };
 }

@@ -43,23 +43,35 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
           type={inputType}
+          required={obrigatorio}
           error={error}
           fullWidth
         />
       );
     }
 
-    case 'DATA':
+    case 'DATA': {
+      const d = new Date();
+      const today = [
+        d.getFullYear(),
+        String(d.getMonth() + 1).padStart(2, '0'),
+        String(d.getDate()).padStart(2, '0'),
+      ].join('-');
+      const dateError =
+        value && (value as string) > today ? 'Data inválida!' : error;
       return (
-        <Input
-          label={label}
-          value={(value as string) ?? ''}
-          onChange={(e) => onChange(e.target.value)}
-          type="date"
-          error={error}
-          fullWidth
-        />
+        <div style={{ maxWidth: '240px' }}>
+          <Input
+            label={label}
+            value={(value as string) ?? ''}
+            onChange={(e) => onChange(e.target.value)}
+            type="date"
+            required={obrigatorio}
+            error={dateError}
+          />
+        </div>
       );
+    }
 
     case 'AREA':
       return (

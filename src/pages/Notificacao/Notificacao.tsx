@@ -9,14 +9,36 @@ import { useNotificacao } from "../../hooks/useNotificacao";
 import type { CampoDinamico } from "../../types/formulario";
 import styles from "./Notificacao.module.css";
 
-function groupByEtapa(campos: CampoDinamico[]): Map<number, CampoDinamico[]> {
-  const map = new Map<number, CampoDinamico[]>();
+const SECAO_PACIENTE = "Tela 2 - Informações sobre o Paciente";
+
+function groupBySecao(campos: CampoDinamico[]): Map<string, CampoDinamico[]> {
+  const map = new Map<string, CampoDinamico[]>();
   for (const campo of campos) {
-    const etapa = campo.etapa ?? 1;
-    const existing = map.get(etapa) ?? [];
-    map.set(etapa, [...existing, campo]);
+    const secao = campo.secao ?? 'Etapa 1';
+    const existing = map.get(secao) ?? [];
+    map.set(secao, [...existing, campo]);
   }
   return map;
+}
+function pacienteEnvolvido(campos: CampoDinamico[], formValues: Record<string, unknown>): boolean {
+  const campoPaciente = campos.find(
+    (c) =>
+      c.secao === "Tela 1 - Abertura" &&
+      c.opcoes?.some((o) => o.valor === "Sim") &&
+      c.opcoes?.some((o) => o.valor === "Não")
+  );
+  if (!campoPaciente) return true; // sem dado suficiente → exibe a tela por segurança
+  const simOpcao = campoPaciente.opcoes?.find((o) => o.valor === "Sim");
+  return formValues[campoPaciente.id] === simOpcao?.id;
+}
+
+function todayStr(): string {
+  const d = new Date();
+  return [
+    d.getFullYear(),
+    String(d.getMonth() + 1).padStart(2, '0'),
+    String(d.getDate()).padStart(2, '0'),
+  ].join('-');
 }
 
 function isStepComplete(
@@ -29,6 +51,7 @@ function isStepComplete(
       const v = formValues[c.id];
       if (v === undefined || v === null || v === "") return false;
       if (Array.isArray(v)) return v.length > 0;
+      if (c.tipo === 'DATA') return (v as string) <= todayStr();
       return true;
     });
 }
@@ -36,23 +59,30 @@ function isStepComplete(
 export default function Notificacao() {
   const navigate = useNavigate();
   const { campos, loading, error } = useCamposFormulario();
-  const { formValues, updateField, submit, submitting, submitError } =
+  const { formValues, updateField, resetForm, submit, submitting, submitError } =
     useNotificacao();
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [submitted, setSubmitted] = useState(false);
 
-  const etapaMap = groupByEtapa(campos);
-  const etapas = Array.from(etapaMap.keys()).sort((a, b) => a - b);
-  const totalSteps = etapas.length || 1;
-  const currentEtapa = etapas[currentStepIndex] ?? 1;
-  const camposEtapaAtual = etapaMap.get(currentEtapa) ?? [];
+  const secaoMap = groupBySecao(campos);
+  const todasSecoes = Array.from(secaoMap.keys());
+
+  const secoes = todasSecoes.filter(
+    (s) => s !== SECAO_PACIENTE || pacienteEnvolvido(campos, formValues)
+  );
+
+  const totalSteps = secoes.length || 1;
+  const currentSecao = secoes[currentStepIndex] ?? 'Etapa 1';
+  const camposEtapaAtual = secaoMap.get(currentSecao) ?? [];
   const isLastStep = currentStepIndex === totalSteps - 1;
+  const isCurrentStepOptional = camposEtapaAtual.every((c) => !c.obrigatorio);
   const canAdvance = isStepComplete(camposEtapaAtual, formValues) && !submitting;
 
   async function handleNext() {
     if (isLastStep) {
       try {
-        await submit(campos);
+        const camposAtivos = secoes.flatMap((s) => secaoMap.get(s) ?? []);
+        await submit(camposAtivos);
         setSubmitted(true);
       } catch {
         // submitError is handled by the hook
@@ -102,6 +132,16 @@ export default function Notificacao() {
               color="gray"
               onClick={() => navigate("/")}
             />
+            <Button
+              title="Enviar outra notificação"
+              variant="contained"
+              color="primary"
+              onClick={() => {
+                resetForm();
+                setSubmitted(false);
+                setCurrentStepIndex(0);
+              }}
+            />
           </div>
         </div>
       </div>
@@ -120,12 +160,17 @@ export default function Notificacao() {
       <StepForm
         currentStep={currentStepIndex + 1}
         totalSteps={totalSteps}
-        stepTitle={`Etapa ${currentEtapa}`}
+        stepTitle={currentSecao}
         onNext={handleNext}
         onPrev={currentStepIndex > 0 ? handlePrev : undefined}
         isLastStep={isLastStep}
         canAdvance={canAdvance}
       >
+        {isCurrentStepOptional && (
+          <p className={styles.optionalNotice}>
+            Esta etapa é opcional. Você pode enviar a notificação sem preencher os campos abaixo.
+          </p>
+        )}
         {camposEtapaAtual.map((campo) => (
           <FieldRenderer
             key={campo.id}

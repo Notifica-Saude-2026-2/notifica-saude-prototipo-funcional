@@ -24,10 +24,9 @@ export type CampoDinamico = {
   obrigatorio: boolean;
   placeholder?: string;
   opcoes?: OpcaoCampo[];
-  /**
-   * Número da etapa do StepForm onde este campo deve aparecer.
-   * Se não fornecido pelo backend, todos os campos são exibidos na etapa 1.
-   */
+  ordem?: number;
+  secao?: string;
+  /** Número da etapa — derivado de secao no frontend se não fornecido diretamente */
   etapa?: number;
 };
 
@@ -35,13 +34,13 @@ export type RespostaCampo = {
   campo_id: string;
   valor?: string;
   valor_opcao_id?: string;
+  valores_opcoes_ids?: string[];
 };
 
 export type NotificacaoPayload = {
+  anonima: boolean;
   unidade_id: string;
   setor_id: string;
   data_incidente: string;
-  descricao: string;
-  anonima: boolean;
   respostas: RespostaCampo[];
 };
