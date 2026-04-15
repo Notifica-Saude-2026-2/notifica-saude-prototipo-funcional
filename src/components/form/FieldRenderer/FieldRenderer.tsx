@@ -11,6 +11,8 @@ type FieldRendererProps = CampoDinamico & {
   value: unknown;
   onChange: (value: unknown) => void;
   error?: string;
+  outroValue?: string;
+  onOutroChange?: (value: string) => void;
 };
 
 export const FieldRenderer: React.FC<FieldRendererProps> = ({
@@ -23,8 +25,11 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
   value,
   onChange,
   error,
+  outroValue,
+  onOutroChange,
 }) => {
   const radioOptions = opcoes.map((opt) => ({ value: opt.id, label: opt.valor }));
+  const outroOption = opcoes.find((o) => o.valor.toLowerCase() === 'outro');
 
   switch (tipo) {
     case 'TEXTO':
@@ -111,18 +116,35 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
         />
       );
 
-    case 'RADIO':
+    case 'RADIO': {
+      const isOutroSelected = outroOption != null && value === outroOption.id;
       return (
-        <RadioGroup
-          name={id}
-          label={label}
-          options={radioOptions}
-          value={(value as string) ?? ''}
-          onChange={(v) => onChange(v)}
-          required={obrigatorio}
-          error={error}
-        />
+        <>
+          <RadioGroup
+            name={id}
+            label={label}
+            options={radioOptions}
+            value={(value as string) ?? ''}
+            onChange={(v) => {
+              onChange(v);
+              if (outroOption && v !== outroOption.id) onOutroChange?.('');
+            }}
+            required={obrigatorio}
+            error={error}
+          />
+          {isOutroSelected && (
+            <Input
+              label="Especifique"
+              value={outroValue ?? ''}
+              onChange={(e) => onOutroChange?.(e.target.value)}
+              placeholder="Digite aqui..."
+              required={obrigatorio}
+              fullWidth
+            />
+          )}
+        </>
       );
+    }
 
     case 'BOOLEAN':
       return (
@@ -140,17 +162,33 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
         />
       );
 
-    case 'CHECKBOX':
+    case 'CHECKBOX': {
+      const isOutroChecked = outroOption != null && (value as string[] ?? []).includes(outroOption.id);
       return (
-        <CheckboxGroup
-          label={label}
-          options={opcoes}
-          value={(value as string[]) ?? []}
-          onChange={onChange}
-          required={obrigatorio}
-          error={error}
-        />
+        <>
+          <CheckboxGroup
+            label={label}
+            options={opcoes}
+            value={(value as string[]) ?? []}
+            onChange={(v) => {
+              onChange(v);
+              if (outroOption && !(v as string[]).includes(outroOption.id)) onOutroChange?.('');
+            }}
+            required={obrigatorio}
+            error={error}
+          />
+          {isOutroChecked && (
+            <Input
+              label="Especifique"
+              value={outroValue ?? ''}
+              onChange={(e) => onOutroChange?.(e.target.value)}
+              placeholder="Digite aqui..."
+              fullWidth
+            />
+          )}
+        </>
       );
+    }
 
     case 'ARQUIVO':
       return (
