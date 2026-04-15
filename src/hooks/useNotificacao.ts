@@ -37,13 +37,23 @@ function buildRespostas(
     }
 
     if (campo.tipo === 'SELECT' || campo.tipo === 'RADIO') {
-      acc.push({ campo_id: campo.id, valor_opcao_id: String(value) });
+      const outroText = formValues[`${campo.id}_outro`];
+      const resposta: RespostaCampo = { campo_id: campo.id, valor_opcao_id: String(value) };
+      if (outroText && String(outroText).trim()) {
+        resposta.valor = String(outroText).trim();
+      }
+      acc.push(resposta);
       return acc;
     }
 
     if (campo.tipo === 'MULTISELECT' || campo.tipo === 'CHECKBOX') {
       if (Array.isArray(value) && value.length > 0) {
-        acc.push({ campo_id: campo.id, valores_opcoes_ids: value.map(String) });
+        const outroText = formValues[`${campo.id}_outro`];
+        const resposta: RespostaCampo = { campo_id: campo.id, valores_opcoes_ids: value.map(String) };
+        if (outroText && String(outroText).trim()) {
+          resposta.valor = String(outroText).trim();
+        }
+        acc.push(resposta);
       }
       return acc;
     }
