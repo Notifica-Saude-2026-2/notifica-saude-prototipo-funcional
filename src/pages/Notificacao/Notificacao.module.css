@@ -12,15 +12,16 @@
 }
 
 .pageTitle {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 700;
-  color: var(--text-h);
+  color: #222;
   margin-bottom: 4px;
 }
 
 .pageSubtitle {
   font-size: 13px;
-  color: var(--text);
+  font-weight: 500;
+  color: #222;
 }
 
 .pageContainer > :not(.pageHeader) {
@@ -127,11 +128,33 @@
   padding: 48px 0;
 }
 
-.errorText {
-  font-size: 14px;
-  color: #d32f2f;
+.errorCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  border-top: 4px solid #d32f2f;
+  padding: 48px 24px;
+  width: 100%;
+  max-width: 900px;
   text-align: center;
-  padding: 48px 0;
+}
+
+.errorTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: #d32f2f;
+}
+
+.errorMessage {
+  font-size: 14px;
+  color: var(--text);
+  max-width: 480px;
+  line-height: 1.6;
+  margin-bottom: 8px;
 }
 
 .submitError {
@@ -186,12 +209,8 @@
     padding: 32px 24px 64px;
   }
 
-  .pageTitle {
-    font-size: 22px;
-  }
-
   .pageSubtitle {
-    font-size: 14px;
+    font-size: 15px;
   }
 
   .fieldLabel {

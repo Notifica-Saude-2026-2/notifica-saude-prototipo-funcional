@@ -25,10 +25,12 @@
 .stepHeader {
   display: flex;
   align-items: center;
-  gap: 10px;
-  background: #d9d9d9;
-  padding: 10px 16px;
-  margin-top: 8px;
+  justify-content: center;
+  gap: 8px;
+  background: #e6e6e6;
+  padding: 4px 16px;
+  margin: 8px 16px 0;
+  border-radius: 5px;
 }
 
 .stepIcon {
@@ -38,10 +40,16 @@
   color: #444;
 }
 
+.stepIcon img {
+  width: 15px;
+  height: 15px;
+}
+
 .stepTitle {
   font-size: 13px;
-  font-weight: 600;
-  color: #333;
+  font-family: "Raleway", sans-serif;
+  font-weight: 800;
+  color: #3C3C3C;
 }
 
 .content {
@@ -64,8 +72,8 @@
   }
 
   .stepHeader {
-    padding: 12px 24px;
-    margin-top: 10px;
+    padding: 5px 24px;
+    margin: 10px 24px 0;
   }
 
   .stepIcon {
@@ -73,7 +81,7 @@
   }
 
   .stepTitle {
-    font-size: 15px;
+    font-size: 14px;
   }
 
   .content {

@@ -8,8 +8,20 @@ import { useCamposFormulario } from "../../hooks/useCamposFormulario";
 import { useNotificacao } from "../../hooks/useNotificacao";
 import type { CampoDinamico } from "../../types/formulario";
 import styles from "./Notificacao.module.css";
+import step1Icon from "../../assets/step1.svg";
+import step2Icon from "../../assets/step2.svg";
+import step3Icon from "../../assets/step3.svg";
+import step4Icon from "../../assets/step4.svg";
 
 const SECAO_PACIENTE = "Tela 2 - Informações sobre o Paciente";
+
+const SECAO_CONFIG: Record<string, { label: string; icon: string }> = {
+  "Tela 1 - Abertura":                                                  { label: "Informações iniciais",                     icon: step1Icon },
+  "Tela 2 - Informações sobre o Paciente":                              { label: "Informações sobre o paciente envolvido",   icon: step2Icon },
+  "Tela 3 - Momento e Local do Incidente":                              { label: "Momento e local do incidente",             icon: step3Icon },
+  "Tela 4 - Descrição do Incidente e Papel do Notificador":             { label: "Descrição do incidente",                   icon: step4Icon },
+  "Identificação opcional do notificador":                              { label: "Informações opcionais do notificante",     icon: step2Icon },
+};
 
 function groupBySecao(campos: CampoDinamico[]): Map<string, CampoDinamico[]> {
   const map = new Map<string, CampoDinamico[]>();
@@ -58,7 +70,7 @@ function isStepComplete(
 
 export default function Notificacao() {
   const navigate = useNavigate();
-  const { campos, loading, error } = useCamposFormulario();
+  const { campos, loading, error, retry } = useCamposFormulario();
   const { formValues, updateField, resetForm, submit, submitting, submitError } =
     useNotificacao();
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
@@ -107,7 +119,16 @@ export default function Notificacao() {
   if (error) {
     return (
       <div className={styles.pageContainer}>
-        <p className={styles.errorText}>{error}</p>
+        <div className={styles.errorCard}>
+          <p className={styles.errorTitle}>Não foi possível carregar o formulário</p>
+          <p className={styles.errorMessage}>{error}</p>
+          <Button
+            title="Tentar novamente"
+            variant="contained"
+            color="primary"
+            onClick={retry}
+          />
+        </div>
       </div>
     );
   }
@@ -160,7 +181,8 @@ export default function Notificacao() {
       <StepForm
         currentStep={currentStepIndex + 1}
         totalSteps={totalSteps}
-        stepTitle={currentSecao}
+        stepTitle={SECAO_CONFIG[currentSecao]?.label ?? currentSecao}
+        stepIcon={SECAO_CONFIG[currentSecao] && <img src={SECAO_CONFIG[currentSecao].icon} alt="" />}
         onNext={handleNext}
         onPrev={currentStepIndex > 0 ? handlePrev : undefined}
         isLastStep={isLastStep}
@@ -177,6 +199,8 @@ export default function Notificacao() {
             {...campo}
             value={formValues[campo.id]}
             onChange={(value) => updateField(campo.id, value)}
+            outroValue={(formValues[`${campo.id}_outro`] as string) ?? ''}
+            onOutroChange={(v) => updateField(`${campo.id}_outro`, v)}
           />
         ))}
 
