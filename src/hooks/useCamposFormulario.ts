@@ -54,17 +54,28 @@ export function useCamposFormulario(): UseCamposFormularioReturn {
   const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
-    setLoading(true);
-    setError(null);
+    let cancelled = false;
     getCamposFormularioAtivos()
       .then((data) => {
-        setCampos(deduplicarCampos(data));
+        if (!cancelled) {
+          setCampos(deduplicarCampos(data));
+          setLoading(false);
+        }
       })
-      .catch((err: unknown) => setError(toUserMessage(err)))
-      .finally(() => setLoading(false));
+      .catch((err: unknown) => {
+        if (!cancelled) {
+          setError(toUserMessage(err));
+          setLoading(false);
+        }
+      });
+    return () => { cancelled = true; };
   }, [attempt]);
 
-  const retry = () => setAttempt((n) => n + 1);
+  const retry = () => {
+    setLoading(true);
+    setError(null);
+    setAttempt((n) => n + 1);
+  };
 
   return { campos, loading, error, retry };
 }
