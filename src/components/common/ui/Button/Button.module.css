@@ -26,12 +26,14 @@
 }
 
 .title {
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .subtitle {
-  font-size: 12px;
+  font-size: 13px;
   margin-top: 4px;
+  font-weight: 400;
+  font-family: "Poppins", sans-serif;
   opacity: 0.8;
 }
 
@@ -44,7 +46,7 @@
 }
 
 .green {
-  --btn-color: #2e7d32;
+  --btn-color: #3FA35C;
 }
 
 .primary {

@@ -10,21 +10,24 @@
 }
 
 .title {
-  font-size: 22px;
-  margin-bottom: 16px;
+  font-size: 18px;
+  margin-bottom: 10px;
+  font-family: "Poppins", sans-serif;
   color: #183EFF;
 }
 
 .text {
-  font-size: 14px;
+  font-size: 15px;
   color: #000;
-  line-height: 1.6;
+  line-height: 1.4;
   margin-bottom: 16px;
+  font-family: "Poppins", sans-serif;
+  font-weight: 400;
   text-align: justify;
 }
 
 .subtext {
-  font-size: 12px;
+  font-size: 13px;
   margin-top: 4px;
   opacity: 0.8;
   text-align: center;
@@ -37,7 +40,7 @@
 
 .actionsTitle {
   display: block;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 800;
   color: #000;
   margin-bottom: 4px;
@@ -47,6 +50,8 @@
   display: block;
   margin-bottom: 20px;
   font-size: 14px;
+  font-weight: 400;
+  font-family: "Poppins", sans-serif;
   color: #000;
 }
 
@@ -59,14 +64,6 @@
 
 /* DESKTOP */
 @media (min-width: 768px) {
-  .title {
-    font-size: 28px;
-  }
-
-  .text {
-    font-size: 16px;
-  }
-
   .buttons {
     flex-direction: row;
   }
