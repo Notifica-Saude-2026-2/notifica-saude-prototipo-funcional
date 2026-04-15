@@ -6,6 +6,7 @@ type UseCamposFormularioReturn = {
   campos: CampoDinamico[];
   loading: boolean;
   error: string | null;
+  retry: () => void;
 };
 
 /**
@@ -38,21 +39,43 @@ function deduplicarOpcoes(opcoes: CampoDinamico['opcoes']): CampoDinamico['opcoe
   });
 }
 
+function toUserMessage(err: unknown): string {
+  const msg = err instanceof Error ? err.message : '';
+  if (msg === 'Failed to fetch' || msg.includes('NetworkError') || msg.includes('network')) {
+    return 'Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente.';
+  }
+  return 'Ocorreu um erro ao carregar o formulário. Tente novamente.';
+}
+
 export function useCamposFormulario(): UseCamposFormularioReturn {
   const [campos, setCampos] = useState<CampoDinamico[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
+    let cancelled = false;
     getCamposFormularioAtivos()
       .then((data) => {
-        setCampos(deduplicarCampos(data));
+        if (!cancelled) {
+          setCampos(deduplicarCampos(data));
+          setLoading(false);
+        }
       })
-      .catch((err: unknown) =>
-        setError(err instanceof Error ? err.message : 'Erro ao carregar campos')
-      )
-      .finally(() => setLoading(false));
-  }, []);
+      .catch((err: unknown) => {
+        if (!cancelled) {
+          setError(toUserMessage(err));
+          setLoading(false);
+        }
+      });
+    return () => { cancelled = true; };
+  }, [attempt]);
 
-  return { campos, loading, error };
+  const retry = () => {
+    setLoading(true);
+    setError(null);
+    setAttempt((n) => n + 1);
+  };
+
+  return { campos, loading, error, retry };
 }

@@ -6,6 +6,7 @@
 
 .label {
   font-size: 14px;
+  font-family: "Poppins", sans-serif;
   font-weight: 600;
   color: var(--text-h);
 }
@@ -16,7 +17,8 @@
 }
 
 .requiredHint {
-  font-size: 11px;
+  font-size: 10px;
+  font-family: "Poppins", sans-serif;
   color: #d32f2f;
   margin-top: -4px;
 }
@@ -42,7 +44,8 @@
   gap: 10px;
   cursor: pointer;
   font-size: 14px;
-  color: var(--text-h);
+  font-family: "Poppins", sans-serif;
+  color: #222;
 }
 
 .radio {
@@ -75,7 +78,13 @@
   border-radius: 50%; /* Garante que a bolinha de dentro também seja redonda */
 }
 .optionText {
-  line-height: 1.4;
+  font-family: "Poppins", sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.5;
+  letter-spacing: 0.12px;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizelegibility;
 }
 
 .errorMessage {
