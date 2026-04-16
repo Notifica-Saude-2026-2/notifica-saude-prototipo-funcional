@@ -62,8 +62,20 @@ function isStepComplete(
     .every((c) => {
       const v = formValues[c.id];
       if (v === undefined || v === null || v === "") return false;
-      if (Array.isArray(v)) return v.length > 0;
+      if (Array.isArray(v) && v.length === 0) return false;
       if (c.tipo === 'DATA') return (v as string) <= todayStr();
+
+      const outroOption = c.opcoes?.find((o) => o.valor.toLowerCase() === 'outro');
+      if (outroOption) {
+        const outroSelected =
+          (c.tipo === 'RADIO' && v === outroOption.id) ||
+          (c.tipo === 'CHECKBOX' && Array.isArray(v) && v.includes(outroOption.id));
+        if (outroSelected) {
+          const outroVal = formValues[`${c.id}_outro`];
+          if (!outroVal || (outroVal as string).trim() === '') return false;
+        }
+      }
+
       return true;
     });
 }

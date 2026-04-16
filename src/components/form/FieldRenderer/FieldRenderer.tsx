@@ -183,6 +183,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
               value={outroValue ?? ''}
               onChange={(e) => onOutroChange?.(e.target.value)}
               placeholder="Digite aqui..."
+              required={obrigatorio}
               fullWidth
             />
           )}
