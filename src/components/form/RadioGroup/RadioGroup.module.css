@@ -41,7 +41,7 @@
 .optionLabel {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 6px;
   cursor: pointer;
   font-size: 14px;
   font-family: "Poppins", sans-serif;
@@ -54,10 +54,12 @@
   width: 16px;
   height: 16px;
   min-width: 16px;
+  flex-shrink: 0;
   border: 2px solid #bbb;
-  border-radius: 50%; /* CORRIGIDO: 50% transforma em um círculo perfeito */
+  border-radius: 50%;
   cursor: pointer;
   position: relative;
+  transform: translateY(-1px);
   transition: border-color 0.15s, background-color 0.15s;
 }
 
@@ -81,7 +83,7 @@
   font-family: "Poppins", sans-serif;
   font-size: 14px;
   font-weight: 500;
-  line-height: 1.5;
+  line-height: 1;
   letter-spacing: 0.12px;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizelegibility;
