@@ -111,11 +111,30 @@
   text-decoration: underline;
 }
 
-.formError {
+.errorAlert {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background-color: #fff5f5;
+  border: 1px solid #f5c6c6;
+  border-left: 4px solid #d32f2f;
+  border-radius: 8px;
+  padding: 12px 14px;
+}
+
+.errorIcon {
+  font-size: 16px;
+  color: #d32f2f;
+  flex-shrink: 0;
+  line-height: 1.4;
+}
+
+.errorMessage {
   font-family: 'Poppins', sans-serif;
   font-size: 13px;
-  color: #d32f2f;
+  color: #b71c1c;
   margin: 0;
+  line-height: 1.5;
 }
 
 /* ── Tablet / Desktop ── */

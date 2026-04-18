@@ -1,16 +1,20 @@
 import { useState, type ReactNode } from 'react';
 import { AuthContext } from './authContextDef';
+import { loginRequest } from '../services/auth.service';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(
+    () => !!localStorage.getItem('auth_token'),
+  );
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async function login(_username: string, _password: string) {
-    // TODO: trocar por chamada real
+  async function login(email: string, senha: string) {
+    const data = await loginRequest({ email, senha });
+    localStorage.setItem('auth_token', data.token);
     setIsAuthenticated(true);
   }
 
   function logout() {
+    localStorage.removeItem('auth_token');
     setIsAuthenticated(false);
   }
 

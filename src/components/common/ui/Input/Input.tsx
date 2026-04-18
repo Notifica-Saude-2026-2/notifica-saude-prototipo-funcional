@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState } from "react";
+import { FiEye, FiEyeOff } from "react-icons/fi";
 import styles from "./Input.module.css";
 
 type InputProps = {
@@ -13,6 +14,7 @@ type InputProps = {
   fullWidth?: boolean;
   max?: string;
   required?: boolean;
+  showPasswordToggle?: boolean;
 };
 
 export const Input: React.FC<InputProps> = ({
@@ -27,8 +29,12 @@ export const Input: React.FC<InputProps> = ({
   fullWidth = false,
   max,
   required = false,
+  showPasswordToggle = false,
 }) => {
+  const [showPassword, setShowPassword] = useState(false);
   const hasError = !!error;
+  const isPassword = type === "password";
+  const resolvedType = isPassword && showPasswordToggle && showPassword ? "text" : type;
 
   const containerClass = [
     styles.container,
@@ -38,6 +44,7 @@ export const Input: React.FC<InputProps> = ({
   const inputClass = [
     styles.input,
     hasError ? styles.error : "",
+    isPassword && showPasswordToggle ? styles.inputWithToggle : "",
   ].join(" ");
 
   return (
@@ -52,15 +59,29 @@ export const Input: React.FC<InputProps> = ({
         <span className={styles.requiredHint}>*Preenchimento obrigatório</span>
       )}
 
-      <input
-        type={type}
-        value={value}
-        onChange={onChange}
-        placeholder={placeholder}
-        disabled={disabled}
-        max={max}
-        className={inputClass}
-      />
+      <div className={styles.inputWrapper}>
+        <input
+          type={resolvedType}
+          value={value}
+          onChange={onChange}
+          placeholder={placeholder}
+          disabled={disabled}
+          max={max}
+          className={inputClass}
+        />
+
+        {isPassword && showPasswordToggle && (
+          <button
+            type="button"
+            className={styles.toggleButton}
+            onClick={() => setShowPassword((v) => !v)}
+            aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+            tabIndex={-1}
+          >
+            {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+          </button>
+        )}
+      </div>
 
       {hasError && <span className={styles.errorMessage}>{error}</span>}
     </div>
