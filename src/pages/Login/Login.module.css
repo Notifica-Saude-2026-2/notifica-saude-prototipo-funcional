@@ -1,0 +1,173 @@
+/* Mobile-first */
+
+.page {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 40px 16px 56px;
+  flex: 1;
+  background-color: #f0f2f5;
+}
+
+.card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 32px rgba(0, 0, 0, 0.1);
+  padding: 32px 24px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+/* ── Coluna esquerda (info) ── */
+
+.infoColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.cardTitle {
+  display: inline-block;
+  font-family: 'Poppins', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #183eff;
+  line-height: 1.2;
+  margin: 0;
+}
+
+.cardTitle::after {
+  content: '';
+  display: block;
+  width: 100%;
+  height: 2px;
+  background-color: #183eff;
+  margin-top: 8px;
+}
+
+.infoSubtitle {
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-h);
+  margin: 0;
+  margin-top: 4px;
+}
+
+.infoText {
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.7;
+  margin: 0;
+}
+
+/* ── Divisor ── */
+
+.divider {
+  width: 100%;
+  height: 1px;
+  background-color: var(--border);
+  flex-shrink: 0;
+}
+
+/* ── Coluna direita (formulário) ── */
+
+.formColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.passwordGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.inputLabel {
+  font-family: 'Raleway', sans-serif !important;
+  font-weight: 400 !important;
+}
+
+.loginButton {
+  padding: 10px 12px !important;
+  font-size: 14px !important;
+}
+
+.forgotLink {
+  font-family: 'Raleway', sans-serif;
+  font-size: 13px;
+  color: #183eff;
+  text-decoration: none;
+  text-align: right;
+  align-self: flex-end;
+}
+
+.forgotLink:hover {
+  text-decoration: underline;
+}
+
+.formError {
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  color: #d32f2f;
+  margin: 0;
+}
+
+/* ── Tablet / Desktop ── */
+
+@media (min-width: 768px) {
+  .page {
+    align-items: center;
+    padding: 60px 24px;
+  }
+
+  .card {
+    flex-direction: row;
+    align-items: stretch;
+    max-width: 880px;
+    padding: 48px;
+    gap: 0;
+  }
+
+  .infoColumn {
+    flex: 0 0 40%;
+    padding-right: 48px;
+    justify-content: flex-start;
+  }
+
+  .cardTitle {
+    font-size: 20px;
+  }
+
+  .divider {
+    width: 1px;
+    height: auto;
+    align-self: stretch;
+  }
+
+  .formColumn {
+    flex: 0 0 60%;
+    padding-left: 48px;
+    justify-content: center;
+  }
+
+  .loginButton {
+    padding: 12px !important;
+  }
+}
+
+@media (min-width: 1024px) {
+  .card {
+    max-width: 960px;
+    padding: 56px;
+  }
+
+  .loginButton {
+    padding: 14px !important;
+  }
+}

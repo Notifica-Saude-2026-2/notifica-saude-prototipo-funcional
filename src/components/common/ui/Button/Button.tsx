@@ -15,6 +15,7 @@ type ButtonProps = {
   fullWidth?: boolean;
   startIcon?: React.ReactNode;
   endIcon?: React.ReactNode;
+  className?: string;
 };
 
 export const Button: React.FC<ButtonProps> = ({
@@ -28,6 +29,7 @@ export const Button: React.FC<ButtonProps> = ({
   fullWidth = false,
   startIcon,
   endIcon,
+  className,
 }) => {
   const classNames = [
     styles.button,
@@ -35,6 +37,7 @@ export const Button: React.FC<ButtonProps> = ({
     color ? styles[color] : "",
     fullWidth ? styles.fullWidth : "",
     disabled ? styles.disabled : "",
+    className ?? "",
   ].join(" ");
 
   const content = (

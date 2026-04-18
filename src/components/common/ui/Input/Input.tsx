@@ -3,6 +3,7 @@ import styles from "./Input.module.css";
 
 type InputProps = {
   label?: string;
+  labelClassName?: string;
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   placeholder?: string;
@@ -16,6 +17,7 @@ type InputProps = {
 
 export const Input: React.FC<InputProps> = ({
   label,
+  labelClassName,
   value,
   onChange,
   placeholder,
@@ -41,7 +43,7 @@ export const Input: React.FC<InputProps> = ({
   return (
     <div className={containerClass}>
       {label && (
-        <span className={styles.label}>
+        <span className={[styles.label, labelClassName].filter(Boolean).join(' ')}>
           {label}
           {required && <span className={styles.required}>*</span>}
         </span>

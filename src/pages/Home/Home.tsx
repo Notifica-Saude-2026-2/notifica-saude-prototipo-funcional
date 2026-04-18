@@ -44,6 +44,7 @@ export default function Home() {
               fullWidth
               title="Acessar área profissional"
               subtitle="Para gerenciar notificações e relatórios"
+              onClick={() => navigate("/login")}
             />
           </div>
         </div>
