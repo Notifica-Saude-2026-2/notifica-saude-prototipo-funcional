@@ -1,20 +1,21 @@
 import { useState, type ReactNode } from 'react';
 import { AuthContext } from './authContextDef';
 import { loginRequest } from '../services/auth.service';
+import { getCookie, setCookie, deleteCookie } from '../utils/cookies';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(
-    () => !!localStorage.getItem('auth_token'),
+    () => !!getCookie('auth_token'),
   );
 
   async function login(email: string, senha: string) {
     const data = await loginRequest({ email, senha });
-    localStorage.setItem('auth_token', data.token);
+    setCookie('auth_token', data.token);
     setIsAuthenticated(true);
   }
 
   function logout() {
-    localStorage.removeItem('auth_token');
+    deleteCookie('auth_token');
     setIsAuthenticated(false);
   }
 
