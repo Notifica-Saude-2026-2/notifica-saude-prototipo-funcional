@@ -1,7 +1,13 @@
 {
   "ci": {
     "collect": {
-      "staticDistDir": "./dist",
+      "startServerCommand": "npx serve@14 -s ./dist -l 3000",
+      "startServerReadyPattern": "Local:",
+      "url": [
+        "http://localhost:3000/",
+        "http://localhost:3000/login",
+        "http://localhost:3000/notificacao"
+      ],
       "numberOfRuns": 1
     },
     "assert": {
