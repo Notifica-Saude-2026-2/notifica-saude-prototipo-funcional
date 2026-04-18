@@ -1,0 +1,141 @@
+.wrapper {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.trigger {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: #2f4fff;
+  color: #fff;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+.trigger:hover,
+.trigger:focus-visible {
+  background: #1d2fd6;
+  outline: 3px solid #f58220;
+  outline-offset: 2px;
+}
+
+.panel {
+  background: var(--bg, #fff);
+  color: var(--text, #333);
+  border: 1px solid var(--border, #e5e4e7);
+  border-radius: 12px;
+  padding: 16px;
+  width: 220px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  outline: none;
+  animation: fadeIn 0.15s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.sectionTitle {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text, #555);
+  margin: 0;
+}
+
+.fontButtons {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+}
+
+.fontBtn {
+  flex: 1;
+  border: 2px solid var(--border, #e5e4e7);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text, #333);
+  cursor: pointer;
+  padding: 6px 0;
+  font-size: 14px;
+  font-weight: 700;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.fontBtn.active {
+  border-color: #2f4fff;
+  background: #eef0ff;
+  color: #2f4fff;
+}
+
+.fontBtn:hover:not(.active) {
+  border-color: #2f4fff;
+}
+
+.fontMd { font-size: 18px; }
+.fontLg { font-size: 22px; }
+
+.contrastBtn {
+  width: 100%;
+  padding: 8px;
+  border: 2px solid var(--border, #e5e4e7);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text, #333);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: left;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.contrastBtn.active {
+  border-color: #2f4fff;
+  background: #eef0ff;
+  color: #2f4fff;
+}
+
+.contrastBtn:hover:not(.active) {
+  border-color: #2f4fff;
+}
+
+.divider {
+  border: none;
+  border-top: 1px solid var(--border, #e5e4e7);
+  margin: 0;
+}
+
+.resetBtn {
+  width: 100%;
+  padding: 8px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: #888;
+  cursor: pointer;
+  font-size: 13px;
+  text-align: center;
+  transition: color 0.15s;
+}
+
+.resetBtn:hover {
+  color: var(--text, #333);
+}

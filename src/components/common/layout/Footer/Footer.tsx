@@ -7,9 +7,9 @@ export function Footer() {
         
         <div className={styles.top}>
           <div>
-            <h3 className={styles.title}>
+            <p className={styles.title}>
               Notifica <span className={styles.bold}>Saúde</span>
-            </h3>
+            </p>
             <p className={styles.email}>notifica.saude@gmail.com</p>
           </div>
         </div>
