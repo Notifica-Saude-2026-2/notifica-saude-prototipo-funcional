@@ -3,25 +3,39 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Input } from '../../components/common/ui/Input';
 import { Button } from '../../components/common/ui/Button';
 import { useAuth } from '../../hooks/useAuth';
+import { ApiError } from '../../services/api';
 import styles from './Login.module.css';
+
+function resolverMensagemErro(err: unknown): string {
+  if (err instanceof ApiError) {
+    if (err.status === 401 || err.status === 403) {
+      return 'E-mail ou senha incorretos. Verifique os dados e tente novamente.';
+    }
+    if (err.status === 429) {
+      return 'Muitas tentativas seguidas. Aguarde alguns minutos e tente novamente.';
+    }
+    return 'Algo deu errado no servidor. Tente novamente em instantes.';
+  }
+  return 'Não foi possível conectar ao servidor. Verifique sua internet e tente novamente.';
+}
 
 export default function Login() {
   const navigate = useNavigate();
   const { login } = useAuth();
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('');
+  const [senha, setSenha] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
-  async function handleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError('');
     setIsLoading(true);
     try {
-      await login(username, password);
+      await login(email, senha);
       navigate('/');
-    } catch {
-      setError('Usuário ou senha inválidos.');
+    } catch (err) {
+      setError(resolverMensagemErro(err));
     } finally {
       setIsLoading(false);
     }
@@ -45,8 +59,8 @@ export default function Login() {
           <Input
             label="Usuário"
             labelClassName={styles.inputLabel}
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             placeholder="Digite seu email"
             type="email"
             fullWidth
@@ -56,10 +70,11 @@ export default function Login() {
             <Input
               label="Senha"
               labelClassName={styles.inputLabel}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              value={senha}
+              onChange={(e) => setSenha(e.target.value)}
               placeholder="Digite sua senha"
               type="password"
+              showPasswordToggle
               fullWidth
             />
             <Link to="/esqueceu-senha" className={styles.forgotLink}>
@@ -67,7 +82,12 @@ export default function Login() {
             </Link>
           </div>
 
-          {error && <p className={styles.formError}>{error}</p>}
+          {error && (
+            <div className={styles.errorAlert} role="alert">
+              <span className={styles.errorIcon}>⚠</span>
+              <p className={styles.errorMessage}>{error}</p>
+            </div>
+          )}
 
           <Button
             title={isLoading ? 'Entrando...' : 'Entrar na conta'}

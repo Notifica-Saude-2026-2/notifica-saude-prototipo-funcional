@@ -27,6 +27,37 @@
   margin-top: -4px;
 }
 
+.inputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.inputWrapper .input {
+  width: 100%;
+}
+
+.toggleButton {
+  position: absolute;
+  right: 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #666;
+  display: flex;
+  align-items: center;
+  padding: 0;
+  line-height: 1;
+}
+
+.toggleButton:hover {
+  color: #333;
+}
+
+.inputWithToggle {
+  padding-right: 38px !important;
+}
+
 .input {
   padding: 10px 12px;
   border-radius: 6px;

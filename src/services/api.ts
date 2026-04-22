@@ -1,3 +1,5 @@
+import { getCookie } from '../utils/cookies';
+
 const BASE_URL = import.meta.env.VITE_API_URL ?? '';
 
 export class ApiError extends Error {
@@ -12,8 +14,11 @@ export class ApiError extends Error {
 }
 
 export async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
+  const token = getCookie('auth_token');
+  const authHeader = token ? { Authorization: `Bearer ${token}` } : {};
+
   const response = await fetch(`${BASE_URL}${path}`, {
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...authHeader },
     ...options,
   });
 
