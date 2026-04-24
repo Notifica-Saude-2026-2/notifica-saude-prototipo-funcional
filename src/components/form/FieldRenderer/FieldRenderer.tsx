@@ -51,6 +51,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
           required={obrigatorio}
           error={error}
           fullWidth
+          data-testid={`field-${id}`}
         />
       );
     }
@@ -73,6 +74,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
             type="date"
             required={obrigatorio}
             error={dateError}
+            data-testid={`field-${id}`}
           />
         </div>
       );
@@ -87,6 +89,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
           placeholder={placeholder}
           required={obrigatorio}
           error={error}
+          data-testid={`field-${id}`}
         />
       );
 
@@ -100,6 +103,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
           placeholder={placeholder}
           required={obrigatorio}
           error={error}
+          data-testid={`field-${id}`}
         />
       );
 
@@ -113,6 +117,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
           multiple
           required={obrigatorio}
           error={error}
+          data-testid={`field-${id}`}
         />
       );
 
@@ -131,6 +136,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
             }}
             required={obrigatorio}
             error={error}
+            data-testid={`field-${id}`}
           />
           {isOutroSelected && (
             <Input
@@ -140,6 +146,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
               placeholder="Digite aqui..."
               required={obrigatorio}
               fullWidth
+              data-testid={`field-${id}-outro`}
             />
           )}
         </>
@@ -159,6 +166,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
           onChange={(v) => onChange(v)}
           required={obrigatorio}
           error={error}
+          data-testid={`field-${id}`}
         />
       );
 
@@ -176,6 +184,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
             }}
             required={obrigatorio}
             error={error}
+            data-testid={`field-${id}`}
           />
           {isOutroChecked && (
             <Input
@@ -185,6 +194,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
               placeholder="Digite aqui..."
               required={obrigatorio}
               fullWidth
+              data-testid={`field-${id}-outro`}
             />
           )}
         </>
@@ -198,6 +208,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
           onChange={onChange}
           required={obrigatorio}
           error={error}
+          data-testid={`field-${id}`}
         />
       );
 

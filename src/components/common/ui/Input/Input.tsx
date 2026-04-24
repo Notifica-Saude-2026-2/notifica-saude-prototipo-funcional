@@ -15,6 +15,7 @@ type InputProps = {
   max?: string;
   required?: boolean;
   showPasswordToggle?: boolean;
+  'data-testid'?: string;
 };
 
 export const Input: React.FC<InputProps> = ({
@@ -30,6 +31,7 @@ export const Input: React.FC<InputProps> = ({
   max,
   required = false,
   showPasswordToggle = false,
+  'data-testid': dataTestId,
 }) => {
   const [showPassword, setShowPassword] = useState(false);
   const hasError = !!error;
@@ -68,6 +70,7 @@ export const Input: React.FC<InputProps> = ({
           disabled={disabled}
           max={max}
           className={inputClass}
+          data-testid={dataTestId}
         />
 
         {isPassword && showPasswordToggle && (

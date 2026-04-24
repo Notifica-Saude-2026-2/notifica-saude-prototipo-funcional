@@ -8,6 +8,7 @@ type TextareaProps = {
   placeholder?: string;
   required?: boolean;
   error?: string;
+  'data-testid'?: string;
 };
 
 export const Textarea: React.FC<TextareaProps> = ({
@@ -17,6 +18,7 @@ export const Textarea: React.FC<TextareaProps> = ({
   placeholder,
   required = false,
   error,
+  'data-testid': dataTestId,
 }) => {
   return (
     <div className={styles.container}>
@@ -39,6 +41,7 @@ export const Textarea: React.FC<TextareaProps> = ({
         }}
         placeholder={placeholder}
         rows={3}
+        data-testid={dataTestId}
       />
       {error && <span className={styles.errorMessage}>{error}</span>}
     </div>

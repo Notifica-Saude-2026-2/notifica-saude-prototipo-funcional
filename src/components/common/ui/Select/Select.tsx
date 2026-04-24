@@ -20,12 +20,13 @@ type SelectBaseProps = {
   required?: boolean;
   placeholder?: string;
   error?: string;
+  'data-testid'?: string;
 };
 
 type SelectProps = SelectBaseProps & (SelectSingleProps | SelectMultipleProps);
 
 export const Select: React.FC<SelectProps> = (props) => {
-  const { label, options, required = false, placeholder, error, multiple } = props;
+  const { label, options, required = false, placeholder, error, multiple, 'data-testid': dataTestId } = props;
 
   function handleChange(e: React.ChangeEvent<HTMLSelectElement>) {
     if (multiple) {
@@ -52,6 +53,7 @@ export const Select: React.FC<SelectProps> = (props) => {
         value={multiple ? (props as SelectMultipleProps).value : (props as SelectSingleProps).value}
         onChange={handleChange}
         className={[styles.select, error ? styles.error : ''].join(' ').trim()}
+        data-testid={dataTestId}
       >
         {!multiple && (
           <option value="" disabled>

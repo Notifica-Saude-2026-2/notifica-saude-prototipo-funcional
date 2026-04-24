@@ -15,6 +15,7 @@ type RadioGroupProps = {
   error?: string;
   required?: boolean;
   scrollable?: boolean;
+  'data-testid'?: string;
 };
 
 export const RadioGroup: React.FC<RadioGroupProps> = ({
@@ -26,6 +27,7 @@ export const RadioGroup: React.FC<RadioGroupProps> = ({
   error,
   required = false,
   scrollable = false,
+  'data-testid': dataTestId,
 }) => {
   return (
     <div className={styles.container}>
@@ -52,6 +54,7 @@ export const RadioGroup: React.FC<RadioGroupProps> = ({
               checked={value === option.value}
               onChange={() => onChange(option.value)}
               className={styles.radio}
+              data-testid={dataTestId ? `${dataTestId}-option-${option.value}` : undefined}
             />
             <span className={styles.optionText}>{option.label}</span>
           </label>

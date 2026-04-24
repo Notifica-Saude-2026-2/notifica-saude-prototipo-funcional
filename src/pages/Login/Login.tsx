@@ -64,6 +64,7 @@ export default function Login() {
             placeholder="Digite seu email"
             type="email"
             fullWidth
+            data-testid="login-email"
           />
 
           <div className={styles.passwordGroup}>
@@ -76,6 +77,7 @@ export default function Login() {
               type="password"
               showPasswordToggle
               fullWidth
+              data-testid="login-senha"
             />
             <Link to="/esqueceu-senha" className={styles.forgotLink}>
               Esqueceu a senha?
@@ -96,6 +98,7 @@ export default function Login() {
             fullWidth
             disabled={isLoading}
             className={styles.loginButton}
+            data-testid="login-submit"
           />
         </form>
 

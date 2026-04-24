@@ -36,6 +36,7 @@ export default function Home() {
               onClick={() => navigate("/notificacao")}
               title="Registrar incidente"
               subtitle="Não é necessário login. Leva menos de 3 minutos."
+              data-testid="home-btn-notificacao"
             />
 
             <Button
@@ -45,6 +46,7 @@ export default function Home() {
               title="Acessar área profissional"
               subtitle="Para gerenciar notificações e relatórios"
               onClick={() => navigate("/login")}
+              data-testid="home-btn-login"
             />
           </div>
         </div>

@@ -16,6 +16,7 @@ type ButtonProps = {
   startIcon?: React.ReactNode;
   endIcon?: React.ReactNode;
   className?: string;
+  'data-testid'?: string;
 };
 
 export const Button: React.FC<ButtonProps> = ({
@@ -30,6 +31,7 @@ export const Button: React.FC<ButtonProps> = ({
   startIcon,
   endIcon,
   className,
+  'data-testid': dataTestId,
 }) => {
   const classNames = [
     styles.button,
@@ -57,14 +59,14 @@ export const Button: React.FC<ButtonProps> = ({
 
   if (href) {
     return (
-      <a href={href} className={classNames}>
+      <a href={href} className={classNames} data-testid={dataTestId}>
         {content}
       </a>
     );
   }
 
   return (
-    <button onClick={onClick} disabled={disabled} className={classNames}>
+    <button onClick={onClick} disabled={disabled} className={classNames} data-testid={dataTestId}>
       {content}
     </button>
   );

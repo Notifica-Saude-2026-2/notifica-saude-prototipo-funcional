@@ -55,6 +55,7 @@ export const StepForm: React.FC<StepFormProps> = ({
             variant="outlined"
             color="gray"
             onClick={onPrev}
+            data-testid="stepform-btn-prev"
           />
         )}
         <Button
@@ -63,6 +64,7 @@ export const StepForm: React.FC<StepFormProps> = ({
           color={isLastStep ? "green" : "primary"}
           onClick={onNext}
           disabled={!canAdvance}
+          data-testid={isLastStep ? "stepform-btn-submit" : "stepform-btn-next"}
         />
       </div>
     </div>

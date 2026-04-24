@@ -9,6 +9,7 @@ type CheckboxGroupProps = {
   onChange: (value: string[]) => void;
   required?: boolean;
   error?: string;
+  'data-testid'?: string;
 };
 
 export const CheckboxGroup: React.FC<CheckboxGroupProps> = ({
@@ -18,6 +19,7 @@ export const CheckboxGroup: React.FC<CheckboxGroupProps> = ({
   onChange,
   required = false,
   error,
+  'data-testid': dataTestId,
 }) => {
   function toggle(id: string) {
     onChange(
@@ -43,6 +45,7 @@ export const CheckboxGroup: React.FC<CheckboxGroupProps> = ({
               checked={value.includes(opt.id)}
               onChange={() => toggle(opt.id)}
               className={styles.checkbox}
+              data-testid={dataTestId ? `${dataTestId}-option-${opt.id}` : undefined}
             />
             <span className={styles.optionText}>{opt.valor}</span>
           </label>

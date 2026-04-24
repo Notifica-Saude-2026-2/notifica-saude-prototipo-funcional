@@ -7,6 +7,7 @@ type FileInputProps = {
   required?: boolean;
   error?: string;
   accept?: string;
+  'data-testid'?: string;
 };
 
 export const FileInput: React.FC<FileInputProps> = ({
@@ -15,6 +16,7 @@ export const FileInput: React.FC<FileInputProps> = ({
   required = false,
   error,
   accept,
+  'data-testid': dataTestId,
 }) => {
   return (
     <div className={styles.container}>
@@ -32,6 +34,7 @@ export const FileInput: React.FC<FileInputProps> = ({
         accept={accept}
         className={styles.input}
         onChange={(e) => onChange(e.target.files?.[0] ?? null)}
+        data-testid={dataTestId}
       />
       {error && <span className={styles.errorMessage}>{error}</span>}
     </div>
