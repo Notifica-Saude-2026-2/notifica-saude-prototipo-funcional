@@ -30,7 +30,7 @@ export const RadioGroup: React.FC<RadioGroupProps> = ({
   'data-testid': dataTestId,
 }) => {
   return (
-    <div className={styles.container}>
+    <div className={styles.container} data-testid={dataTestId}>
       <span className={styles.label}>
         {label}
         {required && <span className={styles.required}>*</span>}

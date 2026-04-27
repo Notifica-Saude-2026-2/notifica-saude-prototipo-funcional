@@ -25,11 +25,6 @@ dist-ssr
 
 .env
 
-# Playwright
-/test-results/
-/playwright-report/
-/blob-report/
-/playwright/.cache/
-/playwright/.auth/
-
 .claude/settings.local.json
+/.playwright-mcp
+
