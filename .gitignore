@@ -27,4 +27,6 @@ dist-ssr
 
 .claude/settings.local.json
 /.playwright-mcp
+/playwright-report
+/test-results
 

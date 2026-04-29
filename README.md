@@ -11,7 +11,7 @@
 <p align="center">
   <img src="https://img.shields.io/badge/React-19.x-61DAFB?style=flat-square&logo=react" alt="React" />
   <img src="https://img.shields.io/badge/TypeScript-5.x-3178C6?style=flat-square&logo=typescript" alt="TypeScript" />
-  <img src="https://img.shields.io/badge/MUI-6.x-007FFF?style=flat-square&logo=mui" alt="MUI" />
+  <img src="https://img.shields.io/badge/Vite-8.x-646CFF?style=flat-square&logo=vite" alt="Vite" />
 </p>
 
 ---
@@ -90,14 +90,14 @@ routes/        → definição de rotas e proteção por perfil
 ---
 
 
+## Instalação e configuração
+
 ### Dependências obrigatórias
 
 | Ferramenta | Versão mínima | Observação |
 |---|---|---|
 | [Node.js](https://nodejs.org/) | 22.x | Recomendado via [nvm](https://github.com/nvm-sh/nvm) |
 | [npm](https://www.npmjs.com/) | 10.x | Incluso com Node.js |
-
-> O backend deve estar em execução para que a interface funcione corretamente. Consulte o [README do backend](https://github.com/Notifica-Saude/notifica-saude-backend) para instruções de instalação.
 
 ### Variáveis de ambiente
 
@@ -110,6 +110,46 @@ cp .env.example .env
 | Variável | Descrição | Exemplo |
 |---|---|---|
 | `VITE_API_URL` | URL base da API backend | `http://localhost:3333` |
+
+### Instalação
+
+1. Clone o repositório:
+
+```sh
+git clone https://github.com/Notifica-Saude/notifica-saude-frontend.git
+cd notifica-saude-frontend
+```
+
+2. Instale as dependências:
+
+```sh
+npm install
+```
+
+3. Configure as variáveis de ambiente conforme descrito acima.
+
+---
+
+## Primeiros passos
+
+Inicie o servidor de desenvolvimento:
+
+```sh
+npm run dev
+```
+
+A aplicação estará disponível em `http://localhost:5173`.
+
+> O backend deve estar em execução para que a interface funcione corretamente. Consulte o [README do backend](https://github.com/Notifica-Saude/notifica-saude-backend) para instruções de instalação.
+
+### Scripts disponíveis
+
+| Comando | Descrição |
+|---|---|
+| `npm run dev` | Inicia o servidor de desenvolvimento (Vite) |
+| `npm run build` | Verifica os tipos TypeScript e gera o build de produção |
+| `npm run preview` | Pré-visualiza o build de produção localmente |
+| `npm run lint` | Executa o ESLint no código-fonte |
 
 ---
 
@@ -157,9 +197,6 @@ notifica-saude-frontend/
 │   ├── types/                      # Tipos e interfaces TypeScript
 │   ├── App.tsx
 │   └── main.tsx
-├── tests/
-│   ├── unit/
-│   └── integration/
 ├── .env.example
 ├── package.json
 └── tsconfig.json
@@ -184,7 +221,7 @@ Resumo rápido:
 3. Implemente as alterações com commits no formato `<tipo>: <assunto>`
 4. Abra um Pull Request com título igual ao commit principal
 5. Aguarde a aprovação de pelo menos **dois membros** da equipe
-6. Após aprovação e testes passando, realize o merge na `main`
+6. Após aprovação, realize o merge na `main`
 
 ---
 
