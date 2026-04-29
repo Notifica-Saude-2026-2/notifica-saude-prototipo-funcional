@@ -1,7 +1,6 @@
 ## 📋 Tipo
 <!-- Marque o tipo desta issue -->
 - [ ] ✨ Feature — nova funcionalidade
-- [ ] 🐛 Bug — comportamento incorreto
 - [ ] ♻️ Refactor — melhoria de código sem mudança de comportamento
 - [ ] 📄 Docs — documentação
 - [ ] 🔧 Chore — configuração, dependências, CI
