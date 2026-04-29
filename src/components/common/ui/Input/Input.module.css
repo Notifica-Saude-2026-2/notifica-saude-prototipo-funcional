@@ -71,6 +71,10 @@
   border: 1px solid #1976d2;
 }
 
+.input::placeholder {
+  font-size: 12.5px;
+}
+
 .error {
   border: 1px solid #d32f2f;
 }

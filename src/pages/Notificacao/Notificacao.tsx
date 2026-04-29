@@ -14,6 +14,8 @@ import step3Icon from "../../assets/step3.svg";
 import step4Icon from "../../assets/step4.svg";
 
 const SECAO_PACIENTE = "Tela 2 - Informações sobre o Paciente";
+const CAMPO_CONTATO_ID = "55555555-5555-4555-b555-000000000007";
+const CAMPO_NOME_ID = "55555555-5555-4555-b555-000000000006";
 
 const SECAO_CONFIG: Record<string, { label: string; icon: string }> = {
   "Tela 1 - Abertura":                                                  { label: "Informações iniciais",                     icon: step1Icon },
@@ -209,6 +211,13 @@ export default function Notificacao() {
           <FieldRenderer
             key={campo.id}
             {...campo}
+            placeholder={
+              campo.id === CAMPO_CONTATO_ID
+                ? "Informe um telefone ou email completo (opcional)"
+                : campo.id === CAMPO_NOME_ID
+                  ? "Informe seu nome completo (opcional)"
+                  : campo.placeholder
+            }
             value={formValues[campo.id]}
             onChange={(value) => updateField(campo.id, value)}
             outroValue={(formValues[`${campo.id}_outro`] as string) ?? ''}

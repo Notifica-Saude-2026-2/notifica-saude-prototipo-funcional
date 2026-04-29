@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef, useEffect } from "react";
 import styles from "./StepForm.module.css";
 import { Button } from "../../common/ui/Button";
 
@@ -25,8 +25,14 @@ export const StepForm: React.FC<StepFormProps> = ({
   isLastStep = false,
   canAdvance = true,
 }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    containerRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [currentStep]);
+
   return (
-    <div className={styles.container}>
+    <div ref={containerRef} className={styles.container}>
       <div className={styles.progressBar}>
         {Array.from({ length: totalSteps }).map((_, i) => (
           <div
