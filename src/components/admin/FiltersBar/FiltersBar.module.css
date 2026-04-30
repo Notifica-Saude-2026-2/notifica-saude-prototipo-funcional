@@ -1,0 +1,24 @@
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 24px;
+  background: #f5f6fa;
+  flex-wrap: wrap;
+}
+
+.filterRight {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.filterLabel {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6b6375;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
