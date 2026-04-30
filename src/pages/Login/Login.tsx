@@ -33,7 +33,7 @@ export default function Login() {
     setIsLoading(true);
     try {
       await login(email, senha);
-      navigate('/');
+      navigate('/admin');
     } catch (err) {
       setError(resolverMensagemErro(err));
     } finally {
