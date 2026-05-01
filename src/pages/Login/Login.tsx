@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, Link, Navigate } from 'react-router-dom';
 import { Input } from '../../components/common/ui/Input';
 import { Button } from '../../components/common/ui/Button';
 import { useAuth } from '../../hooks/useAuth';
@@ -21,11 +21,23 @@ function resolverMensagemErro(err: unknown): string {
 
 export default function Login() {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, isAuthenticated } = useAuth();
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // redireciona após estado ser commitado pelo React
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/admin', { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
+
+  // já logado: evita flash da tela de login
+  if (isAuthenticated) {
+    return <Navigate to="/admin" replace />;
+  }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -33,7 +45,7 @@ export default function Login() {
     setIsLoading(true);
     try {
       await login(email, senha);
-      navigate('/admin');
+      // navegação ocorre via useEffect após isAuthenticated virar true
     } catch (err) {
       setError(resolverMensagemErro(err));
     } finally {
