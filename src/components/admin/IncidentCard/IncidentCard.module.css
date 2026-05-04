@@ -1,0 +1,118 @@
+.card {
+  display: flex;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  margin-bottom: 12px;
+  cursor: pointer;
+  transition: box-shadow 0.15s ease;
+  outline: none;
+  border: 1px solid #e5e4e7;
+  overflow: hidden;
+  font-family: 'Inter', sans-serif;
+  align-items: stretch;
+}
+
+.card:hover {
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
+}
+
+.card:focus-visible {
+  box-shadow: 0 0 0 2px #183EFF;
+}
+
+/* ─── Barra lateral colorida (baseada no Status) ─── */
+.colorBar {
+  width: 5px;
+  flex-shrink: 0;
+}
+
+/* ─── Conteúdo ─── */
+.left {
+  flex: 1;
+  padding: 14px 18px;
+  min-width: 0;
+}
+
+.topRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.id {
+  font-weight: 700;
+  font-size: 0.875rem;
+  color: #f58220;
+  background: #fff3e0;
+  padding: 2px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.date {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.78rem;
+  color: #6b6375;
+  background: #f0f0f2;
+  border: 1px solid #e5e4e7;
+  border-radius: 4px;
+  padding: 2px 8px;
+  white-space: nowrap;
+}
+
+.calendarIcon {
+  display: block;
+  opacity: 0.6;
+}
+
+.statusRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  flex-wrap: nowrap;
+}
+
+.statusBadge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.description {
+  font-size: 0.875rem;
+  color: #08060d;
+  margin: 0;
+  line-height: 1.45;
+}
+
+.label {
+  font-size: 0.875rem;
+  color: #08060d;
+  font-weight: 600;
+}
+
+.sectorGroup {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 12px;
+}
+
+.sectorValue {
+  font-size: 0.875rem;
+  color: #08060d;
+}
+
+/* ─── Responsivo ─── */
+@media (max-width: 480px) {
+  .statusRow {
+    flex-wrap: wrap;
+  }
+}
