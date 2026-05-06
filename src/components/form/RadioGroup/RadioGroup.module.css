@@ -60,12 +60,14 @@
   cursor: pointer;
   position: relative;
   transform: translateY(-1px);
-  transition: border-color 0.15s, background-color 0.15s;
+  transition:
+    border-color 0.15s,
+    background-color 0.15s;
 }
 
 .radio:checked {
-  background-color: #183EFF;
-  border-color: #183EFF;
+  background-color: #183eff;
+  border-color: #183eff;
 }
 
 .radio:checked::after {

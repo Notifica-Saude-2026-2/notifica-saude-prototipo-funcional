@@ -1,16 +1,16 @@
 export type TipoCampo =
-  | 'TEXTO'
-  | 'NUMERO'
-  | 'DATA'
-  | 'AREA'
-  | 'EMAIL'
-  | 'TELEFONE'
-  | 'ARQUIVO'
-  | 'BOOLEAN'
-  | 'SELECT'
-  | 'MULTISELECT'
-  | 'RADIO'
-  | 'CHECKBOX';
+  | "TEXTO"
+  | "NUMERO"
+  | "DATA"
+  | "AREA"
+  | "EMAIL"
+  | "TELEFONE"
+  | "ARQUIVO"
+  | "BOOLEAN"
+  | "SELECT"
+  | "MULTISELECT"
+  | "RADIO"
+  | "CHECKBOX";
 
 export type OpcaoCampo = {
   id: string;

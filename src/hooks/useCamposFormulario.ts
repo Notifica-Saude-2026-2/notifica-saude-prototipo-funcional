@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
-import type { CampoDinamico } from '../types/formulario';
-import { getCamposFormularioAtivos } from '../services/camposFormulario.service';
+import { useEffect, useState } from "react";
+import type { CampoDinamico } from "../types/formulario";
+import { getCamposFormularioAtivos } from "../services/camposFormulario.service";
 
 type UseCamposFormularioReturn = {
   campos: CampoDinamico[];
@@ -29,7 +29,7 @@ function deduplicarCampos(data: CampoDinamico[]): CampoDinamico[] {
   return Array.from(mapaId.values());
 }
 
-function deduplicarOpcoes(opcoes: CampoDinamico['opcoes']): CampoDinamico['opcoes'] {
+function deduplicarOpcoes(opcoes: CampoDinamico["opcoes"]): CampoDinamico["opcoes"] {
   if (!opcoes) return opcoes;
   const vistos = new Set<string>();
   return opcoes.filter((opt) => {
@@ -40,11 +40,11 @@ function deduplicarOpcoes(opcoes: CampoDinamico['opcoes']): CampoDinamico['opcoe
 }
 
 function toUserMessage(err: unknown): string {
-  const msg = err instanceof Error ? err.message : '';
-  if (msg === 'Failed to fetch' || msg.includes('NetworkError') || msg.includes('network')) {
-    return 'Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente.';
+  const msg = err instanceof Error ? err.message : "";
+  if (msg === "Failed to fetch" || msg.includes("NetworkError") || msg.includes("network")) {
+    return "Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente.";
   }
-  return 'Ocorreu um erro ao carregar o formulário. Tente novamente.';
+  return "Ocorreu um erro ao carregar o formulário. Tente novamente.";
 }
 
 export function useCamposFormulario(): UseCamposFormularioReturn {
@@ -68,7 +68,9 @@ export function useCamposFormulario(): UseCamposFormularioReturn {
           setLoading(false);
         }
       });
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [attempt]);
 
   const retry = () => {

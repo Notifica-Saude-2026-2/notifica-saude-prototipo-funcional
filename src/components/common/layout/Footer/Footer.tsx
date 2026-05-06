@@ -4,7 +4,6 @@ export function Footer() {
   return (
     <footer className={styles.footer}>
       <div className={styles.container}>
-        
         <div className={styles.top}>
           <div>
             <p className={styles.title}>
@@ -19,7 +18,6 @@ export function Footer() {
         <div className={styles.bottom}>
           <p>© 2026 Notifica Saúde. Todos os direitos reservados</p>
         </div>
-
       </div>
     </footer>
   );

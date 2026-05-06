@@ -56,7 +56,9 @@ export function AccessibilityProvider({ children }: { children: React.ReactNode 
   }
 
   return (
-    <AccessibilityContext.Provider value={{ fontSize, highContrast, setFontSize, toggleHighContrast, reset }}>
+    <AccessibilityContext.Provider
+      value={{ fontSize, highContrast, setFontSize, toggleHighContrast, reset }}
+    >
       {children}
     </AccessibilityContext.Provider>
   );

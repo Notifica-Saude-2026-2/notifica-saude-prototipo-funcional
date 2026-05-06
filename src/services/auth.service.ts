@@ -1,4 +1,4 @@
-import { apiFetch } from './api';
+import { apiFetch } from "./api";
 
 export type LoginPayload = {
   email: string;
@@ -19,8 +19,8 @@ export type LoginResponse = {
 };
 
 export async function loginRequest(payload: LoginPayload): Promise<LoginResponse> {
-  return apiFetch<LoginResponse>('/api/auth/login', {
-    method: 'POST',
+  return apiFetch<LoginResponse>("/api/auth/login", {
+    method: "POST",
     body: JSON.stringify(payload),
   });
 }

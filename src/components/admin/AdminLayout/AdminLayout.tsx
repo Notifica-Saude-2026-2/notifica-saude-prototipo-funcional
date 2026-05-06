@@ -1,6 +1,6 @@
-import type { ReactNode } from 'react';
-import { AdminDrawer } from '../AdminDrawer/AdminDrawer';
-import styles from './AdminLayout.module.css';
+import type { ReactNode } from "react";
+import { AdminDrawer } from "../AdminDrawer/AdminDrawer";
+import styles from "./AdminLayout.module.css";
 
 type Props = {
   children: ReactNode;

@@ -1,10 +1,6 @@
 // src/hooks/useNotificacao.ts
 import { useState, useCallback } from "react";
-import type {
-  CampoDinamico,
-  NotificacaoPayload,
-  RespostaCampo,
-} from "../types/formulario";
+import type { CampoDinamico, NotificacaoPayload, RespostaCampo } from "../types/formulario";
 import { criarNotificacao } from "../services/notificacao.service";
 import { ApiError } from "../services/api";
 
@@ -84,12 +80,9 @@ export function useNotificacao(): UseNotificacaoReturn {
     setFormValues((prev) => ({ ...prev, [fieldId]: value }));
   }, []);
 
-  const updateMeta = useCallback(
-    <K extends keyof FormMeta>(key: K, value: FormMeta[K]) => {
-      setFormMeta((prev) => ({ ...prev, [key]: value }));
-    },
-    [],
-  );
+  const updateMeta = useCallback(<K extends keyof FormMeta>(key: K, value: FormMeta[K]) => {
+    setFormMeta((prev) => ({ ...prev, [key]: value }));
+  }, []);
 
   const submit = useCallback(
     async (campos: CampoDinamico[]) => {
@@ -97,12 +90,8 @@ export function useNotificacao(): UseNotificacaoReturn {
       setSubmitError(null);
 
       try {
-        const nomePreenchido = Boolean(
-          formValues[CAMPO_NOME_ID]?.toString().trim(),
-        );
-        const contatoPreenchido = Boolean(
-          formValues[CAMPO_CONTATO_ID]?.toString().trim(),
-        );
+        const nomePreenchido = Boolean(formValues[CAMPO_NOME_ID]?.toString().trim());
+        const contatoPreenchido = Boolean(formValues[CAMPO_CONTATO_ID]?.toString().trim());
 
         const isAnonima = !(nomePreenchido || contatoPreenchido);
 
@@ -113,23 +102,19 @@ export function useNotificacao(): UseNotificacaoReturn {
           unidade_id: "11111111-1111-4111-a111-111111111111", // Hospital Exemplo
           setor_id: "22222222-2222-4222-a222-222222222221", // UTI (Fallback)
           data_incidente: formValues[CAMPO_DATA_ID]
-            ? new Date(
-                `${formValues[CAMPO_DATA_ID]}T00:00:00.000Z`,
-              ).toISOString()
+            ? new Date(`${formValues[CAMPO_DATA_ID]}T00:00:00.000Z`).toISOString()
             : new Date().toISOString(), // Adicionado um fallback seguro para a data
           respostas: buildRespostas(campos, formValues),
         };
 
         await criarNotificacao(payload);
       } catch (err: unknown) {
-        let errorMessage =
-          "Não foi possível registrar a notificação. Verifique os dados.";
+        let errorMessage = "Não foi possível registrar a notificação. Verifique os dados.";
 
         if (err instanceof ApiError) {
           const body = err.body as Record<string, unknown> | null;
           errorMessage =
-            (body?.message as string) ||
-            (body?.errors ? JSON.stringify(body.errors) : err.message);
+            (body?.message as string) || (body?.errors ? JSON.stringify(body.errors) : err.message);
         } else if (err instanceof Error) {
           errorMessage = err.message;
         }

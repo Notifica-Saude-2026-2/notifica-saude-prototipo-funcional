@@ -16,7 +16,7 @@ type ButtonProps = {
   startIcon?: React.ReactNode;
   endIcon?: React.ReactNode;
   className?: string;
-  'data-testid'?: string;
+  "data-testid"?: string;
 };
 
 export const Button: React.FC<ButtonProps> = ({
@@ -31,7 +31,7 @@ export const Button: React.FC<ButtonProps> = ({
   startIcon,
   endIcon,
   className,
-  'data-testid': dataTestId,
+  "data-testid": dataTestId,
 }) => {
   const classNames = [
     styles.button,
@@ -48,9 +48,7 @@ export const Button: React.FC<ButtonProps> = ({
 
       <span className={styles.textWrapper}>
         <span className={styles.title}>{title}</span>
-        {subtitle && (
-          <span className={styles.subtitle}>{subtitle}</span>
-        )}
+        {subtitle && <span className={styles.subtitle}>{subtitle}</span>}
       </span>
 
       {endIcon && <span className={styles.icon}>{endIcon}</span>}

@@ -1,6 +1,6 @@
-import React from 'react';
-import styles from './Select.module.css';
-import type { OpcaoCampo } from '../../../../types/formulario';
+import React from "react";
+import styles from "./Select.module.css";
+import type { OpcaoCampo } from "../../../../types/formulario";
 
 type SelectSingleProps = {
   multiple?: false;
@@ -20,13 +20,21 @@ type SelectBaseProps = {
   required?: boolean;
   placeholder?: string;
   error?: string;
-  'data-testid'?: string;
+  "data-testid"?: string;
 };
 
 type SelectProps = SelectBaseProps & (SelectSingleProps | SelectMultipleProps);
 
 export const Select: React.FC<SelectProps> = (props) => {
-  const { label, options, required = false, placeholder, error, multiple, 'data-testid': dataTestId } = props;
+  const {
+    label,
+    options,
+    required = false,
+    placeholder,
+    error,
+    multiple,
+    "data-testid": dataTestId,
+  } = props;
 
   function handleChange(e: React.ChangeEvent<HTMLSelectElement>) {
     if (multiple) {
@@ -45,19 +53,17 @@ export const Select: React.FC<SelectProps> = (props) => {
           {required && <span className={styles.required}>*</span>}
         </label>
       )}
-      {required && (
-        <span className={styles.requiredHint}>*Preenchimento obrigatório</span>
-      )}
+      {required && <span className={styles.requiredHint}>*Preenchimento obrigatório</span>}
       <select
         multiple={multiple}
         value={multiple ? (props as SelectMultipleProps).value : (props as SelectSingleProps).value}
         onChange={handleChange}
-        className={[styles.select, error ? styles.error : ''].join(' ').trim()}
+        className={[styles.select, error ? styles.error : ""].join(" ").trim()}
         data-testid={dataTestId}
       >
         {!multiple && (
           <option value="" disabled>
-            {placeholder ?? 'Selecione...'}
+            {placeholder ?? "Selecione..."}
           </option>
         )}
         {options.map((opt) => (
@@ -66,9 +72,7 @@ export const Select: React.FC<SelectProps> = (props) => {
           </option>
         ))}
       </select>
-      {multiple && (
-        <span className={styles.hint}>Segure Ctrl/Cmd para selecionar múltiplos</span>
-      )}
+      {multiple && <span className={styles.hint}>Segure Ctrl/Cmd para selecionar múltiplos</span>}
       {error && <span className={styles.errorMessage}>{error}</span>}
     </div>
   );

@@ -10,13 +10,11 @@ O que voce fez
 - [ ] Solução 2
 - [ ] Solução 3
 
-
 ## ✅ Critérios de Aceitação
 
 - [ ] Critério 1
 - [ ] Critério 2
 - [ ] Critério 3
-
 
 ## 🔗 Informações Adicionais
 

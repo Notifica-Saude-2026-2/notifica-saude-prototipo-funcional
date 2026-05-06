@@ -1,36 +1,36 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, Link, Navigate } from 'react-router-dom';
-import { Input } from '../../components/common/ui/Input';
-import { Button } from '../../components/common/ui/Button';
-import { useAuth } from '../../hooks/useAuth';
-import { ApiError } from '../../services/api';
-import styles from './Login.module.css';
+import { useState, useEffect } from "react";
+import { useNavigate, Link, Navigate } from "react-router-dom";
+import { Input } from "../../components/common/ui/Input";
+import { Button } from "../../components/common/ui/Button";
+import { useAuth } from "../../hooks/useAuth";
+import { ApiError } from "../../services/api";
+import styles from "./Login.module.css";
 
 function resolverMensagemErro(err: unknown): string {
   if (err instanceof ApiError) {
     if (err.status === 401 || err.status === 403) {
-      return 'E-mail ou senha incorretos. Verifique os dados e tente novamente.';
+      return "E-mail ou senha incorretos. Verifique os dados e tente novamente.";
     }
     if (err.status === 429) {
-      return 'Muitas tentativas seguidas. Aguarde alguns minutos e tente novamente.';
+      return "Muitas tentativas seguidas. Aguarde alguns minutos e tente novamente.";
     }
-    return 'Algo deu errado no servidor. Tente novamente em instantes.';
+    return "Algo deu errado no servidor. Tente novamente em instantes.";
   }
-  return 'Não foi possível conectar ao servidor. Verifique sua internet e tente novamente.';
+  return "Não foi possível conectar ao servidor. Verifique sua internet e tente novamente.";
 }
 
 export default function Login() {
   const navigate = useNavigate();
   const { login, isAuthenticated } = useAuth();
-  const [email, setEmail] = useState('');
-  const [senha, setSenha] = useState('');
+  const [email, setEmail] = useState("");
+  const [senha, setSenha] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   // redireciona após estado ser commitado pelo React
   useEffect(() => {
     if (isAuthenticated) {
-      navigate('/admin', { replace: true });
+      navigate("/admin", { replace: true });
     }
   }, [isAuthenticated, navigate]);
 
@@ -41,7 +41,7 @@ export default function Login() {
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setError('');
+    setError("");
     setIsLoading(true);
     try {
       await login(email, senha);
@@ -56,7 +56,6 @@ export default function Login() {
   return (
     <div className={styles.page}>
       <div className={styles.card}>
-
         <div className={styles.infoColumn}>
           <h1 className={styles.cardTitle}>Entrar na conta</h1>
           <p className={styles.infoSubtitle}>Não tem uma conta?</p>
@@ -104,7 +103,7 @@ export default function Login() {
           )}
 
           <Button
-            title={isLoading ? 'Entrando...' : 'Entrar na conta'}
+            title={isLoading ? "Entrando..." : "Entrar na conta"}
             variant="contained"
             color="primary"
             fullWidth
@@ -113,7 +112,6 @@ export default function Login() {
             data-testid="login-submit"
           />
         </form>
-
       </div>
     </div>
   );

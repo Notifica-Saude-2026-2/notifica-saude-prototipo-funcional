@@ -1,5 +1,5 @@
-import React from 'react';
-import styles from './Textarea.module.css';
+import React from "react";
+import styles from "./Textarea.module.css";
 
 type TextareaProps = {
   label?: string;
@@ -8,7 +8,7 @@ type TextareaProps = {
   placeholder?: string;
   required?: boolean;
   error?: string;
-  'data-testid'?: string;
+  "data-testid"?: string;
 };
 
 export const Textarea: React.FC<TextareaProps> = ({
@@ -18,7 +18,7 @@ export const Textarea: React.FC<TextareaProps> = ({
   placeholder,
   required = false,
   error,
-  'data-testid': dataTestId,
+  "data-testid": dataTestId,
 }) => {
   return (
     <div className={styles.container}>
@@ -28,15 +28,13 @@ export const Textarea: React.FC<TextareaProps> = ({
           {required && <span className={styles.required}>*</span>}
         </label>
       )}
-      {required && (
-        <span className={styles.requiredHint}>*Preenchimento obrigatório</span>
-      )}
+      {required && <span className={styles.requiredHint}>*Preenchimento obrigatório</span>}
       <textarea
-        className={[styles.textarea, error ? styles.error : ''].join(' ').trim()}
+        className={[styles.textarea, error ? styles.error : ""].join(" ").trim()}
         value={value}
         onChange={(e) => {
           onChange(e.target.value);
-          e.currentTarget.style.height = 'auto';
+          e.currentTarget.style.height = "auto";
           e.currentTarget.style.height = `${e.currentTarget.scrollHeight}px`;
         }}
         placeholder={placeholder}

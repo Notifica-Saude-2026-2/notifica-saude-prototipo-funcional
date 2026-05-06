@@ -4,7 +4,8 @@ import styles from "./AccessibilityWidget.module.css";
 
 type FontSize = "normal" | "medium" | "large";
 
-const FOCUSABLE_SELECTOR = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+const FOCUSABLE_SELECTOR =
+  'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
 
 const FONT_LABELS: Record<FontSize, string> = {
   normal: "normal",
@@ -24,9 +25,7 @@ export function AccessibilityWidget() {
     if (!open) return;
 
     function getFocusable() {
-      return Array.from(
-        panelRef.current?.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR) ?? []
-      );
+      return Array.from(panelRef.current?.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR) ?? []);
     }
 
     function handleKeyDown(e: KeyboardEvent) {
@@ -60,10 +59,7 @@ export function AccessibilityWidget() {
 
     function handleClickOutside(e: MouseEvent) {
       const target = e.target as Node;
-      if (
-        !panelRef.current?.contains(target) &&
-        !buttonRef.current?.contains(target)
-      ) {
+      if (!panelRef.current?.contains(target) && !buttonRef.current?.contains(target)) {
         setOpen(false);
       }
     }
@@ -158,7 +154,14 @@ export function AccessibilityWidget() {
         aria-expanded={open}
         title="Acessibilidade"
       >
-        <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="currentColor" width="22" height="22">
+        <svg
+          aria-hidden="true"
+          focusable="false"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+          width="22"
+          height="22"
+        >
           <circle cx="12" cy="4" r="2" />
           <path d="M15.5 8.5h-7a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5H10v6a1 1 0 0 0 2 0v-3h1v3a1 1 0 0 0 2 0v-6h1.5a.5.5 0 0 0 .5-.5V9a.5.5 0 0 0-.5-.5z" />
         </svg>

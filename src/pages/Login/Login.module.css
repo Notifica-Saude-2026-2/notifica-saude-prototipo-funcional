@@ -31,7 +31,7 @@
 
 .cardTitle {
   display: inline-block;
-  font-family: 'Poppins', sans-serif;
+  font-family: "Poppins", sans-serif;
   font-size: 18px;
   font-weight: 700;
   color: #183eff;
@@ -40,7 +40,7 @@
 }
 
 .cardTitle::after {
-  content: '';
+  content: "";
   display: block;
   width: 100%;
   height: 2px;
@@ -49,7 +49,7 @@
 }
 
 .infoSubtitle {
-  font-family: 'Poppins', sans-serif;
+  font-family: "Poppins", sans-serif;
   font-size: 14px;
   font-weight: 600;
   color: var(--text-h);
@@ -58,7 +58,7 @@
 }
 
 .infoText {
-  font-family: 'Poppins', sans-serif;
+  font-family: "Poppins", sans-serif;
   font-size: 13px;
   color: var(--text);
   line-height: 1.7;
@@ -89,7 +89,7 @@
 }
 
 .inputLabel {
-  font-family: 'Raleway', sans-serif !important;
+  font-family: "Raleway", sans-serif !important;
   font-weight: 400 !important;
 }
 
@@ -99,7 +99,7 @@
 }
 
 .forgotLink {
-  font-family: 'Raleway', sans-serif;
+  font-family: "Raleway", sans-serif;
   font-size: 13px;
   color: #183eff;
   text-decoration: none;
@@ -130,7 +130,7 @@
 }
 
 .errorMessage {
-  font-family: 'Poppins', sans-serif;
+  font-family: "Poppins", sans-serif;
   font-size: 13px;
   color: #b71c1c;
   margin: 0;

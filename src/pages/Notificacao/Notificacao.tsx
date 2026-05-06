@@ -18,17 +18,29 @@ const CAMPO_CONTATO_ID = "55555555-5555-4555-b555-000000000007";
 const CAMPO_NOME_ID = "55555555-5555-4555-b555-000000000006";
 
 const SECAO_CONFIG: Record<string, { label: string; icon: string }> = {
-  "Tela 1 - Abertura":                                                  { label: "Informações iniciais",                     icon: step1Icon },
-  "Tela 2 - Informações sobre o Paciente":                              { label: "Informações sobre o paciente envolvido",   icon: step2Icon },
-  "Tela 3 - Momento e Local do Incidente":                              { label: "Momento e local do incidente",             icon: step3Icon },
-  "Tela 4 - Descrição do Incidente e Papel do Notificador":             { label: "Descrição do incidente",                   icon: step4Icon },
-  "Identificação opcional do notificador":                              { label: "Informações opcionais do notificante",     icon: step2Icon },
+  "Tela 1 - Abertura": { label: "Informações iniciais", icon: step1Icon },
+  "Tela 2 - Informações sobre o Paciente": {
+    label: "Informações sobre o paciente envolvido",
+    icon: step2Icon,
+  },
+  "Tela 3 - Momento e Local do Incidente": {
+    label: "Momento e local do incidente",
+    icon: step3Icon,
+  },
+  "Tela 4 - Descrição do Incidente e Papel do Notificador": {
+    label: "Descrição do incidente",
+    icon: step4Icon,
+  },
+  "Identificação opcional do notificador": {
+    label: "Informações opcionais do notificante",
+    icon: step2Icon,
+  },
 };
 
 function groupBySecao(campos: CampoDinamico[]): Map<string, CampoDinamico[]> {
   const map = new Map<string, CampoDinamico[]>();
   for (const campo of campos) {
-    const secao = campo.secao ?? 'Etapa 1';
+    const secao = campo.secao ?? "Etapa 1";
     const existing = map.get(secao) ?? [];
     map.set(secao, [...existing, campo]);
   }
@@ -39,7 +51,7 @@ function pacienteEnvolvido(campos: CampoDinamico[], formValues: Record<string, u
     (c) =>
       c.secao === "Tela 1 - Abertura" &&
       c.opcoes?.some((o) => o.valor === "Sim") &&
-      c.opcoes?.some((o) => o.valor === "Não")
+      c.opcoes?.some((o) => o.valor === "Não"),
   );
   if (!campoPaciente) return true; // sem dado suficiente → exibe a tela por segurança
   const simOpcao = campoPaciente.opcoes?.find((o) => o.valor === "Sim");
@@ -50,31 +62,28 @@ function todayStr(): string {
   const d = new Date();
   return [
     d.getFullYear(),
-    String(d.getMonth() + 1).padStart(2, '0'),
-    String(d.getDate()).padStart(2, '0'),
-  ].join('-');
+    String(d.getMonth() + 1).padStart(2, "0"),
+    String(d.getDate()).padStart(2, "0"),
+  ].join("-");
 }
 
-function isStepComplete(
-  campos: CampoDinamico[],
-  formValues: Record<string, unknown>
-): boolean {
+function isStepComplete(campos: CampoDinamico[], formValues: Record<string, unknown>): boolean {
   return campos
     .filter((c) => c.obrigatorio)
     .every((c) => {
       const v = formValues[c.id];
       if (v === undefined || v === null || v === "") return false;
       if (Array.isArray(v) && v.length === 0) return false;
-      if (c.tipo === 'DATA') return (v as string) <= todayStr();
+      if (c.tipo === "DATA") return (v as string) <= todayStr();
 
-      const outroOption = c.opcoes?.find((o) => o.valor.toLowerCase() === 'outro');
+      const outroOption = c.opcoes?.find((o) => o.valor.toLowerCase() === "outro");
       if (outroOption) {
         const outroSelected =
-          (c.tipo === 'RADIO' && v === outroOption.id) ||
-          (c.tipo === 'CHECKBOX' && Array.isArray(v) && v.includes(outroOption.id));
+          (c.tipo === "RADIO" && v === outroOption.id) ||
+          (c.tipo === "CHECKBOX" && Array.isArray(v) && v.includes(outroOption.id));
         if (outroSelected) {
           const outroVal = formValues[`${c.id}_outro`];
-          if (!outroVal || (outroVal as string).trim() === '') return false;
+          if (!outroVal || (outroVal as string).trim() === "") return false;
         }
       }
 
@@ -85,8 +94,7 @@ function isStepComplete(
 export default function Notificacao() {
   const navigate = useNavigate();
   const { campos, loading, error, retry } = useCamposFormulario();
-  const { formValues, updateField, resetForm, submit, submitting, submitError } =
-    useNotificacao();
+  const { formValues, updateField, resetForm, submit, submitting, submitError } = useNotificacao();
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [submitted, setSubmitted] = useState(false);
 
@@ -94,11 +102,11 @@ export default function Notificacao() {
   const todasSecoes = Array.from(secaoMap.keys());
 
   const secoes = todasSecoes.filter(
-    (s) => s !== SECAO_PACIENTE || pacienteEnvolvido(campos, formValues)
+    (s) => s !== SECAO_PACIENTE || pacienteEnvolvido(campos, formValues),
   );
 
   const totalSteps = secoes.length || 1;
-  const currentSecao = secoes[currentStepIndex] ?? 'Etapa 1';
+  const currentSecao = secoes[currentStepIndex] ?? "Etapa 1";
   const camposEtapaAtual = secaoMap.get(currentSecao) ?? [];
   const isLastStep = currentStepIndex === totalSteps - 1;
   const isCurrentStepOptional = camposEtapaAtual.every((c) => !c.obrigatorio);
@@ -136,12 +144,7 @@ export default function Notificacao() {
         <div className={styles.errorCard}>
           <p className={styles.errorTitle}>Não foi possível carregar o formulário</p>
           <p className={styles.errorMessage}>{error}</p>
-          <Button
-            title="Tentar novamente"
-            variant="contained"
-            color="primary"
-            onClick={retry}
-          />
+          <Button title="Tentar novamente" variant="contained" color="primary" onClick={retry} />
         </div>
       </div>
     );
@@ -152,13 +155,10 @@ export default function Notificacao() {
       <div className={styles.pageContainer}>
         <div className={styles.successCard}>
           <BsCheckCircle className={styles.successIcon} />
-          <h2 className={styles.successTitle}>
-            Notificação enviada com sucesso!
-          </h2>
+          <h2 className={styles.successTitle}>Notificação enviada com sucesso!</h2>
           <p className={styles.successText}>
-            Agradecemos o tempo dedicado para registrar o incidente. Sua
-            contribuição é muito importante para melhorar a segurança do
-            paciente.
+            Agradecemos o tempo dedicado para registrar o incidente. Sua contribuição é muito
+            importante para melhorar a segurança do paciente.
           </p>
           <div className={styles.successActions}>
             <Button
@@ -196,7 +196,9 @@ export default function Notificacao() {
         currentStep={currentStepIndex + 1}
         totalSteps={totalSteps}
         stepTitle={SECAO_CONFIG[currentSecao]?.label ?? currentSecao}
-        stepIcon={SECAO_CONFIG[currentSecao] && <img src={SECAO_CONFIG[currentSecao].icon} alt="" />}
+        stepIcon={
+          SECAO_CONFIG[currentSecao] && <img src={SECAO_CONFIG[currentSecao].icon} alt="" />
+        }
         onNext={handleNext}
         onPrev={currentStepIndex > 0 ? handlePrev : undefined}
         isLastStep={isLastStep}
@@ -220,7 +222,7 @@ export default function Notificacao() {
             }
             value={formValues[campo.id]}
             onChange={(value) => updateField(campo.id, value)}
-            outroValue={(formValues[`${campo.id}_outro`] as string) ?? ''}
+            outroValue={(formValues[`${campo.id}_outro`] as string) ?? ""}
             onOutroChange={(v) => updateField(`${campo.id}_outro`, v)}
           />
         ))}

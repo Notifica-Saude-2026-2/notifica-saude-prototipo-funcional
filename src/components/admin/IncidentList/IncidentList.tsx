@@ -1,7 +1,7 @@
-import { useState } from 'react';
-import { IncidentCard } from '../IncidentCard/IncidentCard';
-import type { Incident } from '../../../mocks/incidents';
-import styles from './IncidentList.module.css';
+import { useState } from "react";
+import { IncidentCard } from "../IncidentCard/IncidentCard";
+import type { Incident } from "../../../mocks/incidents";
+import styles from "./IncidentList.module.css";
 
 const PAGE_SIZE = 5;
 
@@ -23,9 +23,7 @@ export function IncidentList({ incidents }: Props) {
   }
 
   if (incidents.length === 0) {
-    return (
-      <div className={styles.empty}>Nenhuma notificação encontrada.</div>
-    );
+    return <div className={styles.empty}>Nenhuma notificação encontrada.</div>;
   }
 
   return (
@@ -49,7 +47,7 @@ export function IncidentList({ incidents }: Props) {
           </button>
 
           {pageNumbers.map((item, idx) =>
-            item === '...' ? (
+            item === "..." ? (
               <span key={`ellipsis-${idx}`} className={styles.ellipsis}>
                 …
               </span>
@@ -57,9 +55,9 @@ export function IncidentList({ incidents }: Props) {
               <button
                 key={item}
                 data-testid={`pagination-page-${item}`}
-                className={`${styles.pageBtn} ${currentPage === item ? styles.active : ''}`}
+                className={`${styles.pageBtn} ${currentPage === item ? styles.active : ""}`}
                 onClick={() => goTo(item as number)}
-                aria-current={currentPage === item ? 'page' : undefined}
+                aria-current={currentPage === item ? "page" : undefined}
               >
                 {item}
               </button>
@@ -81,19 +79,19 @@ export function IncidentList({ incidents }: Props) {
   );
 }
 
-function buildPageNumbers(current: number, total: number): (number | '...')[] {
+function buildPageNumbers(current: number, total: number): (number | "...")[] {
   if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
 
-  const pages: (number | '...')[] = [1];
+  const pages: (number | "...")[] = [1];
 
-  if (current > 3) pages.push('...');
+  if (current > 3) pages.push("...");
 
   const start = Math.max(2, current - 1);
   const end = Math.min(total - 1, current + 1);
 
   for (let i = start; i <= end; i++) pages.push(i);
 
-  if (current < total - 2) pages.push('...');
+  if (current < total - 2) pages.push("...");
 
   pages.push(total);
   return pages;

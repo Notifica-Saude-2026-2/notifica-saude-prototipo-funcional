@@ -11,11 +11,11 @@
   flex-direction: column;
   overflow-y: auto;
   min-width: 0;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
 }
 
 /* Garante Inter em todos os descendentes, sobrepondo o * { Raleway } do index.css.
    Seletor de classe tem especificidade (0,1,0), maior que * (0,0,0). */
 .content * {
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
 }

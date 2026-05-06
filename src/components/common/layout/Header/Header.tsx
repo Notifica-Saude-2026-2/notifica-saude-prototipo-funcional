@@ -9,17 +9,11 @@ type HeaderProps = {
 export function Header({ isAdmin = false }: HeaderProps) {
   return (
     <header className={styles.header}>
-      
       <Link to="/" className={styles.logo}>
         <img src={logo} alt="Logo Notifica Saúde" />
       </Link>
 
-      <nav className={styles.nav}>
-        {isAdmin && (
-          <> </>
-        )}
-      </nav>
-
+      <nav className={styles.nav}>{isAdmin && <> </>}</nav>
     </header>
   );
 }

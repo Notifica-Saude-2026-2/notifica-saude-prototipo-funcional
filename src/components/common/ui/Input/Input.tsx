@@ -15,7 +15,7 @@ type InputProps = {
   max?: string;
   required?: boolean;
   showPasswordToggle?: boolean;
-  'data-testid'?: string;
+  "data-testid"?: string;
 };
 
 export const Input: React.FC<InputProps> = ({
@@ -31,17 +31,14 @@ export const Input: React.FC<InputProps> = ({
   max,
   required = false,
   showPasswordToggle = false,
-  'data-testid': dataTestId,
+  "data-testid": dataTestId,
 }) => {
   const [showPassword, setShowPassword] = useState(false);
   const hasError = !!error;
   const isPassword = type === "password";
   const resolvedType = isPassword && showPasswordToggle && showPassword ? "text" : type;
 
-  const containerClass = [
-    styles.container,
-    fullWidth ? styles.fullWidth : "",
-  ].join(" ");
+  const containerClass = [styles.container, fullWidth ? styles.fullWidth : ""].join(" ");
 
   const inputClass = [
     styles.input,
@@ -52,14 +49,12 @@ export const Input: React.FC<InputProps> = ({
   return (
     <div className={containerClass}>
       {label && (
-        <span className={[styles.label, labelClassName].filter(Boolean).join(' ')}>
+        <span className={[styles.label, labelClassName].filter(Boolean).join(" ")}>
           {label}
           {required && <span className={styles.required}>*</span>}
         </span>
       )}
-      {required && (
-        <span className={styles.requiredHint}>*Preenchimento obrigatório</span>
-      )}
+      {required && <span className={styles.requiredHint}>*Preenchimento obrigatório</span>}
 
       <div className={styles.inputWrapper}>
         <input

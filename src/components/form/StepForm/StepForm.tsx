@@ -37,10 +37,7 @@ export const StepForm: React.FC<StepFormProps> = ({
         {Array.from({ length: totalSteps }).map((_, i) => (
           <div
             key={i}
-            className={[
-              styles.progressSegment,
-              i < currentStep ? styles.active : "",
-            ]
+            className={[styles.progressSegment, i < currentStep ? styles.active : ""]
               .join(" ")
               .trim()}
           />

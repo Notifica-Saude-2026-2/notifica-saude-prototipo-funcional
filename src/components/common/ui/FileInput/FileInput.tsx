@@ -1,5 +1,5 @@
-import React from 'react';
-import styles from './FileInput.module.css';
+import React from "react";
+import styles from "./FileInput.module.css";
 
 type FileInputProps = {
   label?: string;
@@ -7,7 +7,7 @@ type FileInputProps = {
   required?: boolean;
   error?: string;
   accept?: string;
-  'data-testid'?: string;
+  "data-testid"?: string;
 };
 
 export const FileInput: React.FC<FileInputProps> = ({
@@ -16,7 +16,7 @@ export const FileInput: React.FC<FileInputProps> = ({
   required = false,
   error,
   accept,
-  'data-testid': dataTestId,
+  "data-testid": dataTestId,
 }) => {
   return (
     <div className={styles.container}>
@@ -26,9 +26,7 @@ export const FileInput: React.FC<FileInputProps> = ({
           {required && <span className={styles.required}>*</span>}
         </label>
       )}
-      {required && (
-        <span className={styles.requiredHint}>*Preenchimento obrigatório</span>
-      )}
+      {required && <span className={styles.requiredHint}>*Preenchimento obrigatório</span>}
       <input
         type="file"
         accept={accept}

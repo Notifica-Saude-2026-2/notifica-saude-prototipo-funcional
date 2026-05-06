@@ -30,14 +30,14 @@ Todos os elementos interativos devem ter `data-testid` para rastreabilidade nos 
 
 ### Campos dinâmicos (via FieldRenderer)
 
-| Tipo de campo | `data-testid` |
-|---|---|
-| TEXTO, EMAIL, TELEFONE, NUMERO, DATA | `field-{id}` |
-| AREA | `field-{id}` |
-| SELECT, MULTISELECT | `field-{id}` |
-| RADIO, BOOLEAN — cada opção | `field-{id}-option-{valor}` |
-| CHECKBOX — cada opção | `field-{id}-option-{id-da-opcao}` |
-| Campo "Especifique" (outro) | `field-{id}-outro` |
+| Tipo de campo                        | `data-testid`                     |
+| ------------------------------------ | --------------------------------- |
+| TEXTO, EMAIL, TELEFONE, NUMERO, DATA | `field-{id}`                      |
+| AREA                                 | `field-{id}`                      |
+| SELECT, MULTISELECT                  | `field-{id}`                      |
+| RADIO, BOOLEAN — cada opção          | `field-{id}-option-{valor}`       |
+| CHECKBOX — cada opção                | `field-{id}-option-{id-da-opcao}` |
+| Campo "Especifique" (outro)          | `field-{id}-outro`                |
 
 > `{id}` = valor do campo `id` de `CampoDinamico` (vem do backend).
 > `{valor}` em RADIO/BOOLEAN = o `id` da `OpcaoCampo` mapeado para `value` em `RadioOption`.
@@ -45,29 +45,29 @@ Todos os elementos interativos devem ter `data-testid` para rastreabilidade nos 
 
 ### Páginas estáticas
 
-| Elemento | `data-testid` |
-|---|---|
-| Login — input email | `login-email` |
-| Login — input senha | `login-senha` |
-| Login — botão submit | `login-submit` |
-| Home — botão notificação | `home-btn-notificacao` |
-| Home — botão área profissional | `home-btn-login` |
+| Elemento                       | `data-testid`          |
+| ------------------------------ | ---------------------- |
+| Login — input email            | `login-email`          |
+| Login — input senha            | `login-senha`          |
+| Login — botão submit           | `login-submit`         |
+| Home — botão notificação       | `home-btn-notificacao` |
+| Home — botão área profissional | `home-btn-login`       |
 
 ### StepForm
 
-| Elemento | `data-testid` |
-|---|---|
-| Botão "Próximo" | `stepform-btn-next` |
-| Botão "Voltar" | `stepform-btn-prev` |
+| Elemento                   | `data-testid`         |
+| -------------------------- | --------------------- |
+| Botão "Próximo"            | `stepform-btn-next`   |
+| Botão "Voltar"             | `stepform-btn-prev`   |
 | Botão "Enviar notificação" | `stepform-btn-submit` |
 
 ### Uso no Playwright
 
 ```ts
-page.getByTestId('login-email')
-page.getByTestId('field-42')
-page.getByTestId('field-42-option-7')
-page.getByTestId('stepform-btn-next')
+page.getByTestId("login-email");
+page.getByTestId("field-42");
+page.getByTestId("field-42-option-7");
+page.getByTestId("stepform-btn-next");
 ```
 
 ### Regras

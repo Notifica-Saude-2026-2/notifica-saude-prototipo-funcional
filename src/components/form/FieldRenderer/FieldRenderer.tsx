@@ -1,11 +1,11 @@
-import React from 'react';
-import type { CampoDinamico } from '../../../types/formulario';
-import { Input } from '../../common/ui/Input';
-import { Textarea } from '../../common/ui/Textarea';
-import { Select } from '../../common/ui/Select';
-import { RadioGroup } from '../RadioGroup';
-import { CheckboxGroup } from '../CheckboxGroup';
-import { FileInput } from '../../common/ui/FileInput';
+import React from "react";
+import type { CampoDinamico } from "../../../types/formulario";
+import { Input } from "../../common/ui/Input";
+import { Textarea } from "../../common/ui/Textarea";
+import { Select } from "../../common/ui/Select";
+import { RadioGroup } from "../RadioGroup";
+import { CheckboxGroup } from "../CheckboxGroup";
+import { FileInput } from "../../common/ui/FileInput";
 
 type FieldRendererProps = CampoDinamico & {
   value: unknown;
@@ -29,22 +29,25 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
   onOutroChange,
 }) => {
   const radioOptions = opcoes.map((opt) => ({ value: opt.id, label: opt.valor }));
-  const outroOption = opcoes.find((o) => o.valor.toLowerCase() === 'outro');
+  const outroOption = opcoes.find((o) => o.valor.toLowerCase() === "outro");
 
   switch (tipo) {
-    case 'TEXTO':
-    case 'EMAIL':
-    case 'TELEFONE':
-    case 'NUMERO': {
+    case "TEXTO":
+    case "EMAIL":
+    case "TELEFONE":
+    case "NUMERO": {
       const inputType =
-        tipo === 'EMAIL' ? 'email' :
-        tipo === 'NUMERO' ? 'number' :
-        tipo === 'TELEFONE' ? 'tel' :
-        'text';
+        tipo === "EMAIL"
+          ? "email"
+          : tipo === "NUMERO"
+            ? "number"
+            : tipo === "TELEFONE"
+              ? "tel"
+              : "text";
       return (
         <Input
           label={label}
-          value={(value as string) ?? ''}
+          value={(value as string) ?? ""}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
           type={inputType}
@@ -56,20 +59,19 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
       );
     }
 
-    case 'DATA': {
+    case "DATA": {
       const d = new Date();
       const today = [
         d.getFullYear(),
-        String(d.getMonth() + 1).padStart(2, '0'),
-        String(d.getDate()).padStart(2, '0'),
-      ].join('-');
-      const dateError =
-        value && (value as string) > today ? 'Data inválida!' : error;
+        String(d.getMonth() + 1).padStart(2, "0"),
+        String(d.getDate()).padStart(2, "0"),
+      ].join("-");
+      const dateError = value && (value as string) > today ? "Data inválida!" : error;
       return (
-        <div style={{ maxWidth: '240px' }}>
+        <div style={{ maxWidth: "240px" }}>
           <Input
             label={label}
-            value={(value as string) ?? ''}
+            value={(value as string) ?? ""}
             onChange={(e) => onChange(e.target.value)}
             type="date"
             required={obrigatorio}
@@ -80,11 +82,11 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
       );
     }
 
-    case 'AREA':
+    case "AREA":
       return (
         <Textarea
           label={label}
-          value={(value as string) ?? ''}
+          value={(value as string) ?? ""}
           onChange={onChange}
           placeholder={placeholder}
           required={obrigatorio}
@@ -93,11 +95,11 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
         />
       );
 
-    case 'SELECT':
+    case "SELECT":
       return (
         <Select
           label={label}
-          value={(value as string) ?? ''}
+          value={(value as string) ?? ""}
           onChange={onChange}
           options={opcoes}
           placeholder={placeholder}
@@ -107,7 +109,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
         />
       );
 
-    case 'MULTISELECT':
+    case "MULTISELECT":
       return (
         <Select
           label={label}
@@ -121,7 +123,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
         />
       );
 
-    case 'RADIO': {
+    case "RADIO": {
       const isOutroSelected = outroOption != null && value === outroOption.id;
       return (
         <>
@@ -129,10 +131,10 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
             name={id}
             label={label}
             options={radioOptions}
-            value={(value as string) ?? ''}
+            value={(value as string) ?? ""}
             onChange={(v) => {
               onChange(v);
-              if (outroOption && v !== outroOption.id) onOutroChange?.('');
+              if (outroOption && v !== outroOption.id) onOutroChange?.("");
             }}
             required={obrigatorio}
             error={error}
@@ -141,7 +143,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
           {isOutroSelected && (
             <Input
               label="Especifique"
-              value={outroValue ?? ''}
+              value={outroValue ?? ""}
               onChange={(e) => onOutroChange?.(e.target.value)}
               placeholder="Digite aqui..."
               required={obrigatorio}
@@ -153,16 +155,16 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
       );
     }
 
-    case 'BOOLEAN':
+    case "BOOLEAN":
       return (
         <RadioGroup
           name={id}
           label={label}
           options={[
-            { value: 'true', label: 'Sim' },
-            { value: 'false', label: 'Não' },
+            { value: "true", label: "Sim" },
+            { value: "false", label: "Não" },
           ]}
-          value={(value as string) ?? ''}
+          value={(value as string) ?? ""}
           onChange={(v) => onChange(v)}
           required={obrigatorio}
           error={error}
@@ -170,8 +172,9 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
         />
       );
 
-    case 'CHECKBOX': {
-      const isOutroChecked = outroOption != null && (value as string[] ?? []).includes(outroOption.id);
+    case "CHECKBOX": {
+      const isOutroChecked =
+        outroOption != null && ((value as string[]) ?? []).includes(outroOption.id);
       return (
         <>
           <CheckboxGroup
@@ -180,7 +183,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
             value={(value as string[]) ?? []}
             onChange={(v) => {
               onChange(v);
-              if (outroOption && !(v as string[]).includes(outroOption.id)) onOutroChange?.('');
+              if (outroOption && !(v as string[]).includes(outroOption.id)) onOutroChange?.("");
             }}
             required={obrigatorio}
             error={error}
@@ -189,7 +192,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
           {isOutroChecked && (
             <Input
               label="Especifique"
-              value={outroValue ?? ''}
+              value={outroValue ?? ""}
               onChange={(e) => onOutroChange?.(e.target.value)}
               placeholder="Digite aqui..."
               required={obrigatorio}
@@ -201,7 +204,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
       );
     }
 
-    case 'ARQUIVO':
+    case "ARQUIVO":
       return (
         <FileInput
           label={label}

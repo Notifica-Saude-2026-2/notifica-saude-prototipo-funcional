@@ -1,5 +1,5 @@
 export function setCookie(name: string, value: string, maxAgeSeconds?: number) {
-  const expiry = maxAgeSeconds ? `; max-age=${maxAgeSeconds}` : '';
+  const expiry = maxAgeSeconds ? `; max-age=${maxAgeSeconds}` : "";
   document.cookie = `${name}=${encodeURIComponent(value)}; path=/${expiry}; SameSite=Strict`;
 }
 

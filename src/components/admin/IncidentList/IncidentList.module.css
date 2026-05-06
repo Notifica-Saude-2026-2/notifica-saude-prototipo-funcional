@@ -12,7 +12,7 @@
 .empty {
   padding: 48px 24px;
   text-align: center;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   color: #6b6375;
   font-size: 0.9rem;
 }
@@ -36,16 +36,19 @@
   border: 1px solid #e5e4e7;
   border-radius: 6px;
   background: #fff;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 0.85rem;
   color: #08060d;
   cursor: pointer;
-  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  transition:
+    background 0.15s,
+    border-color 0.15s,
+    color 0.15s;
 }
 
 .pageBtn:hover:not(:disabled) {
-  border-color: #183EFF;
-  color: #183EFF;
+  border-color: #183eff;
+  color: #183eff;
 }
 
 .pageBtn:disabled {
@@ -55,14 +58,14 @@
 }
 
 .pageBtn.active {
-  background: #183EFF;
-  border-color: #183EFF;
+  background: #183eff;
+  border-color: #183eff;
   color: #fff;
   font-weight: 600;
 }
 
 .ellipsis {
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 0.9rem;
   color: #6b6375;
   padding: 0 4px;

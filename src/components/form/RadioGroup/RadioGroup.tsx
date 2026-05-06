@@ -15,7 +15,7 @@ type RadioGroupProps = {
   error?: string;
   required?: boolean;
   scrollable?: boolean;
-  'data-testid'?: string;
+  "data-testid"?: string;
 };
 
 export const RadioGroup: React.FC<RadioGroupProps> = ({
@@ -27,7 +27,7 @@ export const RadioGroup: React.FC<RadioGroupProps> = ({
   error,
   required = false,
   scrollable = false,
-  'data-testid': dataTestId,
+  "data-testid": dataTestId,
 }) => {
   return (
     <div className={styles.container} data-testid={dataTestId}>
@@ -36,15 +36,9 @@ export const RadioGroup: React.FC<RadioGroupProps> = ({
         {required && <span className={styles.required}>*</span>}
       </span>
 
-      {required && (
-        <span className={styles.requiredHint}>*Preenchimento obrigatório</span>
-      )}
+      {required && <span className={styles.requiredHint}>*Preenchimento obrigatório</span>}
 
-      <div
-        className={[styles.options, scrollable ? styles.scrollable : ""]
-          .join(" ")
-          .trim()}
-      >
+      <div className={[styles.options, scrollable ? styles.scrollable : ""].join(" ").trim()}>
         {options.map((option) => (
           <label key={option.value} className={styles.optionLabel}>
             <input

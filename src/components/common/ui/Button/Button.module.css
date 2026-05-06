@@ -47,11 +47,11 @@
 }
 
 .green {
-  --btn-color: #3FA35C;
+  --btn-color: #3fa35c;
 }
 
 .primary {
-  --btn-color: #183EFF;
+  --btn-color: #183eff;
 }
 
 .outlined {
@@ -79,7 +79,7 @@
 }
 
 .primary.contained {
-  background-color: #183EFF;
+  background-color: #183eff;
 }
 
 .gray {

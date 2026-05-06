@@ -44,10 +44,12 @@ O backend da aplicação está disponível em [`notifica-saude-backend`](https:/
 ## Funcionalidades
 
 ### Épico 1 — Registro de notificações
+
 - [ ] Formulário de registro de incidente (identificado ou anônimo)
 - [ ] Exibição de confirmação de envio com identificador da notificação (RN-10)
 
 ### Épico 2 — Gestão e classificação
+
 - [ ] Painel de notificações registradas (NSP)
 - [ ] Visualização detalhada de uma notificação
 - [ ] Edição e complemento de informações da notificação (NSP)
@@ -57,6 +59,7 @@ O backend da aplicação está disponível em [`notifica-saude-backend`](https:/
 - [ ] Registro de plano de ação e ações corretivas (Gestor de Área)
 
 ### Transversal
+
 - [ ] Tela de autenticação (login)
 - [ ] Controle de rotas por perfil de usuário (RBAC)
 - [ ] Interface responsiva — smartphones, tablets e computadores (Req. 5.4.2)
@@ -89,15 +92,14 @@ routes/        → definição de rotas e proteção por perfil
 
 ---
 
-
 ## Instalação e configuração
 
 ### Dependências obrigatórias
 
-| Ferramenta | Versão mínima | Observação |
-|---|---|---|
-| [Node.js](https://nodejs.org/) | 22.x | Recomendado via [nvm](https://github.com/nvm-sh/nvm) |
-| [npm](https://www.npmjs.com/) | 10.x | Incluso com Node.js |
+| Ferramenta                     | Versão mínima | Observação                                           |
+| ------------------------------ | ------------- | ---------------------------------------------------- |
+| [Node.js](https://nodejs.org/) | 22.x          | Recomendado via [nvm](https://github.com/nvm-sh/nvm) |
+| [npm](https://www.npmjs.com/)  | 10.x          | Incluso com Node.js                                  |
 
 ### Variáveis de ambiente
 
@@ -107,8 +109,8 @@ Copie o arquivo `.env.example` e preencha os valores:
 cp .env.example .env
 ```
 
-| Variável | Descrição | Exemplo |
-|---|---|---|
+| Variável       | Descrição               | Exemplo                 |
+| -------------- | ----------------------- | ----------------------- |
 | `VITE_API_URL` | URL base da API backend | `http://localhost:3333` |
 
 ### Instalação
@@ -144,18 +146,14 @@ A aplicação estará disponível em `http://localhost:5173`.
 
 ### Scripts disponíveis
 
-| Comando | Descrição |
-|---|---|
-| `npm run dev` | Inicia o servidor de desenvolvimento (Vite) |
-| `npm run build` | Verifica os tipos TypeScript e gera o build de produção |
-| `npm run preview` | Pré-visualiza o build de produção localmente |
-| `npm run lint` | Executa o ESLint no código-fonte |
+| Comando           | Descrição                                               |
+| ----------------- | ------------------------------------------------------- |
+| `npm run dev`     | Inicia o servidor de desenvolvimento (Vite)             |
+| `npm run build`   | Verifica os tipos TypeScript e gera o build de produção |
+| `npm run preview` | Pré-visualiza o build de produção localmente            |
+| `npm run lint`    | Executa o ESLint no código-fonte                        |
 
 ---
-
-
-
-
 
 ## Estrutura de diretórios
 
@@ -234,19 +232,21 @@ Professora: Maria Istela Cagnin
 Técnicos: Lucas Henrique Alves Borth
 
 Proponentes:
+
 - Viviane Euzebia
 - Ercilene Ribeiro
 
-| Nome | E-mail |
-|---|---|
-| Aline Hirokawa | aline.hirokawa@ufms.br |
-| Fábio Ramos | fabio.ramos@ufms.br |
+| Nome              | E-mail                   |
+| ----------------- | ------------------------ |
+| Aline Hirokawa    | aline.hirokawa@ufms.br   |
+| Fábio Ramos       | fabio.ramos@ufms.br      |
 | Lucas G. Cordeiro | lucas.g.cordeiro@ufms.br |
-| Luigi Almeida | luigi.almeida@ufms.br |
-| Pedro Soledade | pedro.soledade@ufms.br |
-| Sophya Ribeiro | sophya.ribeiro@ufms.br |
+| Luigi Almeida     | luigi.almeida@ufms.br    |
+| Pedro Soledade    | pedro.soledade@ufms.br   |
+| Sophya Ribeiro    | sophya.ribeiro@ufms.br   |
 
 ---
 
 ## Licença
+
 Inserir

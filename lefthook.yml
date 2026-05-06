@@ -1,0 +1,13 @@
+#   Refer for explanation to following link:
+#   https://lefthook.dev/configuration/
+pre-commit:
+  commands:
+    lint:
+      run: npm run lint:fix {staged_files}
+      stage_fixed: true
+      glob: "*.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"
+
+    format:
+      run: npm run fmt {staged_files}
+      stage_fixed: true
+      glob: "*.{md,yml,yaml,toml,json,js,mjs,cjs,ts,mts,cts,jsx,tsx}"

@@ -1,6 +1,6 @@
-import React from 'react';
-import styles from './CheckboxGroup.module.css';
-import type { OpcaoCampo } from '../../../types/formulario';
+import React from "react";
+import styles from "./CheckboxGroup.module.css";
+import type { OpcaoCampo } from "../../../types/formulario";
 
 type CheckboxGroupProps = {
   label: string;
@@ -9,7 +9,7 @@ type CheckboxGroupProps = {
   onChange: (value: string[]) => void;
   required?: boolean;
   error?: string;
-  'data-testid'?: string;
+  "data-testid"?: string;
 };
 
 export const CheckboxGroup: React.FC<CheckboxGroupProps> = ({
@@ -19,12 +19,10 @@ export const CheckboxGroup: React.FC<CheckboxGroupProps> = ({
   onChange,
   required = false,
   error,
-  'data-testid': dataTestId,
+  "data-testid": dataTestId,
 }) => {
   function toggle(id: string) {
-    onChange(
-      value.includes(id) ? value.filter((v) => v !== id) : [...value, id]
-    );
+    onChange(value.includes(id) ? value.filter((v) => v !== id) : [...value, id]);
   }
 
   return (
@@ -33,9 +31,7 @@ export const CheckboxGroup: React.FC<CheckboxGroupProps> = ({
         {label}
         {required && <span className={styles.required}>*</span>}
       </span>
-      {required && (
-        <span className={styles.requiredHint}>*Preenchimento obrigatório</span>
-      )}
+      {required && <span className={styles.requiredHint}>*Preenchimento obrigatório</span>}
       <div className={styles.options}>
         {options.map((opt) => (
           <label key={opt.id} className={styles.optionLabel}>

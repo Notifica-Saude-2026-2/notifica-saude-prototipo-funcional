@@ -1,26 +1,26 @@
-import { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import Drawer from '@mui/material/Drawer';
-import List from '@mui/material/List';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
-import Avatar from '@mui/material/Avatar';
-import IconButton from '@mui/material/IconButton';
-import Divider from '@mui/material/Divider';
-import Tooltip from '@mui/material/Tooltip';
-import cubeIcon from '../../../assets/cube.svg';
-import fireIcon from '../../../assets/fire.svg';
-import airplaneIcon from '../../../assets/airplane.svg';
-import doneIcon from '../../../assets/done.svg';
-import menuIcon from '../../../assets/menu-hamburguer.svg';
-import arrowExitIcon from '../../../assets/arrow-exit.svg';
-import { useAuth } from '../../../hooks/useAuth';
-import styles from './AdminDrawer.module.css';
+import { useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import Drawer from "@mui/material/Drawer";
+import List from "@mui/material/List";
+import ListItemButton from "@mui/material/ListItemButton";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import ListItemText from "@mui/material/ListItemText";
+import Avatar from "@mui/material/Avatar";
+import IconButton from "@mui/material/IconButton";
+import Divider from "@mui/material/Divider";
+import Tooltip from "@mui/material/Tooltip";
+import cubeIcon from "../../../assets/cube.svg";
+import fireIcon from "../../../assets/fire.svg";
+import airplaneIcon from "../../../assets/airplane.svg";
+import doneIcon from "../../../assets/done.svg";
+import menuIcon from "../../../assets/menu-hamburguer.svg";
+import arrowExitIcon from "../../../assets/arrow-exit.svg";
+import { useAuth } from "../../../hooks/useAuth";
+import styles from "./AdminDrawer.module.css";
 
 const DRAWER_WIDTH_OPEN = 260;
 const DRAWER_WIDTH_CLOSED = 64;
-const ACTIVE_COLOR = '#131D53';
+const ACTIVE_COLOR = "#131D53";
 
 type NavItem = {
   label: string;
@@ -29,25 +29,25 @@ type NavItem = {
 };
 
 const NAV_ITEMS: NavItem[] = [
-  { label: 'Todos incidentes', icon: cubeIcon, path: '/admin' },
-  { label: 'Novos incidentes', icon: fireIcon, path: '/admin/novos' },
-  { label: 'Encaminhados', icon: airplaneIcon, path: '/admin/encaminhados' },
-  { label: 'Resolvidos', icon: doneIcon, path: '/admin/resolvidos' },
+  { label: "Todos incidentes", icon: cubeIcon, path: "/admin" },
+  { label: "Novos incidentes", icon: fireIcon, path: "/admin/novos" },
+  { label: "Encaminhados", icon: airplaneIcon, path: "/admin/encaminhados" },
+  { label: "Resolvidos", icon: doneIcon, path: "/admin/resolvidos" },
 ];
 
 function getInitials(nome: string): string {
   return nome
-    .split(' ')
+    .split(" ")
     .filter(Boolean)
     .slice(0, 2)
     .map((n) => n[0].toUpperCase())
-    .join('');
+    .join("");
 }
 
 function readOpenState(): boolean {
   try {
-    const saved = localStorage.getItem('admin-drawer-open');
-    return saved !== null ? saved === 'true' : true;
+    const saved = localStorage.getItem("admin-drawer-open");
+    return saved !== null ? saved === "true" : true;
   } catch {
     return true;
   }
@@ -55,7 +55,7 @@ function readOpenState(): boolean {
 
 function saveOpenState(value: boolean) {
   try {
-    localStorage.setItem('admin-drawer-open', String(value));
+    localStorage.setItem("admin-drawer-open", String(value));
   } catch {
     // ignore
   }
@@ -67,8 +67,8 @@ export function AdminDrawer() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const nome = usuario?.nome ?? 'Usuário';
-  const email = usuario?.email ?? '';
+  const nome = usuario?.nome ?? "Usuário";
+  const email = usuario?.email ?? "";
   const initials = getInitials(nome);
 
   function toggleDrawer() {
@@ -86,14 +86,14 @@ export function AdminDrawer() {
       sx={{
         width: open ? DRAWER_WIDTH_OPEN : DRAWER_WIDTH_CLOSED,
         flexShrink: 0,
-        '& .MuiDrawer-paper': {
+        "& .MuiDrawer-paper": {
           width: open ? DRAWER_WIDTH_OPEN : DRAWER_WIDTH_CLOSED,
-          overflowX: 'hidden',
-          transition: 'width 0.25s ease',
-          boxSizing: 'border-box',
-          background: 'linear-gradient(to bottom, #131D53, #1C37CB)',
-          color: '#fff',
-          borderRight: 'none',
+          overflowX: "hidden",
+          transition: "width 0.25s ease",
+          boxSizing: "border-box",
+          background: "linear-gradient(to bottom, #131D53, #1C37CB)",
+          color: "#fff",
+          borderRight: "none",
         },
       }}
     >
@@ -102,16 +102,10 @@ export function AdminDrawer() {
           <IconButton
             data-testid="admin-drawer-toggle"
             onClick={toggleDrawer}
-            sx={{ color: '#fff', padding: '8px' }}
+            sx={{ color: "#fff", padding: "8px" }}
             size="small"
           >
-            <img
-              src={menuIcon}
-              alt="Menu"
-              className={styles.iconWhite}
-              width={20}
-              height={20}
-            />
+            <img src={menuIcon} alt="Menu" className={styles.iconWhite} width={20} height={20} />
           </IconButton>
         </div>
 
@@ -119,13 +113,13 @@ export function AdminDrawer() {
           <div className={styles.userSection}>
             <Avatar
               sx={{
-                bgcolor: '#fff',
-                color: '#0D1B4C',
-                fontFamily: 'Raleway, sans-serif',
+                bgcolor: "#fff",
+                color: "#0D1B4C",
+                fontFamily: "Raleway, sans-serif",
                 fontWeight: 700,
                 width: 56,
                 height: 56,
-                fontSize: '1.2rem',
+                fontSize: "1.2rem",
                 mb: 1,
               }}
             >
@@ -141,13 +135,13 @@ export function AdminDrawer() {
             <Tooltip title={nome} placement="right">
               <Avatar
                 sx={{
-                  bgcolor: '#fff',
-                  color: '#0D1B4C',
-                  fontFamily: 'Raleway, sans-serif',
+                  bgcolor: "#fff",
+                  color: "#0D1B4C",
+                  fontFamily: "Raleway, sans-serif",
                   fontWeight: 700,
                   width: 36,
                   height: 36,
-                  fontSize: '0.85rem',
+                  fontSize: "0.85rem",
                 }}
               >
                 {initials}
@@ -156,37 +150,29 @@ export function AdminDrawer() {
           </div>
         )}
 
-        <Divider sx={{ borderColor: 'rgba(255,255,255,0.2)', my: 1 }} />
+        <Divider sx={{ borderColor: "rgba(255,255,255,0.2)", my: 1 }} />
 
         <List disablePadding className={styles.navList}>
           {NAV_ITEMS.map((item) => {
             const isActive = location.pathname === item.path;
             return (
-              <Tooltip
-                key={item.path}
-                title={!open ? item.label : ''}
-                placement="right"
-              >
+              <Tooltip key={item.path} title={!open ? item.label : ""} placement="right">
                 <ListItemButton
                   onClick={() => navigate(item.path)}
                   sx={{
-                    borderRadius: '8px',
+                    borderRadius: "8px",
                     mx: 1,
                     mb: 0.5,
                     minHeight: 44,
-                    backgroundColor: isActive ? '#fff' : 'transparent',
-                    '&:hover': {
-                      backgroundColor: isActive
-                        ? '#fff'
-                        : 'rgba(255,255,255,0.12)',
+                    backgroundColor: isActive ? "#fff" : "transparent",
+                    "&:hover": {
+                      backgroundColor: isActive ? "#fff" : "rgba(255,255,255,0.12)",
                     },
-                    justifyContent: open ? 'flex-start' : 'center',
+                    justifyContent: open ? "flex-start" : "center",
                     px: open ? 1.5 : 1,
                   }}
                 >
-                  <ListItemIcon
-                    sx={{ minWidth: open ? 36 : 'auto' }}
-                  >
+                  <ListItemIcon sx={{ minWidth: open ? 36 : "auto" }}>
                     <img
                       src={item.icon}
                       alt=""
@@ -201,10 +187,10 @@ export function AdminDrawer() {
                       slotProps={{
                         primary: {
                           sx: {
-                            fontSize: '0.875rem',
-                            fontFamily: 'Raleway, sans-serif',
+                            fontSize: "0.875rem",
+                            fontFamily: "Raleway, sans-serif",
                             fontWeight: isActive ? 700 : 400,
-                            color: isActive ? ACTIVE_COLOR : '#fff',
+                            color: isActive ? ACTIVE_COLOR : "#fff",
                           },
                         },
                       }}
@@ -217,23 +203,23 @@ export function AdminDrawer() {
         </List>
 
         <div className={styles.footer}>
-          <Divider sx={{ borderColor: 'rgba(255,255,255,0.2)', mb: 1 }} />
-          <Tooltip title={!open ? 'Sair da conta' : ''} placement="right">
+          <Divider sx={{ borderColor: "rgba(255,255,255,0.2)", mb: 1 }} />
+          <Tooltip title={!open ? "Sair da conta" : ""} placement="right">
             <ListItemButton
               data-testid="admin-logout"
               onClick={logout}
               sx={{
-                borderRadius: '8px',
+                borderRadius: "8px",
                 mx: 1,
                 minHeight: 44,
-                justifyContent: open ? 'flex-start' : 'center',
+                justifyContent: open ? "flex-start" : "center",
                 px: open ? 1.5 : 1,
-                '&:hover': {
-                  backgroundColor: 'rgba(255,255,255,0.12)',
+                "&:hover": {
+                  backgroundColor: "rgba(255,255,255,0.12)",
                 },
               }}
             >
-              <ListItemIcon sx={{ minWidth: open ? 36 : 'auto' }}>
+              <ListItemIcon sx={{ minWidth: open ? 36 : "auto" }}>
                 <img
                   src={arrowExitIcon}
                   alt=""
@@ -248,9 +234,9 @@ export function AdminDrawer() {
                   slotProps={{
                     primary: {
                       sx: {
-                        fontSize: '0.875rem',
-                        fontFamily: 'Raleway, sans-serif',
-                        color: 'rgba(255,255,255,0.8)',
+                        fontSize: "0.875rem",
+                        fontFamily: "Raleway, sans-serif",
+                        color: "rgba(255,255,255,0.8)",
                       },
                     },
                   }}

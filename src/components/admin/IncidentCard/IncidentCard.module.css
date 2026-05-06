@@ -9,7 +9,7 @@
   outline: none;
   border: 1px solid #e5e4e7;
   overflow: hidden;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   align-items: stretch;
 }
 
@@ -18,7 +18,7 @@
 }
 
 .card:focus-visible {
-  box-shadow: 0 0 0 2px #183EFF;
+  box-shadow: 0 0 0 2px #183eff;
 }
 
 /* ─── Barra lateral colorida (baseada no Status) ─── */
