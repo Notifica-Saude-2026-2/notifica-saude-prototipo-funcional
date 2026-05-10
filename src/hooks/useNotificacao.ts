@@ -4,8 +4,8 @@ import type { CampoDinamico, NotificacaoPayload, RespostaCampo } from "../types/
 import { criarNotificacao } from "../services/notificacao.service";
 import { ApiError } from "../services/api";
 
-// const CAMPO_UNIDADE_ID = "55555555-5555-4555-b555-000000000010";
-// const CAMPO_SETOR_ID = "55555555-5555-4555-b555-000000000003";
+const CAMPO_UNIDADE_ID = "55555555-5555-4555-b555-000000000010";
+const CAMPO_SETOR_ID = "55555555-5555-4555-b555-000000000003";
 const CAMPO_DATA_ID = "55555555-5555-4555-b555-000000000008";
 const CAMPO_NOME_ID = "55555555-5555-4555-b555-000000000006";
 const CAMPO_CONTATO_ID = "55555555-5555-4555-b555-000000000007";
@@ -33,6 +33,21 @@ function buildRespostas(
     const value = formValues[campo.id];
 
     if (value === undefined || value === null || String(value).trim() === "") {
+      return acc;
+    }
+
+    // Campos relacionais (C_INSTITUICAO, C_SETOR): enviam valor_entidade_id
+    if (campo.entidade_relacional) {
+      const label = campo.opcoes?.find((o) => o.id === String(value))?.valor;
+      const outroOption = campo.opcoes?.find((o) => o.valor.toLowerCase() === "outro");
+      const isOutro = outroOption != null && value === outroOption.id;
+      const outroText = isOutro ? formValues[`${campo.id}_outro`] : undefined;
+      acc.push({
+        campo_id: campo.id,
+        valor_entidade_id: String(value),
+        ...(label ? { valor_entidade_label: label } : {}),
+        ...(outroText && String(outroText).trim() ? { valor: String(outroText).trim() } : {}),
+      });
       return acc;
     }
 
@@ -95,15 +110,21 @@ export function useNotificacao(): UseNotificacaoReturn {
 
         const isAnonima = !(nomePreenchido || contatoPreenchido);
 
+        // Extrai unidade_id e setor_id do que o usuário selecionou nos campos relacionais
+        const unidadeId = formValues[CAMPO_UNIDADE_ID] as string | undefined;
+        const setorId = formValues[CAMPO_SETOR_ID] as string | undefined;
+
+        if (!unidadeId || !setorId) {
+          throw new Error("Selecione a instituição e o setor antes de enviar.");
+        }
+
         const payload: NotificacaoPayload = {
           anonima: isAnonima,
-          // Usando os IDs estruturais fixos na raiz para passar na validação do Zod.
-          // O que realmente importa para o histórico é o que vai dentro de "respostas".
-          unidade_id: "11111111-1111-4111-a111-111111111111", // Hospital Exemplo
-          setor_id: "22222222-2222-4222-a222-222222222221", // UTI (Fallback)
+          unidade_id: unidadeId,
+          setor_id: setorId,
           data_incidente: formValues[CAMPO_DATA_ID]
             ? new Date(`${formValues[CAMPO_DATA_ID]}T00:00:00.000Z`).toISOString()
-            : new Date().toISOString(), // Adicionado um fallback seguro para a data
+            : new Date().toISOString(),
           respostas: buildRespostas(campos, formValues),
         };
 

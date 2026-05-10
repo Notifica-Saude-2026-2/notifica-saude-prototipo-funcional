@@ -8,6 +8,7 @@ type TextareaProps = {
   placeholder?: string;
   required?: boolean;
   error?: string;
+  maxLength?: number;
   "data-testid"?: string;
 };
 
@@ -18,6 +19,7 @@ export const Textarea: React.FC<TextareaProps> = ({
   placeholder,
   required = false,
   error,
+  maxLength,
   "data-testid": dataTestId,
 }) => {
   return (
@@ -39,9 +41,17 @@ export const Textarea: React.FC<TextareaProps> = ({
         }}
         placeholder={placeholder}
         rows={3}
+        maxLength={maxLength}
         data-testid={dataTestId}
       />
-      {error && <span className={styles.errorMessage}>{error}</span>}
+      <div className={styles.footer}>
+        {error && <span className={styles.errorMessage}>{error}</span>}
+        {maxLength && (
+          <span className={styles.charCount}>
+            {value.length} / {maxLength}
+          </span>
+        )}
+      </div>
     </div>
   );
 };

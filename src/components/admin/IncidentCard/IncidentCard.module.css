@@ -1,7 +1,7 @@
 .card {
   display: flex;
   background: #fff;
-  border-radius: 8px;
+  border-radius: 0;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
   margin-bottom: 12px;
   cursor: pointer;
@@ -110,9 +110,65 @@
   color: #08060d;
 }
 
+.right {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 18px;
+  min-width: 210px;
+  flex-shrink: 0;
+  border-left: 1px solid #f0f0f2;
+}
+
+.rightItem {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.rightValue {
+  font-size: 0.875rem;
+  color: #08060d;
+}
+
+.damageBadge {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #d32f2f;
+  background: #fff5f5;
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px solid #ffcdd2;
+}
+
 /* ─── Responsivo ─── */
+@media (max-width: 640px) {
+  .card {
+    flex-wrap: wrap;
+  }
+
+  .right {
+    min-width: 0;
+    width: 100%;
+    border-left: none;
+    border-top: 1px solid #f0f0f2;
+    flex-direction: row;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+}
+
 @media (max-width: 480px) {
   .statusRow {
     flex-wrap: wrap;
+    align-items: flex-start;
+  }
+
+  .sectorGroup {
+    margin-left: 0;
+    width: 100%;
+    margin-top: 4px;
   }
 }

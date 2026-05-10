@@ -6,6 +6,8 @@ import Notificacao from "../pages/Notificacao/Notificacao";
 import Login from "../pages/Login";
 import AdminDashboard from "../pages/Admin/AdminDashboard";
 import AdminComingSoon from "../pages/Admin/AdminComingSoon";
+import AdminNovos from "../pages/Admin/AdminNovos";
+import NotificacaoDetalhe from "../pages/Admin/NotificacaoDetalhe/NotificacaoDetalhe";
 
 export function AppRoutes() {
   return (
@@ -17,9 +19,10 @@ export function AppRoutes() {
       </Route>
       <Route element={<PrivateRoute />}>
         <Route path="/admin" element={<AdminDashboard />} />
-        <Route path="/admin/novos" element={<AdminComingSoon />} />
+        <Route path="/admin/novos" element={<AdminNovos />} />
         <Route path="/admin/encaminhados" element={<AdminComingSoon />} />
         <Route path="/admin/resolvidos" element={<AdminComingSoon />} />
+        <Route path="/incident/:id" element={<NotificacaoDetalhe />} />
       </Route>
     </Routes>
   );

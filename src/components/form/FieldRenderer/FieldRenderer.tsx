@@ -27,11 +27,15 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
   error,
   outroValue,
   onOutroChange,
+  entidade_relacional,
 }) => {
+  const effectiveTipo =
+    entidade_relacional && tipo === "SELECT" && opcoes.length <= 12 ? "RADIO" : tipo;
+
   const radioOptions = opcoes.map((opt) => ({ value: opt.id, label: opt.valor }));
   const outroOption = opcoes.find((o) => o.valor.toLowerCase() === "outro");
 
-  switch (tipo) {
+  switch (effectiveTipo) {
     case "TEXTO":
     case "EMAIL":
     case "TELEFONE":
@@ -76,6 +80,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
             type="date"
             required={obrigatorio}
             error={dateError}
+            max={today}
             data-testid={`field-${id}`}
           />
         </div>
@@ -91,6 +96,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
           placeholder={placeholder}
           required={obrigatorio}
           error={error}
+          maxLength={2000}
           data-testid={`field-${id}`}
         />
       );

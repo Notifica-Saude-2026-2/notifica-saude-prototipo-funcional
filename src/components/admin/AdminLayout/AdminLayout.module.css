@@ -19,3 +19,47 @@
 .content * {
   font-family: "Inter", sans-serif;
 }
+
+/* ─── Mobile header — aparece apenas em ≤768px via useMediaQuery ─── */
+.mobileHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 16px;
+  height: 52px;
+  min-height: 52px;
+  background: linear-gradient(to right, #131D53, #1C37CB);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  flex-shrink: 0;
+}
+
+.mobileMenuBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  padding: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  min-width: 40px;
+  min-height: 40px;
+  transition: background 0.15s;
+}
+
+.mobileMenuBtn:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.mobileMenuIcon {
+  filter: brightness(0) invert(1);
+}
+
+.mobileHeaderTitle {
+  font-family: "Raleway", sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
+  color: #fff;
+}

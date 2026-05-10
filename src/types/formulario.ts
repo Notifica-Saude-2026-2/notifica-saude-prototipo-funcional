@@ -28,6 +28,7 @@ export type CampoDinamico = {
   secao?: string;
   /** Número da etapa — derivado de secao no frontend se não fornecido diretamente */
   etapa?: number;
+  entidade_relacional?: string;
 };
 
 export type RespostaCampo = {
@@ -35,6 +36,9 @@ export type RespostaCampo = {
   valor?: string;
   valor_opcao_id?: string;
   valores_opcoes_ids?: string[];
+  /** Campos relacionais (C_INSTITUICAO, C_SETOR): UUID da entidade selecionada */
+  valor_entidade_id?: string;
+  valor_entidade_label?: string;
 };
 
 export type NotificacaoPayload = {

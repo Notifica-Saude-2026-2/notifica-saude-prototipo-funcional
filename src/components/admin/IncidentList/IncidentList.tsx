@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { IncidentCard } from "../IncidentCard/IncidentCard";
-import type { Incident } from "../../../mocks/incidents";
+import type { Incident } from "../../../types/incident";
 import styles from "./IncidentList.module.css";
 
 const PAGE_SIZE = 5;

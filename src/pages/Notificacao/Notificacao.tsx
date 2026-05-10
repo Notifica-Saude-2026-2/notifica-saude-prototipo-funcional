@@ -1,12 +1,12 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { BsCheckCircle } from "react-icons/bs";
 import { Button } from "../../components/common/ui/Button";
 import { StepForm } from "../../components/form/StepForm";
 import { FieldRenderer } from "../../components/form/FieldRenderer";
-import { useCamposFormulario } from "../../hooks/useCamposFormulario";
+import { useCamposFormulario, fetchSetoresParaUnidade } from "../../hooks/useCamposFormulario";
 import { useNotificacao } from "../../hooks/useNotificacao";
-import type { CampoDinamico } from "../../types/formulario";
+import type { CampoDinamico, OpcaoCampo } from "../../types/formulario";
 import styles from "./Notificacao.module.css";
 import step1Icon from "../../assets/step1.svg";
 import step2Icon from "../../assets/step2.svg";
@@ -15,7 +15,9 @@ import step4Icon from "../../assets/step4.svg";
 
 const SECAO_PACIENTE = "Tela 2 - Informações sobre o Paciente";
 const CAMPO_CONTATO_ID = "55555555-5555-4555-b555-000000000007";
-const CAMPO_NOME_ID = "55555555-5555-4555-b555-000000000006";
+const CAMPO_NOME_ID    = "55555555-5555-4555-b555-000000000006";
+const CAMPO_UNIDADE_ID = "55555555-5555-4555-b555-000000000010";
+const CAMPO_SETOR_ID   = "55555555-5555-4555-b555-000000000003";
 
 const SECAO_CONFIG: Record<string, { label: string; icon: string }> = {
   "Tela 1 - Abertura": { label: "Informações iniciais", icon: step1Icon },
@@ -46,6 +48,7 @@ function groupBySecao(campos: CampoDinamico[]): Map<string, CampoDinamico[]> {
   }
   return map;
 }
+
 function pacienteEnvolvido(campos: CampoDinamico[], formValues: Record<string, unknown>): boolean {
   const campoPaciente = campos.find(
     (c) =>
@@ -53,7 +56,7 @@ function pacienteEnvolvido(campos: CampoDinamico[], formValues: Record<string, u
       c.opcoes?.some((o) => o.valor === "Sim") &&
       c.opcoes?.some((o) => o.valor === "Não"),
   );
-  if (!campoPaciente) return true; // sem dado suficiente → exibe a tela por segurança
+  if (!campoPaciente) return true;
   const simOpcao = campoPaciente.opcoes?.find((o) => o.valor === "Sim");
   return formValues[campoPaciente.id] === simOpcao?.id;
 }
@@ -97,8 +100,31 @@ export default function Notificacao() {
   const { formValues, updateField, resetForm, submit, submitting, submitError } = useNotificacao();
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [submitted, setSubmitted] = useState(false);
+  // Setores refinados pela unidade selecionada (cascade)
+  const [setoresDisponiveis, setSetoresDisponiveis] = useState<OpcaoCampo[]>([]);
 
-  const secaoMap = groupBySecao(campos);
+  // Injeta setores refinados quando o usuário selecionou a unidade.
+  // Antes disso, usa as opções pré-carregadas pelo hook (globais, mesmas para todas as unidades).
+  const camposComSetoresDinamicos = campos.map((c) =>
+    c.id === CAMPO_SETOR_ID && setoresDisponiveis.length > 0
+      ? { ...c, opcoes: setoresDisponiveis }
+      : c
+  );
+
+  // Cascade: ao trocar unidade, recarrega setores específicos e limpa seleção anterior
+  const handleFieldChange = useCallback(
+    async (campoId: string, value: unknown) => {
+      updateField(campoId, value);
+      if (campoId === CAMPO_UNIDADE_ID && typeof value === "string" && value) {
+        updateField(CAMPO_SETOR_ID, "");
+        const setores = await fetchSetoresParaUnidade(value);
+        setSetoresDisponiveis(setores);
+      }
+    },
+    [updateField],
+  );
+
+  const secaoMap = groupBySecao(camposComSetoresDinamicos);
   const todasSecoes = Array.from(secaoMap.keys());
 
   const secoes = todasSecoes.filter(
@@ -221,7 +247,7 @@ export default function Notificacao() {
                   : campo.placeholder
             }
             value={formValues[campo.id]}
-            onChange={(value) => updateField(campo.id, value)}
+            onChange={(value) => handleFieldChange(campo.id, value)}
             outroValue={(formValues[`${campo.id}_outro`] as string) ?? ""}
             onOutroChange={(v) => updateField(`${campo.id}_outro`, v)}
           />

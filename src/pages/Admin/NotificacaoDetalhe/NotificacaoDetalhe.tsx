@@ -1,0 +1,133 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { AdminLayout } from "../../../components/admin/AdminLayout/AdminLayout";
+import { useNotificacaoDetalhe } from "../../../hooks/useNotificacaoDetalhe";
+import { ClassificacaoModal } from "./ClassificacaoModal";
+import { ArrowLeftIcon } from "../../../components/common/icons/ArrowLeftIcon";
+import type { UpdateNotificacaoPayload } from "../../../services/notificacaoDetalheService";
+import styles from "./NotificacaoDetalhe.module.css";
+
+// Componentes extraídos
+import { NotificacaoHeader } from "./components/NotificacaoHeader";
+import { InformacoesGeraisSection } from "./components/InformacoesGeraisSection";
+import { ClassificacaoSection } from "./components/ClassificacaoSection";
+import { AnaliseSection } from "./components/AnaliseSection";
+import { HistoricoSection } from "./components/HistoricoSection";
+import { EditModal } from "./components/EditModal";
+
+export default function NotificacaoDetalhe() {
+  const navigate = useNavigate();
+  const { detalhe, rawData, hasData, loading, update, historico, salvar, onClassificacaoSuccess } =
+    useNotificacaoDetalhe();
+
+  type SectionKey = "info" | "classification" | "analysis" | "history";
+  const [openSections, setOpenSections] = useState<Record<SectionKey, boolean>>({
+    info: true,
+    classification: true,
+    analysis: false,
+    history: true,
+  });
+
+  const [editOpen, setEditOpen] = useState(false);
+  const [classificacaoOpen, setClassificacaoOpen] = useState(false);
+
+  const toggleSection = (key: SectionKey) =>
+    setOpenSections((prev) => ({ ...prev, [key]: !prev[key] }));
+
+  async function handleSave(payload: UpdateNotificacaoPayload) {
+    const ok = await salvar(payload);
+    if (ok) setTimeout(() => setEditOpen(false), 800);
+  }
+
+  if (loading) {
+    return (
+      <AdminLayout>
+        <div className={styles.page}>
+          <div className={styles.notFound}>
+            <p>Carregando notificação...</p>
+          </div>
+        </div>
+      </AdminLayout>
+    );
+  }
+
+  if (!hasData || !detalhe) {
+    return (
+      <AdminLayout>
+        <div className={styles.page}>
+          <div className={styles.notFound}>
+            <p>Notificação não encontrada ou sessão expirada.</p>
+            <button className={styles.backLink} onClick={() => navigate("/admin")}>
+              <ArrowLeftIcon width={14} stroke="6b6375" /> Voltar para a listagem
+            </button>
+          </div>
+        </div>
+      </AdminLayout>
+    );
+  }
+
+  return (
+    <AdminLayout>
+      <div className={styles.page}>
+        <button className={styles.backLink} onClick={() => navigate("/admin")}>
+          <ArrowLeftIcon width={14} stroke="6b6375" /> Voltar
+        </button>
+
+        <div className={styles.detailsCard}>
+          <NotificacaoHeader detalhe={detalhe} />
+
+          <InformacoesGeraisSection
+            detalhe={detalhe}
+            isOpen={openSections.info}
+            onToggle={() => toggleSection("info")}
+            onEdit={() => setEditOpen(true)}
+          />
+
+          <ClassificacaoSection
+            detalhe={detalhe}
+            isOpen={openSections.classification}
+            onToggle={() => toggleSection("classification")}
+            onClassificar={() => setClassificacaoOpen(true)}
+          />
+
+          <AnaliseSection
+            detalhe={detalhe}
+            isOpen={openSections.analysis}
+            onToggle={() => toggleSection("analysis")}
+          />
+
+          <HistoricoSection
+            detalhe={detalhe}
+            historico={historico}
+            isOpen={openSections.history}
+            onToggle={() => toggleSection("history")}
+          />
+        </div>
+
+        {editOpen && (
+          <EditModal
+            detalhe={detalhe}
+            rawData={rawData!}
+            saving={update.saving}
+            saveError={update.saveError}
+            saveSuccess={update.saveSuccess}
+            onClose={() => setEditOpen(false)}
+            onSave={handleSave}
+          />
+        )}
+
+        {classificacaoOpen && (!detalhe.classificacao || detalhe.classificacao.rascunho) && (
+          <ClassificacaoModal
+            notificacaoId={detalhe.id}
+            classificacaoExistente={detalhe.classificacao ? rawData?.classificacao : null}
+            onClose={() => setClassificacaoOpen(false)}
+            onSuccess={(classificacao) => {
+              onClassificacaoSuccess(classificacao);
+              setClassificacaoOpen(false);
+            }}
+          />
+        )}
+      </div>
+    </AdminLayout>
+  );
+}
