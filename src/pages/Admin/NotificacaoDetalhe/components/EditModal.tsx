@@ -75,6 +75,8 @@ export function EditModal({
     rawData.respostas.find((r) => r.campo_id === CAMPO_IDS.SEXO)?.valor_texto ?? "",
   );
 
+  const [localError, setLocalError] = useState<string | null>(null);
+
   const [setores, setSetores] = useState<{ id: string; valor: string }[]>([]);
 
   useEffect(() => {
@@ -84,8 +86,22 @@ export function EditModal({
   }, [unidadeId]);
 
   function handleSave() {
+    setLocalError(null);
+
+    if (!dataIncidente) {
+      setLocalError("A data do incidente é obrigatória.");
+      return;
+    }
     if (dataIncidente && new Date(dataIncidente) > new Date()) {
-      alert("A data do incidente não pode ser futura.");
+      setLocalError("A data do incidente não pode ser futura.");
+      return;
+    }
+    if (!turnoId) {
+      setLocalError("O turno é obrigatório.");
+      return;
+    }
+    if (!setorId) {
+      setLocalError("O setor é obrigatório.");
       return;
     }
 
@@ -96,24 +112,43 @@ export function EditModal({
     }
 
     if (detalhe.paciente.envolvido) {
-      if (idadeId) respostas.push({ campo_id: CAMPO_IDS.IDADE, valor_opcao_id: idadeId });
-      if (sexoId) {
-        const isSexoOutro =
-          SEXO_OPTIONS.find((s) => s.id === sexoId)?.label.toLowerCase() === "outro";
-        const resposta: {
-          campo_id: string;
-          valor_opcao_id: string;
-          valor?: string;
-        } = {
-          campo_id: CAMPO_IDS.SEXO,
-          valor_opcao_id: sexoId,
-        };
-        if (isSexoOutro && sexoOutroText.trim()) resposta.valor = sexoOutroText.trim();
-        respostas.push(resposta);
+      if (!idadeId) {
+        setLocalError("A idade do paciente é obrigatória.");
+        return;
       }
+      if (!sexoId) {
+        setLocalError("O sexo do paciente é obrigatório.");
+        return;
+      }
+      respostas.push({ campo_id: CAMPO_IDS.IDADE, valor_opcao_id: idadeId });
+
+      const isSexoOutro =
+        SEXO_OPTIONS.find((s) => s.id === sexoId)?.label.toLowerCase() === "outro";
+
+      if (isSexoOutro && !sexoOutroText.trim()) {
+        setLocalError("Por favor, especifique o sexo/gênero.");
+        return;
+      }
+
+      const resposta: {
+        campo_id: string;
+        valor_opcao_id: string;
+        valor?: string;
+      } = {
+        campo_id: CAMPO_IDS.SEXO,
+        valor_opcao_id: sexoId,
+      };
+      if (isSexoOutro && sexoOutroText.trim()) resposta.valor = sexoOutroText.trim();
+      respostas.push(resposta);
     }
 
     const isSetorOutro = setores.find((s) => s.id === setorId)?.valor.toLowerCase() === "outro";
+
+    if (isSetorOutro && !setorOutroText.trim()) {
+      setLocalError("Por favor, especifique o setor.");
+      return;
+    }
+
     if (isSetorOutro && setorOutroText.trim()) {
       respostas.push({
         campo_id: CAMPO_IDS.SETOR,
@@ -166,7 +201,9 @@ export function EditModal({
                 onChange={(e) => setTurnoId(e.target.value)}
                 disabled={saving}
               >
-                <option value="">Selecione</option>
+                <option value="" disabled hidden>
+                  Selecione
+                </option>
                 {TURNO_OPTIONS.map((t) => (
                   <option key={t.id} value={t.id}>
                     {t.label}
@@ -199,7 +236,9 @@ export function EditModal({
                 }}
                 disabled={saving || !unidadeId}
               >
-                <option value="">Selecione</option>
+                <option value="" disabled hidden>
+                  Selecione
+                </option>
                 {setores.map((s) => (
                   <option key={s.id} value={s.id}>
                     {s.valor}
@@ -233,7 +272,9 @@ export function EditModal({
                   onChange={(e) => setIdadeId(e.target.value)}
                   disabled={saving}
                 >
-                  <option value="">Selecione</option>
+                  <option value="" disabled hidden>
+                    Selecione
+                  </option>
                   {FAIXA_ETARIA_OPTIONS.map((o) => (
                     <option key={o.id} value={o.id}>
                       {o.label}
@@ -252,7 +293,9 @@ export function EditModal({
                   }}
                   disabled={saving}
                 >
-                  <option value="">Selecione</option>
+                  <option value="" disabled hidden>
+                    Selecione
+                  </option>
                   {SEXO_OPTIONS.map((s) => (
                     <option key={s.id} value={s.id}>
                       {s.label}
@@ -276,7 +319,9 @@ export function EditModal({
             </div>
           )}
 
-          {saveError && <p className={styles.modalError}>{saveError}</p>}
+          {(localError || saveError) && (
+            <p className={styles.modalError}>{localError || saveError}</p>
+          )}
           {saveSuccess && <p className={styles.modalSuccess}>Alterações salvas com sucesso.</p>}
         </div>
 

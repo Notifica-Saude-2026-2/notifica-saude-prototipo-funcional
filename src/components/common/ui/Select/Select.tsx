@@ -62,7 +62,7 @@ export const Select: React.FC<SelectProps> = (props) => {
         data-testid={dataTestId}
       >
         {!multiple && (
-          <option value="" disabled>
+          <option value="" disabled hidden={required}>
             {placeholder ?? "Selecione..."}
           </option>
         )}

@@ -68,6 +68,21 @@ export const TIPO_ESPECIFICO_LABEL: Record<string, string> = {
   PARALISIA_BRAQUIAL_NEONATO: "Paralisia braquial obstétrica",
 };
 
+export const CATEGORIA_INCIDENTE_LABEL: Record<string, string> = {
+  ERRO_MEDICACAO: "Erro de medicação",
+  FALHA_IDENTIFICACAO: "Falha na identificação do paciente",
+  QUEDA: "Queda",
+  LESAO_PRESSAO: "Lesão por pressão",
+  INFECCAO_ASSISTENCIA: "Infecção relacionada à assistência",
+  PROCEDIMENTO_CIRURGICO: "Procedimento cirúrgico",
+  EQUIPAMENTO_DISPOSITIVO: "Equipamento ou dispositivo médico",
+  FALHA_DIAGNOSTICO: "Falha de diagnóstico",
+  COMUNICACAO: "Comunicação",
+  TRANSFUSAO_SANGUINEA: "Transfusão sanguínea",
+  DOCUMENTACAO_PRONTUARIO: "Documentação / prontuário",
+  OUTRO: "Outro",
+};
+
 export const ENVOLVIDO_LABEL: Record<string, string> = {
   PROFISSIONAL_SAUDE: "Profissional de saúde",
   PACIENTE: "Paciente",
@@ -128,7 +143,18 @@ export function mapToNotificacaoDetalhe(raw: NotificacaoRaw): NotificacaoDetalhe
           ? (TIPO_ESPECIFICO_LABEL[raw.classificacao.tipo_especifico] ??
             raw.classificacao.tipo_especifico)
           : null,
-        envolvidos: raw.classificacao.envolvidos ?? [],
+        tiposIncidentes: (raw.classificacao.tipos_incidentes ?? []).map((t) => {
+          if (t === "OUTRO" && raw.classificacao.outro_tipo_incidente) {
+            return `Outro - ${raw.classificacao.outro_tipo_incidente}`;
+          }
+          return CATEGORIA_INCIDENTE_LABEL[t] ?? t;
+        }),
+        envolvidos: (raw.classificacao.envolvidos ?? []).map((e) => {
+          if (e === "OUTRO" && raw.classificacao.outro_envolvido) {
+            return `Outro - ${raw.classificacao.outro_envolvido}`;
+          }
+          return ENVOLVIDO_LABEL[e] ?? e;
+        }),
         grauDano: raw.classificacao.grau_dano
           ? (GRAU_DANO_LABEL[raw.classificacao.grau_dano] ?? raw.classificacao.grau_dano)
           : null,
@@ -139,6 +165,7 @@ export function mapToNotificacaoDetalhe(raw: NotificacaoRaw): NotificacaoDetalhe
           ? formatDate(raw.classificacao.data_validade)
           : null,
         outroEnvolvido: raw.classificacao.outro_envolvido,
+        outroTipoIncidente: raw.classificacao.outro_tipo_incidente,
       }
     : null;
 
@@ -235,10 +262,12 @@ export async function getNotificacaoHistorico(id: string): Promise<HistoricoItem
 export type ClassificarPayload = {
   tipo_incidente?: string | null;
   tipo_especifico?: string | null;
+  tipos_incidentes?: string[];
   envolvidos?: string[];
   grau_dano?: string | null;
   observacoes?: string | null;
   outro_envolvido?: string | null;
+  outro_tipo_incidente?: string | null;
   rascunho?: boolean;
 };
 

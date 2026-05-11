@@ -41,7 +41,11 @@ const CLASSIFICACAO_OPTIONS = [
 
 const GRAU_DANO_OPTIONS = [
   { value: "LEVE", label: "Leve", desc: "sintomas leves, intervenção mínima" },
-  { value: "MODERADO", label: "Moderado", desc: "requer intervenção, sem risco de vida imediato" },
+  {
+    value: "MODERADO",
+    label: "Moderado",
+    desc: "requer intervenção, sem risco de vida imediato",
+  },
   { value: "GRAVE", label: "Grave", desc: "risco de vida ou dano permanente" },
   { value: "OBITO", label: "Óbito", desc: "morte causada pelo dano" },
   {
@@ -52,35 +56,104 @@ const GRAU_DANO_OPTIONS = [
 ];
 
 const TIPO_ESPECIFICO_OPTIONS = [
-  { value: "CIRURGIA_PARTE_ERRADA", label: "Cirurgia em parte errada do corpo" },
+  {
+    value: "CIRURGIA_PARTE_ERRADA",
+    label: "Cirurgia em parte errada do corpo",
+  },
   { value: "CIRURGIA_PACIENTE_ERRADO", label: "Cirurgia em paciente errado" },
-  { value: "CIRURGIA_PROCEDIMENTO_ERRADO", label: "Procedimento cirúrgico errado" },
-  { value: "RETENCAO_CORPO_ESTRANHO", label: "Retenção não intencional de corpo estranho" },
+  {
+    value: "CIRURGIA_PROCEDIMENTO_ERRADO",
+    label: "Procedimento cirúrgico errado",
+  },
+  {
+    value: "RETENCAO_CORPO_ESTRANHO",
+    label: "Retenção não intencional de corpo estranho",
+  },
   { value: "EMBOLIA_GASOSA", label: "Embolia gasosa" },
-  { value: "TRANSFUSAO_INCOMPATIVEL", label: "Incompatibilidade sanguínea (transfusão)" },
+  {
+    value: "TRANSFUSAO_INCOMPATIVEL",
+    label: "Incompatibilidade sanguínea (transfusão)",
+  },
   { value: "MORTE_MATERNA", label: "Morte ou lesão grave materna (parto)" },
-  { value: "MORTE_NEONATAL", label: "Morte ou lesão grave neonatal (parto de baixo risco)" },
-  { value: "SUICIDIO_HOSPITALAR", label: "Suicídio ou tentativa no ambiente hospitalar" },
+  {
+    value: "MORTE_NEONATAL",
+    label: "Morte ou lesão grave neonatal (parto de baixo risco)",
+  },
+  {
+    value: "SUICIDIO_HOSPITALAR",
+    label: "Suicídio ou tentativa no ambiente hospitalar",
+  },
   { value: "VIOLACAO_SEXUAL", label: "Abuso ou violação sexual no hospital" },
   { value: "FUGA_PACIENTE", label: "Fuga de paciente com dano grave ou morte" },
   { value: "QUEDA_MORTE", label: "Queda que resultou em morte" },
   { value: "ERROS_MEDICAMENTOS_MORTE", label: "Morte por erro de medicação" },
-  { value: "HIPER_HIPOGLICEMIA_MORTE", label: "Morte por hiper/hipoglicemia severa" },
-  { value: "ALTA_TENSAO_MORTE", label: "Morte por alta tensão ou queimadura grave" },
-  { value: "REACAO_ADVERSA_VACINA_MORTE", label: "Morte por reação adversa a vacina" },
-  { value: "INFECCAO_HOSPITALAR_GRAVE", label: "Infecção hospitalar grave ou óbito por infecção" },
-  { value: "DISPOSITIVO_MEDICO_MORTE", label: "Morte ou lesão grave por dispositivo médico" },
-  { value: "ESCARAS_GRAVES", label: "Lesão por pressão Grau 3 ou 4 (adquirida no hospital)" },
+  {
+    value: "HIPER_HIPOGLICEMIA_MORTE",
+    label: "Morte por hiper/hipoglicemia severa",
+  },
+  {
+    value: "ALTA_TENSAO_MORTE",
+    label: "Morte por alta tensão ou queimadura grave",
+  },
+  {
+    value: "REACAO_ADVERSA_VACINA_MORTE",
+    label: "Morte por reação adversa a vacina",
+  },
+  {
+    value: "INFECCAO_HOSPITALAR_GRAVE",
+    label: "Infecção hospitalar grave ou óbito por infecção",
+  },
+  {
+    value: "DISPOSITIVO_MEDICO_MORTE",
+    label: "Morte ou lesão grave por dispositivo médico",
+  },
+  {
+    value: "ESCARAS_GRAVES",
+    label: "Lesão por pressão Grau 3 ou 4 (adquirida no hospital)",
+  },
   { value: "IDENTIFICACAO_ERRADA", label: "Identificação errada do paciente" },
   { value: "COMUNICACAO_FALHA", label: "Falha na comunicação (dano grave)" },
   { value: "QUEDA_LESAO_GRAVE", label: "Queda que resultou em lesão grave" },
-  { value: "INTERVENCAO_NEONATAL", label: "Morte ou lesão grave por intervenção em neonato" },
+  {
+    value: "INTERVENCAO_NEONATAL",
+    label: "Morte ou lesão grave por intervenção em neonato",
+  },
   { value: "COMPLICACAO_ANESTESIA", label: "Complicação por anestesia" },
   { value: "REACAO_TRANSFUSIONAL", label: "Reação transfusional grave" },
-  { value: "CORPO_ESTRANHO_NEONATO", label: "Retenção de corpo estranho em neonato" },
+  {
+    value: "CORPO_ESTRANHO_NEONATO",
+    label: "Retenção de corpo estranho em neonato",
+  },
   { value: "PNEUMOTORAX_NEONATO", label: "Pneumotórax iatrogênico em neonato" },
-  { value: "ENTEROCOLITE_NEONATO", label: "Enterocolite necrotizante em neonato" },
-  { value: "PARALISIA_BRAQUIAL_NEONATO", label: "Paralisia braquial obstétrica" },
+  {
+    value: "ENTEROCOLITE_NEONATO",
+    label: "Enterocolite necrotizante em neonato",
+  },
+  {
+    value: "PARALISIA_BRAQUIAL_NEONATO",
+    label: "Paralisia braquial obstétrica",
+  },
+];
+
+const CATEGORIA_INCIDENTE_OPTIONS = [
+  { value: "ERRO_MEDICACAO", label: "Erro de medicação" },
+  { value: "FALHA_IDENTIFICACAO", label: "Falha na identificação do paciente" },
+  { value: "QUEDA", label: "Queda" },
+  { value: "LESAO_PRESSAO", label: "Lesão por pressão" },
+  {
+    value: "INFECCAO_ASSISTENCIA",
+    label: "Infecção relacionada à assistência",
+  },
+  { value: "PROCEDIMENTO_CIRURGICO", label: "Procedimento cirúrgico" },
+  {
+    value: "EQUIPAMENTO_DISPOSITIVO",
+    label: "Equipamento ou dispositivo médico",
+  },
+  { value: "FALHA_DIAGNOSTICO", label: "Falha de diagnóstico" },
+  { value: "COMUNICACAO", label: "Comunicação" },
+  { value: "TRANSFUSAO_SANGUINEA", label: "Transfusão sanguínea" },
+  { value: "DOCUMENTACAO_PRONTUARIO", label: "Documentação / prontuário" },
+  { value: "OUTRO", label: "Outro" },
 ];
 
 const ENVOLVIDOS_OPTIONS = [
@@ -90,16 +163,18 @@ const ENVOLVIDOS_OPTIONS = [
   { value: "EQUIPAMENTO", label: "Equipamento" },
   { value: "SISTEMA", label: "Sistema" },
   { value: "AMBIENTE_FISICO", label: "Ambiente físico" },
-  { value: "MEDICAMENTO", label: "Medicamento" },
-  { value: "DISPOSITIVO_MEDICO", label: "Dispositivo médico" },
-  { value: "OUTRO", label: "Outro" },
 ];
 
 // --------------------------------------------------------------------------
 // SelectCardGroup — single ou múltiplo, igual ao protótipo
 // --------------------------------------------------------------------------
 
-type SelectOption = { value: string; label: string; desc?: string; title?: string };
+type SelectOption = {
+  value: string;
+  label: string;
+  desc?: string;
+  title?: string;
+};
 
 function SelectCardGroup({
   options,
@@ -182,6 +257,12 @@ export function ClassificacaoModal({
   const [tipoEspecifico, setTipoEspecifico] = useState(
     classificacaoExistente?.tipo_especifico ?? "",
   );
+  const [tiposIncidentes, setTiposIncidentes] = useState<string[]>(
+    classificacaoExistente?.tipos_incidentes ?? [],
+  );
+  const [outroTipoIncidente, setOutroTipoIncidente] = useState(
+    classificacaoExistente?.outro_tipo_incidente ?? "",
+  );
   const [envolvidos, setEnvolvidos] = useState<string[]>(classificacaoExistente?.envolvidos ?? []);
   const [outroEnvolvido, setOutroEnvolvido] = useState(
     classificacaoExistente?.outro_envolvido ?? "",
@@ -192,6 +273,8 @@ export function ClassificacaoModal({
 
   const isAdverso = classificacao === "EVENTO_ADVERSO";
   const isNeverEvent = grauDano === "NEVER_EVENT";
+  const showTipoIncidente = !!classificacao && !isNeverEvent;
+  const isOutroTipoIncidente = tiposIncidentes.includes("OUTRO");
   const isOutroEnvolvido = envolvidos.includes("OUTRO");
   const isRascunho = !!classificacaoExistente;
 
@@ -212,6 +295,14 @@ export function ClassificacaoModal({
       }
       if (isNeverEvent && !tipoEspecifico) {
         setError("Selecione o tipo específico para Never Event.");
+        return;
+      }
+      if (showTipoIncidente && tiposIncidentes.length === 0) {
+        setError("Selecione ao menos um tipo de incidente.");
+        return;
+      }
+      if (showTipoIncidente && isOutroTipoIncidente && !outroTipoIncidente.trim()) {
+        setError("Especifique o tipo de incidente 'Outro'.");
         return;
       }
       if (envolvidos.length === 0) {
@@ -235,6 +326,9 @@ export function ClassificacaoModal({
     const payload: ClassificarPayload = {
       tipo_incidente: classificacao || null,
       tipo_especifico: isNeverEvent ? tipoEspecifico : null,
+      tipos_incidentes: showTipoIncidente ? tiposIncidentes : [],
+      outro_tipo_incidente:
+        showTipoIncidente && isOutroTipoIncidente ? outroTipoIncidente.trim() : null,
       envolvidos: envolvidos.length > 0 ? envolvidos : [],
       outro_envolvido: isOutroEnvolvido ? outroEnvolvido.trim() : null,
       grau_dano: isAdverso && grauDano ? grauDano : null,
@@ -261,18 +355,13 @@ export function ClassificacaoModal({
   }
 
   return (
-    <div
-      className={styles.overlay}
-      role="dialog"
-      aria-modal="true"
-      aria-label="Classificar incidente"
-    >
+    <div className={styles.overlay} role="dialog" aria-modal="true" aria-label="Registar análise">
       <div className={styles.modal}>
         {/* Header */}
         <div className={styles.modalHeader}>
           <div style={{ display: "flex", flexDirection: "column" }}>
             <h2 className={styles.modalTitle}>
-              {isRascunho ? "Continuar classificação" : "Classificar incidente"}
+              {isRascunho ? "Continuar classificação" : "Registrar análise"}
             </h2>
             {classificacaoExistente &&
               !classificacaoExistente.rascunho &&
@@ -301,6 +390,10 @@ export function ClassificacaoModal({
                   setGrauDano("");
                   setTipoEspecifico("");
                 }
+                if (v === "") {
+                  setTiposIncidentes([]);
+                  setOutroTipoIncidente("");
+                }
               }}
               disabled={saving}
             />
@@ -315,7 +408,12 @@ export function ClassificacaoModal({
                 value={grauDano}
                 onChange={(v) => {
                   setGrauDano(v as string);
-                  if (v !== "NEVER_EVENT") setTipoEspecifico("");
+                  if (v === "NEVER_EVENT") {
+                    setTiposIncidentes([]);
+                    setOutroTipoIncidente("");
+                  } else {
+                    setTipoEspecifico("");
+                  }
                 }}
                 disabled={saving}
               />
@@ -335,7 +433,36 @@ export function ClassificacaoModal({
             </div>
           )}
 
-          {/* 4. Envolvidos (múltiplo) */}
+          {/* 4. Tipo de incidente (múltipla escolha) - exibido se não for Never Event */}
+          {showTipoIncidente && (
+            <div>
+              <p className={styles.formQuestion}>Tipo de incidente</p>
+              <SelectCardGroup
+                options={CATEGORIA_INCIDENTE_OPTIONS}
+                value={tiposIncidentes}
+                onChange={(v) => setTiposIncidentes(v as string[])}
+                multiple
+                disabled={saving}
+              />
+
+              {isOutroTipoIncidente && (
+                <div style={{ marginTop: "10px" }}>
+                  <input
+                    type="text"
+                    className={styles.modalInput}
+                    placeholder="Especifique o tipo de incidente..."
+                    value={outroTipoIncidente}
+                    onChange={(e) => setOutroTipoIncidente(e.target.value)}
+                    maxLength={200}
+                    disabled={saving}
+                    required
+                  />
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* 5. Envolvidos (múltiplo) */}
           <div>
             <p className={styles.formQuestion}>O incidente envolve</p>
             <SelectCardGroup

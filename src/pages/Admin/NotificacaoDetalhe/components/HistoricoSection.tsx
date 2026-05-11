@@ -28,6 +28,8 @@ type HistoricoGrupo = {
   usuario: { nome: string } | null;
   campos: string[];
   val_anterior: string | null;
+  isCreation?: boolean;
+  formattedDate?: string;
 };
 
 export function HistoricoSection({ detalhe, historico, isOpen, onToggle }: Props) {
@@ -69,7 +71,18 @@ export function HistoricoSection({ detalhe, historico, isOpen, onToggle }: Props
     return Array.from(map.values());
   }
 
-  const grupos = agruparHistorico(historico.data);
+  const gruposFromApi = agruparHistorico(historico.data);
+  const criacaoGrupo: HistoricoGrupo = {
+    key: "criacao",
+    data_alteracao: "",
+    formattedDate: detalhe.dataCadastro,
+    usuario: { nome: "Notificante" },
+    campos: [],
+    val_anterior: null,
+    isCreation: true,
+  };
+  const grupos = [criacaoGrupo, ...gruposFromApi];
+
   const totalPages = Math.ceil(grupos.length / HISTORICO_PAGE_SIZE);
   const gruposPage = grupos.slice((page - 1) * HISTORICO_PAGE_SIZE, page * HISTORICO_PAGE_SIZE);
 
@@ -86,14 +99,17 @@ export function HistoricoSection({ detalhe, historico, isOpen, onToggle }: Props
             <span className={styles.metaText}>Carregando histórico...</span>
           ) : (
             <div className={styles.historyList}>
-              {/* Item fixo de criação */}
-              <div className={styles.historyItem}>
-                <span className={styles.historyTime}>{detalhe.dataCadastro}</span>
-                <span className={styles.authorBadge}>Notificante</span>
-                <span className={styles.historyAction}>criou a notificação.</span>
-              </div>
-
               {gruposPage.map((g) => {
+                if (g.isCreation) {
+                  return (
+                    <div key={g.key} className={styles.historyItem}>
+                      <span className={styles.historyTime}>{g.formattedDate}</span>
+                      <span className={styles.authorBadge}>{g.usuario?.nome}</span>
+                      <span className={styles.historyAction}>criou a notificação.</span>
+                    </div>
+                  );
+                }
+
                 const dateObj = new Date(g.data_alteracao);
                 const fullDateTime = `${dateObj.toLocaleDateString("pt-BR")} - ${dateObj.toLocaleTimeString("pt-BR")}`;
                 const camposLabel = g.campos.map(formatFieldName).join(", ");

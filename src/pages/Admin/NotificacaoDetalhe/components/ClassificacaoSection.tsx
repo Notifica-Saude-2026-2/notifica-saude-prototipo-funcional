@@ -46,29 +46,11 @@ export function ClassificacaoSection({ detalhe, isOpen, onToggle, onClassificar 
 
               <div className={styles.classificationGrid}>
                 <div className={styles.infoItem}>
-                  <div className={styles.fieldHeader}>Tipo</div>
+                  <div className={styles.fieldHeader}>Classificação</div>
                   <div className={styles.fieldValue}>
                     {detalhe.classificacao.tipoIncidente ?? (
                       <span className={styles.emptyValue}>—</span>
                     )}
-                  </div>
-                </div>
-
-                <div className={styles.infoItem}>
-                  <div className={styles.fieldHeader}>Tipo específico</div>
-                  <div className={styles.fieldValue}>
-                    {detalhe.classificacao.tipoEspecifico ?? (
-                      <span className={styles.emptyValue}>—</span>
-                    )}
-                  </div>
-                </div>
-
-                <div className={`${styles.infoItem} ${styles.infoItemFull}`}>
-                  <div className={styles.fieldHeader}>Envolvidos</div>
-                  <div className={styles.fieldValue}>
-                    {detalhe.classificacao.envolvidos.length > 0
-                      ? detalhe.classificacao.envolvidos.join(", ")
-                      : "—"}
                   </div>
                 </div>
 
@@ -78,6 +60,31 @@ export function ClassificacaoSection({ detalhe, isOpen, onToggle, onClassificar 
                     <div className={styles.fieldValue}>{detalhe.classificacao.grauDano}</div>
                   </div>
                 )}
+
+                {detalhe.classificacao.tipoEspecifico && (
+                  <div className={styles.infoItem}>
+                    <div className={styles.fieldHeader}>Tipo específico (Never Event)</div>
+                    <div className={styles.fieldValue}>{detalhe.classificacao.tipoEspecifico}</div>
+                  </div>
+                )}
+
+                <div className={styles.infoItem}>
+                  <div className={styles.fieldHeader}>Tipo de incidente</div>
+                  <div className={styles.fieldValue}>
+                    {detalhe.classificacao.tiposIncidentes.length > 0
+                      ? detalhe.classificacao.tiposIncidentes.join(", ")
+                      : "—"}
+                  </div>
+                </div>
+
+                <div className={styles.infoItem}>
+                  <div className={styles.fieldHeader}>Envolve</div>
+                  <div className={styles.fieldValue}>
+                    {detalhe.classificacao.envolvidos.length > 0
+                      ? detalhe.classificacao.envolvidos.join(", ")
+                      : "—"}
+                  </div>
+                </div>
 
                 {detalhe.classificacao.observacoes && (
                   <div className={`${styles.infoItem} ${styles.infoItemFull}`}>

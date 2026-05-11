@@ -25,6 +25,7 @@ export type ClassificacaoRaw = {
   profissional_nsp_nome?: string | null;
   tipo_incidente: string | null;
   tipo_especifico: string | null;
+  tipos_incidentes: string[];
   envolvidos: string[];
   grau_dano: string | null;
   observacoes: string | null;
@@ -32,6 +33,7 @@ export type ClassificacaoRaw = {
   data_classificacao: string;
   data_validade: string | null;
   outro_envolvido: string | null;
+  outro_tipo_incidente: string | null;
 };
 
 export type NotificacaoRaw = {
@@ -65,6 +67,7 @@ export type PacienteDTO = {
 export type ClassificacaoDTO = {
   tipoIncidente: string | null;
   tipoEspecifico: string | null;
+  tiposIncidentes: string[];
   envolvidos: string[];
   grauDano: string | null;
   observacoes: string | null;
@@ -72,6 +75,7 @@ export type ClassificacaoDTO = {
   dataClassificacao: string;
   dataValidade: string | null;
   outroEnvolvido: string | null;
+  outroTipoIncidente: string | null;
 };
 
 export type NotificacaoDetalheDTO = {
