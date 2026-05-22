@@ -4,6 +4,8 @@ import { PrivateRoute } from "./PrivateRoute";
 import Home from "../pages/Home/Home";
 import Notificacao from "../pages/Notificacao/Notificacao";
 import Login from "../pages/Login";
+import ForgotPassword from "../pages/ForgotPassword";
+import ResetPassword from "../pages/ResetPassword";
 import AdminDashboard from "../pages/Admin/AdminDashboard";
 import AdminComingSoon from "../pages/Admin/AdminComingSoon";
 import AdminNovos from "../pages/Admin/AdminNovos";
@@ -16,6 +18,8 @@ export function AppRoutes() {
         <Route path="/" element={<Home />} />
         <Route path="/notificacao" element={<Notificacao />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/esqueceu-senha" element={<ForgotPassword />} />
+        <Route path="/redefinir-senha/:token" element={<ResetPassword />} />
       </Route>
       <Route element={<PrivateRoute />}>
         <Route path="/admin" element={<AdminDashboard />} />
