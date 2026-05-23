@@ -4,18 +4,10 @@ import { Input } from "../../components/common/ui/Input";
 import { Button } from "../../components/common/ui/Button";
 import { resetPasswordRequest } from "../../services/password.service";
 import { ApiError } from "../../services/api";
+import { validarSenha, rulesList } from "../../utils/passwordRules";
 import styles from "./ResetPassword.module.css";
 
 type Estado = "idle" | "loading" | "success" | "token_invalido" | "error";
-
-function validarSenha(senha: string): string | null {
-  if (senha.length < 8) return "A senha deve ter no mínimo 8 caracteres.";
-  if (!/[A-Z]/.test(senha)) return "A senha deve conter ao menos uma letra maiúscula.";
-  if (!/[a-z]/.test(senha)) return "A senha deve conter ao menos uma letra minúscula.";
-  if (!/[0-9]/.test(senha)) return "A senha deve conter ao menos um número.";
-  if (!/[^A-Za-z0-9]/.test(senha)) return "A senha deve conter ao menos um caractere especial.";
-  return null;
-}
 
 function resolverMensagemErro(err: unknown): { tipo: "token_invalido" | "error"; mensagem: string } {
   if (err instanceof ApiError) {
@@ -104,11 +96,9 @@ export default function ResetPassword() {
             Escolha uma senha forte para proteger sua conta.
           </p>
           <ul className={styles.rulesList}>
-            <li>Mínimo de 8 caracteres</li>
-            <li>Ao menos uma letra maiúscula</li>
-            <li>Ao menos uma letra minúscula</li>
-            <li>Ao menos um número</li>
-            <li>Ao menos um caractere especial</li>
+            {rulesList.map((rule) => (
+              <li key={rule}>{rule}</li>
+            ))}
           </ul>
           <Link to="/login" className={styles.backLink}>
             ← Voltar ao login
@@ -127,7 +117,7 @@ export default function ResetPassword() {
             type="password"
             showPasswordToggle
             fullWidth
-            data-testid="reset-nova-senha"
+            data-testid="reset-password-new-input"
           />
 
           <Input
@@ -139,7 +129,7 @@ export default function ResetPassword() {
             type="password"
             showPasswordToggle
             fullWidth
-            data-testid="reset-confirma-senha"
+            data-testid="reset-password-confirm-input"
           />
 
           {estado === "token_invalido" && (
@@ -172,7 +162,7 @@ export default function ResetPassword() {
               confirmaSenha.trim() === ""
             }
             className={styles.submitButton}
-            data-testid="reset-submit"
+            data-testid="reset-password-submit-button"
           />
         </form>
       </div>

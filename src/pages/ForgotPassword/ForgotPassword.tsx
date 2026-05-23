@@ -28,7 +28,7 @@ export default function ForgotPassword() {
     setErro("");
     setEstado("loading");
     try {
-      await forgotPasswordRequest(email);
+      await forgotPasswordRequest(email.trim());
       setEstado("success");
     } catch (err) {
       setEstado("error");
@@ -82,7 +82,7 @@ export default function ForgotPassword() {
             placeholder="Digite seu e-mail cadastrado"
             type="email"
             fullWidth
-            data-testid="forgot-email"
+            data-testid="forgot-password-email-input"
           />
 
           {estado === "error" && (
@@ -99,7 +99,7 @@ export default function ForgotPassword() {
             fullWidth
             disabled={estado === "loading" || email.trim() === ""}
             className={styles.submitButton}
-            data-testid="forgot-submit"
+            data-testid="forgot-password-submit-button"
           />
         </form>
       </div>
