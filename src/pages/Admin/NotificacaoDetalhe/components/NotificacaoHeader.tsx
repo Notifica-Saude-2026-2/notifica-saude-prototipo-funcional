@@ -1,4 +1,5 @@
 import type { NotificacaoDetalheDTO } from "../../../../types/notificacaoDetalhe";
+import { getStatusColors } from "../../../../utils/statusColors";
 import styles from "../NotificacaoDetalhe.module.css";
 
 type Props = {
@@ -6,22 +7,13 @@ type Props = {
 };
 
 export function NotificacaoHeader({ detalhe }: Props) {
-  const idShort = `#${detalhe.id.slice(0, 8).toUpperCase()}`;
+  const statusColors = getStatusColors(detalhe.statusRaw);
 
   return (
     <div className={styles.detailsHeader}>
-      <p className={styles.incidentId}>{idShort}</p>
+      <p className={styles.incidentId}>#{detalhe.codigo}</p>
 
       <div className={styles.headerRight}>
-        <div className={styles.headerBadgeGroup}>
-          <span className={styles.headerLabel}>Grau de dano:</span>
-          <span className={styles.headerBadge}>
-            {detalhe.classificacao && !detalhe.classificacao.rascunho
-              ? detalhe.classificacao.grauDano
-              : "Sem"}
-          </span>
-        </div>
-
         <div className={styles.headerBadgeGroup}>
           <span className={styles.headerLabel}>Criado em:</span>
           <span className={styles.headerBadge}>{detalhe.dataCadastro}</span>
@@ -34,7 +26,12 @@ export function NotificacaoHeader({ detalhe }: Props) {
 
         <div className={styles.headerBadgeGroup}>
           <span className={styles.headerLabel}>Status:</span>
-          <span className={styles.headerBadge}>{detalhe.statusLabel}</span>
+          <span
+            className={styles.headerBadge}
+            style={{ background: statusColors.bg, color: statusColors.text }}
+          >
+            {detalhe.statusLabel}
+          </span>
         </div>
       </div>
     </div>

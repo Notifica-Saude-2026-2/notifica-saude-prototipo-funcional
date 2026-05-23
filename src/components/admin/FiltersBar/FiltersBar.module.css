@@ -1,3 +1,17 @@
+.titleWrapper {
+  padding: 20px 24px 0;
+  background: #f5f6fa;
+}
+
+.pageTitle {
+  font-family: "Raleway", sans-serif;
+  font-size: 1.375rem;
+  font-weight: 700;
+  color: #131d53;
+  margin: 0;
+}
+
+
 .bar {
   display: flex;
   align-items: center;

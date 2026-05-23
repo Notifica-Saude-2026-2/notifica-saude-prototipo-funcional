@@ -29,6 +29,7 @@ export type ClassificacaoRaw = {
   envolvidos: string[];
   grau_dano: string | null;
   observacoes: string | null;
+  protocolo_investigacao: string | null;
   rascunho: boolean;
   data_classificacao: string;
   data_validade: string | null;
@@ -38,6 +39,8 @@ export type ClassificacaoRaw = {
 
 export type NotificacaoRaw = {
   id: string;
+  codigo: number;
+  codigo_formatado?: string;
   status: string;
   data_incidente: string;
   data_registro: string;
@@ -71,15 +74,18 @@ export type ClassificacaoDTO = {
   envolvidos: string[];
   grauDano: string | null;
   observacoes: string | null;
+  protocoloInvestigacao: string | null;
   rascunho: boolean;
   dataClassificacao: string;
   dataValidade: string | null;
+  diasValidade: number | null;
   outroEnvolvido: string | null;
   outroTipoIncidente: string | null;
 };
 
 export type NotificacaoDetalheDTO = {
   id: string;
+  codigo: string;
   statusRaw: string;
   statusLabel: string;
   dataIncidente: string;

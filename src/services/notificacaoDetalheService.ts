@@ -7,17 +7,17 @@ import {
   type ClassificacaoDTO,
   type ClassificacaoRaw,
 } from "../types/notificacaoDetalhe";
+import { formatDateOnly, formatDateTime } from "../utils/formatDate";
 
 // --------------------------------------------------------------------------
 // Labels de exibição
 // --------------------------------------------------------------------------
 
 export const STATUS_LABEL: Record<string, string> = {
-  REGISTRADA: "Registrada",
+  NOVA: "Registrada",
   CLASSIFICADA: "Classificada",
-  ENVIADA_SETOR_RESPONSAVEL: "Encaminhada ao setor",
-  EM_INVESTIGACAO: "Em investigação",
-  EM_ANALISE: "Em análise",
+  ANALISADA: "Em análise",
+  ENCAMINHADA_SETOR: "Encaminhada ao setor",
   ARQUIVADA: "Arquivada",
 };
 
@@ -31,41 +31,57 @@ export const GRAU_DANO_LABEL: Record<string, string> = {
 
 export const TIPO_INCIDENTE_LABEL: Record<string, string> = {
   NEAR_MISS: "Near Miss",
-  CIRCUNSTANCIA_RISCO: "Circunstância notificável",
+  CIRCUNSTANCIA_NOTIFICAVEL: "Circunstância notificável",
   EVENTO_ADVERSO: "Evento adverso",
   INCIDENTE_SEM_DANO: "Incidente sem dano",
 };
 
 export const TIPO_ESPECIFICO_LABEL: Record<string, string> = {
-  CIRURGIA_PARTE_ERRADA: "Cirurgia em parte errada do corpo",
-  CIRURGIA_PACIENTE_ERRADO: "Cirurgia em paciente errado",
-  CIRURGIA_PROCEDIMENTO_ERRADO: "Procedimento cirúrgico errado",
-  RETENCAO_CORPO_ESTRANHO: "Retenção não intencional de corpo estranho",
-  EMBOLIA_GASOSA: "Embolia gasosa",
-  TRANSFUSAO_INCOMPATIVEL: "Incompatibilidade sanguínea (transfusão)",
-  MORTE_MATERNA: "Morte ou lesão grave materna (parto)",
-  MORTE_NEONATAL: "Morte ou lesão grave neonatal (parto de baixo risco)",
-  SUICIDIO_HOSPITALAR: "Suicídio ou tentativa no ambiente hospitalar",
-  VIOLACAO_SEXUAL: "Abuso ou violação sexual no hospital",
-  FUGA_PACIENTE: "Fuga de paciente com dano grave ou morte",
-  QUEDA_MORTE: "Queda que resultou em morte",
-  ERROS_MEDICAMENTOS_MORTE: "Morte por erro de medicação",
-  HIPER_HIPOGLICEMIA_MORTE: "Morte por hiper/hipoglicemia severa",
-  ALTA_TENSAO_MORTE: "Morte por alta tensão ou queimadura grave",
-  REACAO_ADVERSA_VACINA_MORTE: "Morte por reação adversa a vacina",
-  INFECCAO_HOSPITALAR_GRAVE: "Infecção hospitalar grave ou óbito por infecção",
-  DISPOSITIVO_MEDICO_MORTE: "Morte ou lesão grave por dispositivo médico",
-  ESCARAS_GRAVES: "Lesão por pressão Grau 3 ou 4 (adquirida no hospital)",
-  IDENTIFICACAO_ERRADA: "Identificação errada do paciente",
-  COMUNICACAO_FALHA: "Falha na comunicação (dano grave)",
-  QUEDA_LESAO_GRAVE: "Queda que resultou em lesão grave",
-  INTERVENCAO_NEONATAL: "Morte ou lesão grave por intervenção em neonato",
-  COMPLICACAO_ANESTESIA: "Complicação por anestesia",
-  REACAO_TRANSFUSIONAL: "Reação transfusional grave",
-  CORPO_ESTRANHO_NEONATO: "Retenção de corpo estranho em neonato",
-  PNEUMOTORAX_NEONATO: "Pneumotórax iatrogênico em neonato",
-  ENTEROCOLITE_NEONATO: "Enterocolite necrotizante em neonato",
-  PARALISIA_BRAQUIAL_NEONATO: "Paralisia braquial obstétrica",
+  ALTA_LIBERACAO_PACIENTE_INCAPAZ_PESSOA_NAO_AUTORIZADA:
+    "Alta ou liberação de paciente incapaz para pessoa não autorizada",
+  CONTAMINACAO_O2_GASES_MEDICINAIS: "Contaminação na administração de O2 ou gases medicinais",
+  DESAPARECIMENTO_CORPO_RECEM_NASCIDO_OBITO:
+    "Desaparecimento do corpo do recém-nascido que foi a óbito",
+  EXODONTIA_DENTE_ERRADO: "Exodontia de dente errado",
+  GAS_ERRADO_O2_GASES_MEDICINAIS: "Gás errado na administração de O2 ou gases medicinais",
+  INSEMINACAO_FERTILIZACAO_ESPERMA_OVULO_ERRADO:
+    "Inseminação artificial ou fertilização in vitro com esperma ou óvulo errado",
+  LESAO_GRAVE_QUEDA_DURANTE_CUIDADOS:
+    "Lesão grave associada à queda do paciente durante prestação de cuidados",
+  LESAO_PRESSAO_ESTAGIO_3: "Lesão por Pressão estágio 3 (perda total da espessura da pele)",
+  LESAO_PRESSAO_ESTAGIO_4:
+    "Lesão por Pressão estágio 4 (perda total da espessura da pele e perda tissular)",
+  LESAO_PRESSAO_NAO_CLASSIFICAVEL: "Lesão por Pressão Não Classificável (perda tissular não visível)",
+  OBITO_QUEDA_DURANTE_CUIDADOS:
+    "Óbito associado à queda do paciente durante prestação de cuidados",
+  OBITO_INTRAOPERATORIO_POS_OPERATORIO_ASA_CLASSE_1:
+    "Óbito intraoperatório ou pós-operatório em paciente ASA Classe 1",
+  OBITO_LESAO_GRAVE_FUGA_PACIENTE: "Óbito ou lesão grave associado à fuga do paciente",
+  OBITO_LESAO_GRAVE_CHOQUE_ELETRICO: "Óbito ou lesão grave por choque elétrico durante a assistência",
+  OBITO_LESAO_GRAVE_OBJETO_METALICO_RESSONANCIA_MAGNETICA:
+    "Óbito ou lesão grave por objeto metálico em área de Ressonância Magnética",
+  OBITO_LESAO_GRAVE_CONTENCAO_FISICA_GRADES:
+    "Óbito ou lesão grave por uso de contenção física ou grades da cama",
+  OBITO_LESAO_GRAVE_QUEIMADURA: "Óbito ou lesão grave por queimadura durante a assistência",
+  OBITO_LESAO_GRAVE_PERDA_AMOSTRA_BIOLOGICA:
+    "Óbito ou lesão grave por perda irrecuperável de amostra biológica",
+  OBITO_LESAO_GRAVE_RECEM_NASCIDO_PARTO_BAIXO_RISCO:
+    "Óbito ou lesão grave de recém-nascido em parto de baixo risco",
+  OBITO_LESAO_GRAVE_FALHA_EXAMES_LABORATORIAIS:
+    "Óbito ou lesão grave por falha no acompanhamento de exames laboratoriais",
+  OBITO_LESAO_GRAVE_FALHA_EXAMES_RADIOLOGICOS:
+    "Óbito ou lesão grave por falha no acompanhamento de exames radiológicos",
+  OBITO_LESAO_MATERNA_PARTO_BAIXO_RISCO: "Óbito ou lesão materna grave em parto de baixo risco",
+  PROCEDIMENTO_CIRURGICO_LOCAL_ERRADO: "Procedimento cirúrgico realizado em local errado",
+  PROCEDIMENTO_CIRURGICO_LADO_ERRADO: "Procedimento cirúrgico realizado no lado errado do corpo",
+  PROCEDIMENTO_CIRURGICO_PACIENTE_ERRADO: "Procedimento cirúrgico realizado no paciente errado",
+  QUEDA_RECEM_NASCIDO_PARTO: "Queda do recém-nascido durante o parto",
+  CIRURGIA_ERRADA_PACIENTE: "Realização de cirurgia errada em um paciente",
+  RETENCAO_CORPO_ESTRANHO_APOS_CIRURGIA:
+    "Retenção não intencional de corpo estranho após a cirurgia",
+  SUICIDIO_TENTATIVA_DANO_AUTO_INFLIGIDO:
+    "Suicídio, tentativa ou dano auto infligido com lesão grave durante a assistência",
+  TROCA_BEBES: "Troca de bebês",
 };
 
 export const CATEGORIA_INCIDENTE_LABEL: Record<string, string> = {
@@ -81,6 +97,11 @@ export const CATEGORIA_INCIDENTE_LABEL: Record<string, string> = {
   TRANSFUSAO_SANGUINEA: "Transfusão sanguínea",
   DOCUMENTACAO_PRONTUARIO: "Documentação / prontuário",
   OUTRO: "Outro",
+};
+
+export const PROTOCOLO_INVESTIGACAO_LABEL: Record<string, string> = {
+  INVESTIGACAO_DIRETA: "Investigação Direta (ACR + Ishikawa + 5 Porquês + SMART)",
+  INVESTIGACAO_SISTEMICA_PROFUNDA: "Investigação Sistêmica Profunda (Protocolo de Londres + SMART)",
 };
 
 export const ENVOLVIDO_LABEL: Record<string, string> = {
@@ -111,17 +132,6 @@ function getRespostaTexto(respostas: RespostaItemRaw[], campoId: string): string
   return respostas.find((r) => r.campo_id === campoId)?.valor_texto ?? null;
 }
 
-function formatDate(isoString: string): string {
-  const [year, month, day] = isoString.split("T")[0].split("-");
-  return `${day}/${month}/${year}`;
-}
-
-function formatDateTime(isoString: string): string {
-  const date = new Date(isoString);
-  const d = date.toLocaleDateString("pt-BR");
-  const t = date.toLocaleTimeString("pt-BR");
-  return `${d} - ${t}`;
-}
 
 // --------------------------------------------------------------------------
 // Mapper: raw → DTO
@@ -133,48 +143,66 @@ export function mapToNotificacaoDetalhe(raw: NotificacaoRaw): NotificacaoDetalhe
   const envolveValor = getRespostaValor(respostas, CAMPO_IDS.ENV_PACIENTE);
   const envolvido = envolveValor?.toLowerCase() === "sim";
 
-  const classificacao: ClassificacaoDTO | null = raw.classificacao
+  const rawClassificacao = raw.classificacao;
+  const classificacao: ClassificacaoDTO | null = rawClassificacao
     ? {
-        tipoIncidente: raw.classificacao.tipo_incidente
-          ? (TIPO_INCIDENTE_LABEL[raw.classificacao.tipo_incidente] ??
-            raw.classificacao.tipo_incidente)
+        tipoIncidente: rawClassificacao.tipo_incidente
+          ? (TIPO_INCIDENTE_LABEL[rawClassificacao.tipo_incidente] ??
+            rawClassificacao.tipo_incidente)
           : null,
-        tipoEspecifico: raw.classificacao.tipo_especifico
-          ? (TIPO_ESPECIFICO_LABEL[raw.classificacao.tipo_especifico] ??
-            raw.classificacao.tipo_especifico)
+        tipoEspecifico: rawClassificacao.tipo_especifico
+          ? (TIPO_ESPECIFICO_LABEL[rawClassificacao.tipo_especifico] ??
+            rawClassificacao.tipo_especifico)
           : null,
-        tiposIncidentes: (raw.classificacao.tipos_incidentes ?? []).map((t) => {
-          if (t === "OUTRO" && raw.classificacao.outro_tipo_incidente) {
-            return `Outro - ${raw.classificacao.outro_tipo_incidente}`;
+        tiposIncidentes: (rawClassificacao.tipos_incidentes ?? []).map((t) => {
+          if (t === "OUTRO" && rawClassificacao.outro_tipo_incidente) {
+            return `Outro - ${rawClassificacao.outro_tipo_incidente}`;
           }
           return CATEGORIA_INCIDENTE_LABEL[t] ?? t;
         }),
-        envolvidos: (raw.classificacao.envolvidos ?? []).map((e) => {
-          if (e === "OUTRO" && raw.classificacao.outro_envolvido) {
-            return `Outro - ${raw.classificacao.outro_envolvido}`;
+        envolvidos: (rawClassificacao.envolvidos ?? []).map((e) => {
+          if (e === "OUTRO" && rawClassificacao.outro_envolvido) {
+            return `Outro - ${rawClassificacao.outro_envolvido}`;
           }
           return ENVOLVIDO_LABEL[e] ?? e;
         }),
-        grauDano: raw.classificacao.grau_dano
-          ? (GRAU_DANO_LABEL[raw.classificacao.grau_dano] ?? raw.classificacao.grau_dano)
+        grauDano: rawClassificacao.grau_dano
+          ? (GRAU_DANO_LABEL[rawClassificacao.grau_dano] ?? rawClassificacao.grau_dano)
           : null,
-        observacoes: raw.classificacao.observacoes,
-        rascunho: raw.classificacao.rascunho,
-        dataClassificacao: formatDate(raw.classificacao.data_classificacao),
-        dataValidade: raw.classificacao.data_validade
-          ? formatDate(raw.classificacao.data_validade)
+        observacoes: rawClassificacao.observacoes,
+        protocoloInvestigacao: rawClassificacao.protocolo_investigacao
+          ? (PROTOCOLO_INVESTIGACAO_LABEL[rawClassificacao.protocolo_investigacao] ??
+            rawClassificacao.protocolo_investigacao)
           : null,
-        outroEnvolvido: raw.classificacao.outro_envolvido,
-        outroTipoIncidente: raw.classificacao.outro_tipo_incidente,
+        rascunho: rawClassificacao.rascunho,
+        // @db.Timestamptz — ISO 8601 com timezone
+        dataClassificacao: formatDateTime(rawClassificacao.data_classificacao),
+        // @db.Timestamptz — exibe apenas a data; new Date() é seguro pois inclui timezone
+        dataValidade: rawClassificacao.data_validade
+          ? new Date(rawClassificacao.data_validade).toLocaleDateString("pt-BR")
+          : null,
+        diasValidade: rawClassificacao.data_validade
+          ? Math.round(
+              (new Date(rawClassificacao.data_validade).getTime() -
+                new Date(raw.data_registro).getTime()) /
+                (1000 * 60 * 60 * 24),
+            )
+          : null,
+        outroEnvolvido: rawClassificacao.outro_envolvido,
+        outroTipoIncidente: rawClassificacao.outro_tipo_incidente,
       }
     : null;
 
   return {
     id: raw.id,
+    codigo: raw.codigo_formatado ?? raw.codigo.toString().padStart(4, "0"),
     statusRaw: raw.status,
     statusLabel: STATUS_LABEL[raw.status] ?? raw.status,
-    dataIncidente: formatDate(raw.data_incidente),
+    // @db.Date — Prisma serializa como UTC midnight; formatDateOnly extrai a parte da data sem converter timezone
+    dataIncidente: formatDateOnly(raw.data_incidente),
+    // @db.Timestamptz — ISO 8601 com timezone
     dataCadastro: formatDateTime(raw.data_registro),
+    // @db.Timestamptz — ISO 8601 com timezone
     dataAtualizacao: formatDateTime(raw.updated_at ?? raw.data_registro),
     descricao: raw.descricao,
     anonima: raw.anonima,
@@ -266,9 +294,9 @@ export type ClassificarPayload = {
   envolvidos?: string[];
   grau_dano?: string | null;
   observacoes?: string | null;
+  protocolo_investigacao?: string | null;
   outro_envolvido?: string | null;
   outro_tipo_incidente?: string | null;
-  rascunho?: boolean;
 };
 
 // --------------------------------------------------------------------------

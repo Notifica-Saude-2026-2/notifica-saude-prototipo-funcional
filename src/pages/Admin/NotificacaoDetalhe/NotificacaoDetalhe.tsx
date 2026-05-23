@@ -6,6 +6,7 @@ import { ClassificacaoModal } from "./ClassificacaoModal";
 import { ArrowLeftIcon } from "../../../components/common/icons/ArrowLeftIcon";
 import type { UpdateNotificacaoPayload } from "../../../services/notificacaoDetalheService";
 import styles from "./NotificacaoDetalhe.module.css";
+import { STATUS_EDITAVEIS } from "../../../constants/notificacaoStatus";
 
 // Componentes extraídos
 import { NotificacaoHeader } from "./components/NotificacaoHeader";
@@ -116,7 +117,8 @@ export default function NotificacaoDetalhe() {
           />
         )}
 
-        {classificacaoOpen && (!detalhe.classificacao || detalhe.classificacao.rascunho) && (
+        {classificacaoOpen &&
+          STATUS_EDITAVEIS.has(detalhe.statusRaw) && (
           <ClassificacaoModal
             notificacaoId={detalhe.id}
             classificacaoExistente={detalhe.classificacao ? rawData?.classificacao : null}

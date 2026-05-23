@@ -1,10 +1,18 @@
 import { useEffect, useRef } from "react";
+import { useLocation } from "react-router-dom";
 import InputAdornment from "@mui/material/InputAdornment";
 import OutlinedInput from "@mui/material/OutlinedInput";
 import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
 import FormControl from "@mui/material/FormControl";
 import styles from "./FiltersBar.module.css";
+
+const PAGE_TITLES: Record<string, string> = {
+  "/admin": "Todos incidentes",
+  "/admin/novos": "Novos incidentes",
+  "/admin/encaminhados": "Encaminhados",
+  "/admin/resolvidos": "Resolvidos",
+};
 
 function SearchIcon() {
   return (
@@ -29,7 +37,7 @@ function SearchIcon() {
 const TIPO_INCIDENTE_OPTIONS = [
   { value: "", label: "Todos os tipos" },
   { value: "NEAR_MISS", label: "Near Miss" },
-  { value: "CIRCUNSTANCIA_RISCO", label: "Circunstância notificável" },
+  { value: "CIRCUNSTANCIA_NOTIFICAVEL", label: "Circunstância notificável" },
   { value: "INCIDENTE_SEM_DANO", label: "Incidente sem dano" },
   { value: "EVENTO_ADVERSO", label: "Evento adverso" },
 ];
@@ -75,6 +83,8 @@ export function FiltersBar({
   onGrauDanoChange,
   onSetorChange,
 }: FiltersBarProps) {
+  const location = useLocation();
+  const pageTitle = PAGE_TITLES[location.pathname] ?? "Incidentes";
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   function handleSearchInput(e: React.ChangeEvent<HTMLInputElement>) {
@@ -92,6 +102,10 @@ export function FiltersBar({
   }, []);
 
   return (
+    <>
+    <div className={styles.titleWrapper}>
+      <h2 className={styles.pageTitle}>{pageTitle}</h2>
+    </div>
     <div className={styles.bar}>
       <OutlinedInput
         data-testid="admin-search"
@@ -207,6 +221,7 @@ export function FiltersBar({
           </Select>
         </FormControl>
 
+        <span className={styles.filterLabel}>ORDENAR POR:</span>
         <FormControl size="small" sx={{ flex: { xs: 1, sm: "none" }, minWidth: 0 }}>
           <Select
             inputProps={{ "data-testid": "admin-sort" }}
@@ -235,5 +250,6 @@ export function FiltersBar({
         </FormControl>
       </div>
     </div>
+    </>
   );
 }

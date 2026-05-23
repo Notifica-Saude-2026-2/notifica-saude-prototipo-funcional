@@ -1,5 +1,5 @@
 import { apiFetch } from "./api";
-import type { Incident, DamageLevel, IncidentStatus } from "../types/incident";
+import type { Incident, IncidentStatus } from "../types/incident";
 import type { NotificacaoRaw } from "../types/notificacaoDetalhe";
 import { CAMPO_IDS } from "../types/notificacaoDetalhe";
 
@@ -7,20 +7,9 @@ import { CAMPO_IDS } from "../types/notificacaoDetalhe";
 // Tipos de resposta do backend
 // --------------------------------------------------------------------------
 
-type BackendStatus =
-  | "REGISTRADA"
-  | "CLASSIFICADA"
-  | "ENVIADA_SETOR_RESPONSAVEL"
-  | "EM_INVESTIGACAO"
-  | "EM_ANALISE"
-  | "ARQUIVADA";
-
-type BackendGrauDano = "LEVE" | "MODERADO" | "GRAVE" | "OBITO" | "NEVER_EVENT";
-
 type BackendNotificacao = NotificacaoRaw & {
-  status: BackendStatus;
   classificacao: {
-    grau_dano: BackendGrauDano;
+    rascunho: boolean;
     profissional_nsp?: { nome: string } | null;
   } | null;
 };
@@ -34,21 +23,12 @@ export type ListNotificacoesResponse = {
 // Mapeamentos de enum
 // --------------------------------------------------------------------------
 
-const STATUS_MAP: Record<BackendStatus, IncidentStatus> = {
-  REGISTRADA: "Novo",
+const STATUS_MAP: Record<string, IncidentStatus> = {
+  NOVA: "Novo",
   CLASSIFICADA: "Classificado",
-  ENVIADA_SETOR_RESPONSAVEL: "Encaminhado",
-  EM_INVESTIGACAO: "Em análise",
-  EM_ANALISE: "Em análise",
+  ANALISADA: "Em análise",
+  ENCAMINHADA_SETOR: "Encaminhado",
   ARQUIVADA: "Resolvido",
-};
-
-const DAMAGE_MAP: Record<BackendGrauDano, DamageLevel> = {
-  LEVE: "LEVE",
-  MODERADO: "MODERADO",
-  GRAVE: "GRAVE",
-  OBITO: "OBITO",
-  NEVER_EVENT: "NEVER_EVENT",
 };
 
 function formatDate(isoString: string): string {
@@ -58,6 +38,8 @@ function formatDate(isoString: string): string {
 function mapToIncident(n: BackendNotificacao): Incident {
   return {
     id: n.id,
+    codigo: n.codigo_formatado ?? n.codigo.toString().padStart(4, "0"),
+    statusRaw: n.status,
     date: formatDate(n.data_registro),
     status: STATUS_MAP[n.status] ?? "Novo",
     description: n.descricao ?? "(Sem descrição)",
@@ -69,10 +51,6 @@ function mapToIncident(n: BackendNotificacao): Incident {
       }
       return nome;
     })(),
-    damageLevel:
-      n.classificacao && !n.classificacao.rascunho && n.classificacao.grau_dano
-        ? DAMAGE_MAP[n.classificacao.grau_dano as BackendGrauDano]
-        : "SEM_CLASSIFICACAO",
     responsavel: n.classificacao?.profissional_nsp?.nome ?? null,
   };
 }

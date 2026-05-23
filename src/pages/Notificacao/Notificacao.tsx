@@ -81,8 +81,10 @@ function isStepComplete(campos: CampoDinamico[], formValues: Record<string, unkn
 
       const outroOption = c.opcoes?.find((o) => o.valor.toLowerCase() === "outro");
       if (outroOption) {
+        const renderedAsRadio =
+          !!c.entidade_relacional && c.tipo === "SELECT" && (c.opcoes?.length ?? 0) <= 12;
         const outroSelected =
-          (c.tipo === "RADIO" && v === outroOption.id) ||
+          ((c.tipo === "RADIO" || renderedAsRadio) && v === outroOption.id) ||
           (c.tipo === "CHECKBOX" && Array.isArray(v) && v.includes(outroOption.id));
         if (outroSelected) {
           const outroVal = formValues[`${c.id}_outro`];

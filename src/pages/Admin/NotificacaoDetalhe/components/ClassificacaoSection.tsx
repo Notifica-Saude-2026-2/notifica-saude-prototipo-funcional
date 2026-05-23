@@ -1,6 +1,9 @@
 import { EditIcon } from "../../../../components/common/icons/EditIcon";
+import { useAuth } from "../../../../hooks/useAuth";
 import type { NotificacaoDetalheDTO } from "../../../../types/notificacaoDetalhe";
 import styles from "../NotificacaoDetalhe.module.css";
+import { STATUS_EDITAVEIS } from "../../../../constants/notificacaoStatus";
+const PERFIS_CLASSIFICADORES = new Set(["NSP", "ADMINISTRADOR"]);
 
 type Props = {
   detalhe: NotificacaoDetalheDTO;
@@ -10,6 +13,11 @@ type Props = {
 };
 
 export function ClassificacaoSection({ detalhe, isOpen, onToggle, onClassificar }: Props) {
+  const { usuario } = useAuth();
+  const temPermissao = PERFIS_CLASSIFICADORES.has(usuario?.perfil ?? "");
+  const podeEditar = temPermissao && STATUS_EDITAVEIS.has(detalhe.statusRaw);
+  const foiEncaminhada = !STATUS_EDITAVEIS.has(detalhe.statusRaw) && !!detalhe.classificacao;
+
   return (
     <div className={styles.section}>
       <div className={styles.sectionHeader} onClick={onToggle}>
@@ -24,22 +32,40 @@ export function ClassificacaoSection({ detalhe, isOpen, onToggle, onClassificar 
               <span className={styles.sectionValue}>
                 Esse incidente ainda está pendente de classificação.
               </span>
-              <button className={styles.primaryButton} onClick={onClassificar}>
-                <EditIcon width={15} stroke="ffffff" /> Classificar incidente
-              </button>
+              {podeEditar && (
+                <button className={styles.primaryButton} onClick={onClassificar}>
+                  <EditIcon width={15} stroke="ffffff" /> Classificar incidente
+                </button>
+              )}
             </>
           ) : (
             <>
               <div className={styles.metaRow}>
-                <span className={styles.metaText}>
-                  Última classificação em: {detalhe.classificacao.dataClassificacao}
-                </span>
-                {detalhe.classificacao.rascunho && (
-                  <span className={styles.rascunhoBadge}>Classificação em andamento</span>
-                )}
-                {detalhe.classificacao.rascunho && (
+                <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+                  <span className={styles.metaText}>
+                    Última classificação em: {detalhe.classificacao.dataClassificacao}
+                  </span>
+                  {detalhe.classificacao.rascunho && (
+                    <span className={styles.rascunhoBadge}>Classificação em andamento</span>
+                  )}
+                  {/* CA05 — prazo de validade imediatamente após o texto */}
+                  {!detalhe.classificacao.rascunho && detalhe.classificacao.dataValidade && (
+                    <span className={styles.prazoBadge}>
+                      Prazo para análise: {detalhe.classificacao.dataValidade}
+                      {detalhe.classificacao.diasValidade != null &&
+                        ` - ${detalhe.classificacao.diasValidade} dias`}
+                    </span>
+                  )}
+                  {/* CA06 — bloqueio quando encaminhada */}
+                  {foiEncaminhada && (
+                    <span className={styles.rascunhoBadge} style={{ background: "#e5e4e7", color: "#6b6375" }}>
+                      Edição bloqueada — notificação encaminhada
+                    </span>
+                  )}
+                </div>
+                {podeEditar && (
                   <button className={styles.editButton} onClick={onClassificar}>
-                    <EditIcon width={15} stroke="484848" /> Continuar classificação
+                    <EditIcon width={15} stroke="484848" /> Editar
                   </button>
                 )}
               </div>
@@ -90,6 +116,15 @@ export function ClassificacaoSection({ detalhe, isOpen, onToggle, onClassificar 
                   <div className={`${styles.infoItem} ${styles.infoItemFull}`}>
                     <div className={styles.fieldHeader}>Observações do NSP</div>
                     <div className={styles.fieldValue}>{detalhe.classificacao.observacoes}</div>
+                  </div>
+                )}
+
+                {detalhe.classificacao.protocoloInvestigacao && (
+                  <div className={`${styles.infoItem} ${styles.infoItemFull}`}>
+                    <div className={styles.fieldHeader}>Protocolo de investigação sugerido</div>
+                    <div className={styles.fieldValue}>
+                      {detalhe.classificacao.protocoloInvestigacao}
+                    </div>
                   </div>
                 )}
               </div>

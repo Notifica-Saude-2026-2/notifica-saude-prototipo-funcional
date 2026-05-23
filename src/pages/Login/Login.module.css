@@ -20,8 +20,6 @@
   gap: 28px;
 }
 
-/* ── Coluna esquerda (info) ── */
-
 .infoColumn {
   display: flex;
   flex-direction: column;
@@ -65,16 +63,12 @@
   margin: 0;
 }
 
-/* ── Divisor ── */
-
 .divider {
   width: 100%;
   height: 1px;
   background-color: var(--border);
   flex-shrink: 0;
 }
-
-/* ── Coluna direita (formulário) ── */
 
 .formColumn {
   display: flex;
@@ -136,8 +130,6 @@
   margin: 0;
   line-height: 1.5;
 }
-
-/* ── Tablet / Desktop ── */
 
 @media (min-width: 768px) {
   .page {
