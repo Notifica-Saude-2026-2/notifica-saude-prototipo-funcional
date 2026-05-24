@@ -12,20 +12,12 @@ import { ApiError } from "../../../services/api";
 import type { NotificacaoDetalheDTO } from "../../../types/notificacaoDetalhe";
 import styles from "./Encaminhamento.module.css";
 
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-function isEmailValido(email: string): boolean {
-  return EMAIL_REGEX.test(email.trim());
-}
-
 export default function Encaminhamento() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
   const [detalhe, setDetalhe] = useState<NotificacaoDetalheDTO | null>(null);
   const [loading, setLoading] = useState(true);
-  const [email, setEmail] = useState("");
-  const [emailTocado, setEmailTocado] = useState(false);
   const [enviando, setEnviando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
 
@@ -39,11 +31,11 @@ export default function Encaminhamento() {
   }, [id]);
 
   async function handleEncaminhar() {
-    if (!id || !isEmailValido(email)) return;
+    if (!id) return;
     setEnviando(true);
     setErro(null);
     try {
-      await encaminharNotificacao(id, email.trim());
+      await encaminharNotificacao(id);
       navigate(`/incident/${id}`, { replace: true });
     } catch (err) {
       let msg = "Erro ao encaminhar. Tente novamente.";
@@ -59,9 +51,6 @@ export default function Encaminhamento() {
       setEnviando(false);
     }
   }
-
-  const emailInvalido = emailTocado && !isEmailValido(email);
-  const podeEncaminhar = isEmailValido(email) && !enviando;
 
   return (
     <AdminLayout>
@@ -85,25 +74,9 @@ export default function Encaminhamento() {
               <div className={styles.setorValue}>{detalhe.setor}</div>
             </div>
 
-            <div className={styles.section}>
-              <label className={styles.sectionLabel} htmlFor="encaminhamento-email-input">
-                E-mail do destinatário
-              </label>
-              <input
-                id="encaminhamento-email-input"
-                type="email"
-                className={`${styles.emailInput} ${emailInvalido ? styles.emailInputError : ""}`}
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                onBlur={() => setEmailTocado(true)}
-                placeholder="destinatario@exemplo.com"
-                disabled={enviando}
-                data-testid="encaminhamento-email-input"
-              />
-              {emailInvalido && (
-                <span className={styles.fieldError}>Informe um e-mail válido.</span>
-              )}
-            </div>
+            <p className={styles.infoText}>
+              O e-mail será enviado automaticamente ao gestor ativo cadastrado neste setor.
+            </p>
 
             {erro && <p className={styles.error}>{erro}</p>}
 
@@ -119,7 +92,7 @@ export default function Encaminhamento() {
               <button
                 className={styles.submitBtn}
                 onClick={handleEncaminhar}
-                disabled={!podeEncaminhar}
+                disabled={enviando}
                 data-testid="encaminhamento-btn-confirmar"
               >
                 {enviando ? "Encaminhando..." : "Confirmar encaminhamento"}

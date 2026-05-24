@@ -331,11 +331,11 @@ export type EncaminhamentoResponse = {
 
 export async function encaminharNotificacao(
   id: string,
-  emailDestinatario: string,
+  mensagem?: string,
 ): Promise<EncaminhamentoResponse> {
   return apiFetch<EncaminhamentoResponse>(`/api/notificacoes/${id}/encaminhamento`, {
     method: "POST",
-    body: JSON.stringify({ email_destinatario: emailDestinatario }),
+    body: JSON.stringify(mensagem ? { mensagem } : {}),
   });
 }
 
