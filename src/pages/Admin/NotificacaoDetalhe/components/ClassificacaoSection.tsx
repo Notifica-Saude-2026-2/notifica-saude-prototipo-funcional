@@ -1,4 +1,5 @@
-import { EditIcon } from "../../../../components/common/icons/EditIcon";
+import { EditIcon } from "../../../../assets/icons/EditIcon";
+import { LockClosedIcon } from "../../../../assets/icons/LockClosedIcon";
 import { useAuth } from "../../../../hooks/useAuth";
 import type { NotificacaoDetalheDTO } from "../../../../types/notificacaoDetalhe";
 import styles from "../NotificacaoDetalhe.module.css";
@@ -58,8 +59,8 @@ export function ClassificacaoSection({ detalhe, isOpen, onToggle, onClassificar 
                   )}
                   {/* CA06 — bloqueio quando encaminhada */}
                   {foiEncaminhada && (
-                    <span className={styles.rascunhoBadge} style={{ background: "#e5e4e7", color: "#6b6375" }}>
-                      Edição bloqueada — notificação encaminhada
+                    <span className={styles.bloqueadoBadge}>
+                      <LockClosedIcon width={11} fill="c8850a" /> Edição bloqueada — notificação encaminhada
                     </span>
                   )}
                 </div>

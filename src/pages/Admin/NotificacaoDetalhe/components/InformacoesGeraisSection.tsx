@@ -1,7 +1,12 @@
-import { EditIcon } from "../../../../components/common/icons/EditIcon";
+import { EditIcon } from "../../../../assets/icons/EditIcon";
+import { LockClosedIcon } from "../../../../assets/icons/LockClosedIcon";
+import { useAuth } from "../../../../hooks/useAuth";
+import { STATUS_EDITAVEIS } from "../../../../constants/notificacaoStatus";
 import type { NotificacaoDetalheDTO } from "../../../../types/notificacaoDetalhe";
 import { InfoField } from "./InfoField";
 import styles from "../NotificacaoDetalhe.module.css";
+
+const PERFIS_EDITORES = new Set(["NSP", "ADMINISTRADOR"]);
 
 type Props = {
   detalhe: NotificacaoDetalheDTO;
@@ -11,6 +16,11 @@ type Props = {
 };
 
 export function InformacoesGeraisSection({ detalhe, isOpen, onToggle, onEdit }: Props) {
+  const { usuario } = useAuth();
+  const temPermissao = PERFIS_EDITORES.has(usuario?.perfil ?? "");
+  const podeEditar = temPermissao && STATUS_EDITAVEIS.has(detalhe.statusRaw);
+  const estaBloqueada = !STATUS_EDITAVEIS.has(detalhe.statusRaw);
+
   return (
     <div className={styles.section}>
       <div className={styles.sectionHeader} onClick={onToggle}>
@@ -21,12 +31,21 @@ export function InformacoesGeraisSection({ detalhe, isOpen, onToggle, onEdit }: 
       {isOpen && (
         <div className={styles.sectionContent} style={{ gap: 0 }}>
           <div className={styles.metaRow}>
-            <span className={styles.metaText}>
-              Última modificação registrada em: {detalhe.dataAtualizacao}
-            </span>
-            <button className={styles.editButton} onClick={onEdit}>
-              <EditIcon width={15} stroke="484848" /> Editar
-            </button>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+              <span className={styles.metaText}>
+                Última modificação registrada em: {detalhe.dataAtualizacao}
+              </span>
+              {estaBloqueada && (
+                <span className={styles.bloqueadoBadge}>
+                  <LockClosedIcon width={11} fill="c8850a" /> Edição bloqueada — notificação encaminhada
+                </span>
+              )}
+            </div>
+            {podeEditar && (
+              <button className={styles.editButton} onClick={onEdit}>
+                <EditIcon width={15} stroke="484848" /> Editar
+              </button>
+            )}
           </div>
 
           <div className={styles.infoGrid}>
