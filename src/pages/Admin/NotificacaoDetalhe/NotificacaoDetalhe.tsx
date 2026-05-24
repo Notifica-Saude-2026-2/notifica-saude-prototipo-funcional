@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { AdminLayout } from "../../../components/admin/AdminLayout/AdminLayout";
 import { useNotificacaoDetalhe } from "../../../hooks/useNotificacaoDetalhe";
 import { ClassificacaoModal } from "./ClassificacaoModal";
-import { ArrowLeftIcon } from "../../../components/common/icons/ArrowLeftIcon";
+import { ArrowLeftIcon } from "../../../assets/icons/ArrowLeftIcon";
 import type { UpdateNotificacaoPayload } from "../../../services/notificacaoDetalheService";
 import styles from "./NotificacaoDetalhe.module.css";
 import { STATUS_EDITAVEIS } from "../../../constants/notificacaoStatus";
@@ -18,8 +18,17 @@ import { EditModal } from "./components/EditModal";
 
 export default function NotificacaoDetalhe() {
   const navigate = useNavigate();
-  const { detalhe, rawData, hasData, loading, update, historico, salvar, onClassificacaoSuccess } =
-    useNotificacaoDetalhe();
+  const {
+    detalhe,
+    rawData,
+    hasData,
+    loading,
+    update,
+    historico,
+    salvar,
+    onClassificacaoSuccess,
+    onArquivarSuccess,
+  } = useNotificacaoDetalhe();
 
   type SectionKey = "info" | "classification" | "analysis" | "history";
   const [openSections, setOpenSections] = useState<Record<SectionKey, boolean>>({
@@ -75,7 +84,7 @@ export default function NotificacaoDetalhe() {
         </button>
 
         <div className={styles.detailsCard}>
-          <NotificacaoHeader detalhe={detalhe} />
+          <NotificacaoHeader detalhe={detalhe} onArquivarSuccess={onArquivarSuccess} />
 
           <InformacoesGeraisSection
             detalhe={detalhe}
