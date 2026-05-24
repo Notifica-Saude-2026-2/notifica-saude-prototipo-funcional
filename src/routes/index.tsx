@@ -10,6 +10,7 @@ import AdminDashboard from "../pages/Admin/AdminDashboard";
 import AdminComingSoon from "../pages/Admin/AdminComingSoon";
 import AdminNovos from "../pages/Admin/AdminNovos";
 import NotificacaoDetalhe from "../pages/Admin/NotificacaoDetalhe/NotificacaoDetalhe";
+import Encaminhamento from "../pages/Admin/Encaminhamento/Encaminhamento";
 
 export function AppRoutes() {
   return (
@@ -27,6 +28,7 @@ export function AppRoutes() {
         <Route path="/admin/encaminhados" element={<AdminComingSoon />} />
         <Route path="/admin/resolvidos" element={<AdminComingSoon />} />
         <Route path="/incident/:id" element={<NotificacaoDetalhe />} />
+        <Route path="/incident/:id/encaminhamento" element={<Encaminhamento />} />
       </Route>
     </Routes>
   );
