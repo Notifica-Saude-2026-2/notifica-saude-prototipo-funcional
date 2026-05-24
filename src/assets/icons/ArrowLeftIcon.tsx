@@ -3,8 +3,8 @@ type ArrowLeftIconProps = {
   stroke?: string;
 };
 
-export function ArrowLeftIcon({ width = 16, stroke = '6b6375' }: ArrowLeftIconProps) {
-  const color = stroke.startsWith('#') ? stroke : `#${stroke}`;
+export function ArrowLeftIcon({ width = 16, stroke = "6b6375" }: ArrowLeftIconProps) {
+  const color = stroke.startsWith("#") ? stroke : `#${stroke}`;
   return (
     <svg
       width={width}

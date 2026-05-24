@@ -3,8 +3,8 @@ type EditIconProps = {
   stroke?: string;
 };
 
-export function EditIcon({ width = 16, stroke = '484848' }: EditIconProps) {
-  const color = stroke.startsWith('#') ? stroke : `#${stroke}`;
+export function EditIcon({ width = 16, stroke = "484848" }: EditIconProps) {
+  const color = stroke.startsWith("#") ? stroke : `#${stroke}`;
   return (
     <svg
       width={width}
