@@ -1,7 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import calendarIcon from "../../../assets/calendar.svg";
 import type { Incident } from "../../../types/incident";
-import { getStatusColors } from "../../../utils/statusColors";
+import { getStatusColors, GRAU_DANO_COLORS } from "../../../utils/statusColors";
+import { GRAU_DANO_LABEL } from "../../../services/notificacaoDetalheService";
 import styles from "./IncidentCard.module.css";
 
 type Props = {
@@ -11,6 +12,10 @@ type Props = {
 export function IncidentCard({ incident }: Props) {
   const navigate = useNavigate();
   const statusStyle = getStatusColors(incident.statusRaw);
+  const grauDanoStyle = incident.grauDano ? GRAU_DANO_COLORS[incident.grauDano] : null;
+  const grauDanoLabel = incident.grauDano
+    ? (GRAU_DANO_LABEL[incident.grauDano] ?? incident.grauDano)
+    : null;
 
   function handleClick() {
     navigate(`/incident/${incident.id}`);
@@ -69,6 +74,17 @@ export function IncidentCard({ incident }: Props) {
           <strong className={styles.label}>Responsável:</strong>{" "}
           <span className={styles.rightValue}>{incident.responsavel ?? "—"}</span>
         </span>
+        {grauDanoLabel && grauDanoStyle && (
+          <span className={styles.rightItem}>
+            <strong className={styles.label}>Grau de dano:</strong>{" "}
+            <span
+              className={styles.damageBadge}
+              style={{ background: grauDanoStyle.bg, color: grauDanoStyle.text }}
+            >
+              {grauDanoLabel}
+            </span>
+          </span>
+        )}
       </div>
     </div>
   );

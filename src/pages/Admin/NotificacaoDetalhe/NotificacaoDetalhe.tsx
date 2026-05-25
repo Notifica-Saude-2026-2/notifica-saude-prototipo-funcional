@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { AdminLayout } from "../../../components/admin/AdminLayout/AdminLayout";
 import { useNotificacaoDetalhe } from "../../../hooks/useNotificacaoDetalhe";
 import { ClassificacaoModal } from "./ClassificacaoModal";
-import { ArrowLeftIcon } from "../../../components/common/icons/ArrowLeftIcon";
+import { ArrowLeftIcon } from "../../../assets/icons/ArrowLeftIcon";
 import type { UpdateNotificacaoPayload } from "../../../services/notificacaoDetalheService";
 import styles from "./NotificacaoDetalhe.module.css";
 import { STATUS_EDITAVEIS } from "../../../constants/notificacaoStatus";
@@ -18,14 +18,23 @@ import { EditModal } from "./components/EditModal";
 
 export default function NotificacaoDetalhe() {
   const navigate = useNavigate();
-  const { detalhe, rawData, hasData, loading, update, historico, salvar, onClassificacaoSuccess } =
-    useNotificacaoDetalhe();
+  const {
+    detalhe,
+    rawData,
+    hasData,
+    loading,
+    update,
+    historico,
+    salvar,
+    onClassificacaoSuccess,
+    onArquivarSuccess,
+  } = useNotificacaoDetalhe();
 
   type SectionKey = "info" | "classification" | "analysis" | "history";
   const [openSections, setOpenSections] = useState<Record<SectionKey, boolean>>({
     info: true,
     classification: true,
-    analysis: false,
+    analysis: true,
     history: true,
   });
 
@@ -58,7 +67,7 @@ export default function NotificacaoDetalhe() {
         <div className={styles.page}>
           <div className={styles.notFound}>
             <p>Notificação não encontrada ou sessão expirada.</p>
-            <button className={styles.backLink} onClick={() => navigate("/admin")}>
+            <button className={styles.backLink} data-testid="btn-voltar" onClick={() => navigate("/admin")}>
               <ArrowLeftIcon width={14} stroke="6b6375" /> Voltar para a listagem
             </button>
           </div>
@@ -70,12 +79,12 @@ export default function NotificacaoDetalhe() {
   return (
     <AdminLayout>
       <div className={styles.page}>
-        <button className={styles.backLink} onClick={() => navigate("/admin")}>
+        <button className={styles.backLink} data-testid="btn-voltar" onClick={() => navigate("/admin")}>
           <ArrowLeftIcon width={14} stroke="6b6375" /> Voltar
         </button>
 
         <div className={styles.detailsCard}>
-          <NotificacaoHeader detalhe={detalhe} />
+          <NotificacaoHeader detalhe={detalhe} onArquivarSuccess={onArquivarSuccess} />
 
           <InformacoesGeraisSection
             detalhe={detalhe}

@@ -39,6 +39,7 @@ type UseNotificacaoDetalheResult = {
   historico: { data: HistoricoItem[]; loading: boolean; error: string | null };
   salvar: (payload: UpdateNotificacaoPayload) => Promise<boolean>;
   onClassificacaoSuccess: (classificacao: ClassificacaoRaw) => void;
+  onArquivarSuccess: () => void;
 };
 
 export function useNotificacaoDetalhe(): UseNotificacaoDetalheResult {
@@ -136,6 +137,12 @@ export function useNotificacaoDetalhe(): UseNotificacaoDetalheResult {
     getNotificacaoHistorico(rawData.id).then((data) => setHistorico((h) => ({ ...h, data })));
   }
 
+  function onArquivarSuccess() {
+    if (!rawData) return;
+    setRawData({ ...rawData, status: "ARQUIVADA" });
+    getNotificacaoHistorico(rawData.id).then((data) => setHistorico((h) => ({ ...h, data })));
+  }
+
   return {
     detalhe,
     rawData,
@@ -145,5 +152,6 @@ export function useNotificacaoDetalhe(): UseNotificacaoDetalheResult {
     historico,
     salvar,
     onClassificacaoSuccess,
+    onArquivarSuccess,
   };
 }

@@ -1,4 +1,5 @@
-import { EditIcon } from "../../../../components/common/icons/EditIcon";
+import { EditIcon } from "../../../../assets/icons/EditIcon";
+import { LockClosedIcon } from "../../../../assets/icons/LockClosedIcon";
 import { useAuth } from "../../../../hooks/useAuth";
 import type { NotificacaoDetalheDTO } from "../../../../types/notificacaoDetalhe";
 import styles from "../NotificacaoDetalhe.module.css";
@@ -33,7 +34,7 @@ export function ClassificacaoSection({ detalhe, isOpen, onToggle, onClassificar 
                 Esse incidente ainda está pendente de classificação.
               </span>
               {podeEditar && (
-                <button className={styles.primaryButton} onClick={onClassificar}>
+                <button className={styles.primaryButton} data-testid="btn-classificar-incidente" onClick={onClassificar}>
                   <EditIcon width={15} stroke="ffffff" /> Classificar incidente
                 </button>
               )}
@@ -58,13 +59,13 @@ export function ClassificacaoSection({ detalhe, isOpen, onToggle, onClassificar 
                   )}
                   {/* CA06 — bloqueio quando encaminhada */}
                   {foiEncaminhada && (
-                    <span className={styles.rascunhoBadge} style={{ background: "#e5e4e7", color: "#6b6375" }}>
-                      Edição bloqueada — notificação encaminhada
+                    <span className={styles.bloqueadoBadge}>
+                      <LockClosedIcon width={11} fill="c8850a" /> Edição bloqueada — notificação encaminhada
                     </span>
                   )}
                 </div>
                 {podeEditar && (
-                  <button className={styles.editButton} onClick={onClassificar}>
+                  <button className={styles.editButton} data-testid="btn-edit-classificacao" onClick={onClassificar}>
                     <EditIcon width={15} stroke="484848" /> Editar
                   </button>
                 )}

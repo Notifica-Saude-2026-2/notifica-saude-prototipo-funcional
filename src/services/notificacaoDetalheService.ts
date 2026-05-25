@@ -314,6 +314,46 @@ export async function classificarNotificacao(
 }
 
 // --------------------------------------------------------------------------
+// Encaminhar — POST /api/notificacoes/:id/encaminhamento
+// --------------------------------------------------------------------------
+
+export type EncaminhamentoResponse = {
+  encaminhamento: {
+    id: string;
+    notificacao_id: string;
+    setor_destino_id: string;
+    responsavel_nsp_id: string;
+    mensagem: string | null;
+    data_envio: string;
+  };
+  notificacao: { id: string; status: string };
+};
+
+export async function encaminharNotificacao(
+  id: string,
+  payload: { mensagem?: string; setor_destino_id?: string } = {},
+): Promise<EncaminhamentoResponse> {
+  return apiFetch<EncaminhamentoResponse>(`/api/notificacoes/${id}/encaminhamento`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+// --------------------------------------------------------------------------
+// Arquivar — POST /api/notificacoes/:id/arquivar
+// --------------------------------------------------------------------------
+
+export async function arquivarNotificacao(
+  id: string,
+  motivo?: string | null,
+): Promise<{ id: string; status: string }> {
+  return apiFetch<{ id: string; status: string }>(`/api/notificacoes/${id}/arquivar`, {
+    method: "POST",
+    body: JSON.stringify({ motivo: motivo ?? null }),
+  });
+}
+
+// --------------------------------------------------------------------------
 // Atualizar rascunho — PUT /api/notificacoes/:id/classificacao
 // --------------------------------------------------------------------------
 

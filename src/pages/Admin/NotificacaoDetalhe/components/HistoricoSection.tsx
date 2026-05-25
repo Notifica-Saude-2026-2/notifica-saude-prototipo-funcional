@@ -128,6 +128,7 @@ export function HistoricoSection({ detalhe, historico, isOpen, onToggle }: Props
                 <div className={styles.historyPagination}>
                   <button
                     className={styles.histPageBtn}
+                    data-testid="btn-historico-anterior"
                     disabled={page === 1}
                     onClick={() => setPage((p) => p - 1)}
                   >
@@ -138,6 +139,7 @@ export function HistoricoSection({ detalhe, historico, isOpen, onToggle }: Props
                   </span>
                   <button
                     className={styles.histPageBtn}
+                    data-testid="btn-historico-proxima"
                     disabled={page === totalPages}
                     onClick={() => setPage((p) => p + 1)}
                   >

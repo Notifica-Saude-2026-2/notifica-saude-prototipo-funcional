@@ -9,4 +9,5 @@ export type Incident = {
   description: string;
   sector: string;
   responsavel?: string | null;
+  grauDano?: string | null;
 };

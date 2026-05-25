@@ -1,4 +1,6 @@
-import { EditIcon } from "../../../../components/common/icons/EditIcon";
+import { useNavigate } from "react-router-dom";
+import { EditIcon } from "../../../../assets/icons/EditIcon";
+import { useAuth } from "../../../../hooks/useAuth";
 import type { NotificacaoDetalheDTO } from "../../../../types/notificacaoDetalhe";
 import styles from "../NotificacaoDetalhe.module.css";
 
@@ -9,6 +11,13 @@ type Props = {
 };
 
 export function AnaliseSection({ detalhe, isOpen, onToggle }: Props) {
+  const navigate = useNavigate();
+  const { usuario } = useAuth();
+
+  const podeEncaminhar =
+    (usuario?.perfil === "NSP" || usuario?.perfil === "ADMINISTRADOR") &&
+    detalhe.statusRaw === "CLASSIFICADA";
+
   return (
     <div className={styles.section}>
       <div className={styles.sectionHeader} onClick={onToggle}>
@@ -23,9 +32,13 @@ export function AnaliseSection({ detalhe, isOpen, onToggle }: Props) {
               ? "Esse incidente ainda está pendente de análise."
               : "Não é possível registrar análises em um incidente sem classificação."}
           </span>
-          {detalhe.classificacao && (
-            <button className={styles.primaryButton}>
-              <EditIcon width={15} stroke="ffffff" /> Registrar análise
+          {podeEncaminhar && (
+            <button
+              className={styles.primaryButton}
+              onClick={() => navigate(`/incident/${detalhe.id}/encaminhamento`)}
+              data-testid="btn-encaminhar-notificacao"
+            >
+              <EditIcon width={15} stroke="ffffff" /> Encaminhar notificação
             </button>
           )}
         </div>

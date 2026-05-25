@@ -187,6 +187,7 @@ export function EditModal({
               <input
                 type="date"
                 className={styles.modalInput}
+                data-testid="field-data-incidente"
                 value={dataIncidente}
                 onChange={(e) => setDataIncidente(e.target.value)}
                 max={new Date().toISOString().split("T")[0]}
@@ -197,6 +198,7 @@ export function EditModal({
               <p className={styles.formQuestion}>Turno</p>
               <select
                 className={styles.modalInput}
+                data-testid="field-turno"
                 value={turnoId}
                 onChange={(e) => setTurnoId(e.target.value)}
                 disabled={saving}
@@ -219,8 +221,9 @@ export function EditModal({
               <p className={styles.formQuestion}>Instituição</p>
               <select
                 className={styles.modalInput}
+                data-testid="field-unidade"
                 value={unidadeId}
-                disabled={true} // Usuário não pode alterar a instituição (RN)
+                disabled={true}
               >
                 <option value={rawData.unidade_id}>{detalhe.unidade}</option>
               </select>
@@ -229,6 +232,7 @@ export function EditModal({
               <p className={styles.formQuestion}>Setor</p>
               <select
                 className={styles.modalInput}
+                data-testid="field-setor"
                 value={setorId}
                 onChange={(e) => {
                   setSetorId(e.target.value);
@@ -251,6 +255,7 @@ export function EditModal({
                   <input
                     type="text"
                     className={styles.modalInput}
+                    data-testid="field-setor-outro"
                     value={setorOutroText}
                     onChange={(e) => setSetorOutroText(e.target.value)}
                     placeholder="Digite o nome do setor"
@@ -268,6 +273,7 @@ export function EditModal({
                 <p className={styles.formQuestion}>Idade do paciente</p>
                 <select
                   className={styles.modalInput}
+                  data-testid="field-idade"
                   value={idadeId}
                   onChange={(e) => setIdadeId(e.target.value)}
                   disabled={saving}
@@ -286,6 +292,7 @@ export function EditModal({
                 <p className={styles.formQuestion}>Sexo</p>
                 <select
                   className={styles.modalInput}
+                  data-testid="field-sexo"
                   value={sexoId}
                   onChange={(e) => {
                     setSexoId(e.target.value);
@@ -308,6 +315,7 @@ export function EditModal({
                     <input
                       type="text"
                       className={styles.modalInput}
+                      data-testid="field-sexo-outro"
                       value={sexoOutroText}
                       onChange={(e) => setSexoOutroText(e.target.value)}
                       placeholder="Descreva o sexo/gênero"
@@ -327,10 +335,10 @@ export function EditModal({
 
         {/* Rodapé */}
         <div className={styles.modalFooter}>
-          <button className={styles.cancelBtn} onClick={onClose} disabled={saving}>
+          <button className={styles.cancelBtn} data-testid="btn-edit-cancelar" onClick={onClose} disabled={saving}>
             Cancelar
           </button>
-          <button className={styles.saveBtn} onClick={handleSave} disabled={saving}>
+          <button className={styles.saveBtn} data-testid="btn-edit-salvar" onClick={handleSave} disabled={saving}>
             {saving ? "Salvando..." : "Salvar alterações"}
           </button>
         </div>
