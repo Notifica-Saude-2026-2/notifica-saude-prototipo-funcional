@@ -20,3 +20,12 @@ export const DEFAULT_STATUS_COLORS: StatusColorSet = {
 export function getStatusColors(statusRaw: string): StatusColorSet {
   return STATUS_COLORS[statusRaw] ?? DEFAULT_STATUS_COLORS;
 }
+
+export type GrauDanoColorSet = { bg: string; text: string };
+
+export const GRAU_DANO_COLORS: Record<string, GrauDanoColorSet> = {
+  LEVE:     { bg: "#e0f2f1", text: "#00695c" },
+  MODERADO: { bg: "#fff8e1", text: "#c8850a" },
+  GRAVE:    { bg: "#ffebee", text: "#c62828" },
+  OBITO:    { bg: "#212121", text: "#ffffff" },
+};

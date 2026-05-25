@@ -34,7 +34,7 @@ export default function NotificacaoDetalhe() {
   const [openSections, setOpenSections] = useState<Record<SectionKey, boolean>>({
     info: true,
     classification: true,
-    analysis: false,
+    analysis: true,
     history: true,
   });
 
