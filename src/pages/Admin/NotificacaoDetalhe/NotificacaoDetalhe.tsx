@@ -67,7 +67,7 @@ export default function NotificacaoDetalhe() {
         <div className={styles.page}>
           <div className={styles.notFound}>
             <p>Notificação não encontrada ou sessão expirada.</p>
-            <button className={styles.backLink} onClick={() => navigate("/admin")}>
+            <button className={styles.backLink} data-testid="btn-voltar" onClick={() => navigate("/admin")}>
               <ArrowLeftIcon width={14} stroke="6b6375" /> Voltar para a listagem
             </button>
           </div>
@@ -79,7 +79,7 @@ export default function NotificacaoDetalhe() {
   return (
     <AdminLayout>
       <div className={styles.page}>
-        <button className={styles.backLink} onClick={() => navigate("/admin")}>
+        <button className={styles.backLink} data-testid="btn-voltar" onClick={() => navigate("/admin")}>
           <ArrowLeftIcon width={14} stroke="6b6375" /> Voltar
         </button>
 

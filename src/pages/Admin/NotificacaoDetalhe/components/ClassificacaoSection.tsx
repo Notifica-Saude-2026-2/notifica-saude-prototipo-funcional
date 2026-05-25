@@ -34,7 +34,7 @@ export function ClassificacaoSection({ detalhe, isOpen, onToggle, onClassificar 
                 Esse incidente ainda está pendente de classificação.
               </span>
               {podeEditar && (
-                <button className={styles.primaryButton} onClick={onClassificar}>
+                <button className={styles.primaryButton} data-testid="btn-classificar-incidente" onClick={onClassificar}>
                   <EditIcon width={15} stroke="ffffff" /> Classificar incidente
                 </button>
               )}
@@ -65,7 +65,7 @@ export function ClassificacaoSection({ detalhe, isOpen, onToggle, onClassificar 
                   )}
                 </div>
                 {podeEditar && (
-                  <button className={styles.editButton} onClick={onClassificar}>
+                  <button className={styles.editButton} data-testid="btn-edit-classificacao" onClick={onClassificar}>
                     <EditIcon width={15} stroke="484848" /> Editar
                   </button>
                 )}

@@ -622,7 +622,7 @@ export function ClassificacaoModal({
 
         {/* Footer */}
         <div className={styles.modalFooter}>
-          <button className={styles.cancelBtn} onClick={onClose} disabled={saving}>
+          <button className={styles.cancelBtn} data-testid="btn-classificacao-cancelar" onClick={onClose} disabled={saving}>
             Cancelar
           </button>
           <button

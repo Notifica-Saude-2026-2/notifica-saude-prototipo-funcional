@@ -42,7 +42,7 @@ export function InformacoesGeraisSection({ detalhe, isOpen, onToggle, onEdit }: 
               )}
             </div>
             {podeEditar && (
-              <button className={styles.editButton} onClick={onEdit}>
+              <button className={styles.editButton} data-testid="btn-edit-info-gerais" onClick={onEdit}>
                 <EditIcon width={15} stroke="484848" /> Editar
               </button>
             )}
