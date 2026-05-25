@@ -10,6 +10,7 @@ import { CAMPO_IDS } from "../types/notificacaoDetalhe";
 type BackendNotificacao = NotificacaoRaw & {
   classificacao: {
     rascunho: boolean;
+    grau_dano?: string | null;
     profissional_nsp?: { nome: string } | null;
   } | null;
 };
@@ -52,12 +53,20 @@ function mapToIncident(n: BackendNotificacao): Incident {
       return nome;
     })(),
     responsavel: n.classificacao?.profissional_nsp?.nome ?? null,
+    grauDano: n.classificacao?.grau_dano ?? null,
   };
 }
 
 // --------------------------------------------------------------------------
 // Service
 // --------------------------------------------------------------------------
+
+export type BackendStatus =
+  | "NOVA"
+  | "CLASSIFICADA"
+  | "ANALISADA"
+  | "ENCAMINHADA_SETOR"
+  | "ARQUIVADA";
 
 export type FetchIncidentsParams = {
   page?: number;
