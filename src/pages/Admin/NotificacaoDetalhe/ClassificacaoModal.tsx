@@ -474,7 +474,7 @@ export function ClassificacaoModal({
     } catch (e) {
       let msg = "Erro ao salvar classificação.";
       if (e instanceof ApiError) {
-        if (e.status === 409) msg = "Classificação já existe ou já foi finalizada.";
+        if (e.status === 409) msg = "Não é possível editar: a notificação já foi encaminhada.";
         else if (e.status === 422) msg = "Dados inválidos. Verifique os campos.";
         else msg = `Erro ${e.status}: tente novamente.`;
       }
