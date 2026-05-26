@@ -11,7 +11,7 @@ const PAGE_TITLES: Record<string, string> = {
   "/admin": "Todos incidentes",
   "/admin/novos": "Novos incidentes",
   "/admin/encaminhados": "Encaminhados",
-  "/admin/resolvidos": "Resolvidos",
+  "/admin/resolvidos": "Arquivados",
 };
 
 function SearchIcon() {

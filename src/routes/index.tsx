@@ -7,7 +7,7 @@ import Login from "../pages/Login";
 import ForgotPassword from "../pages/ForgotPassword";
 import ResetPassword from "../pages/ResetPassword";
 import AdminDashboard from "../pages/Admin/AdminDashboard";
-import AdminResolvidos from "../pages/Admin/AdminResolvidos";
+import AdminArquivados from "../pages/Admin/AdminArquivados";
 import AdminNovos from "../pages/Admin/AdminNovos";
 import AdminEncaminhados from "../pages/Admin/AdminEncaminhados";
 import NotificacaoDetalhe from "../pages/Admin/NotificacaoDetalhe/NotificacaoDetalhe";
@@ -27,7 +27,7 @@ export function AppRoutes() {
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/admin/novos" element={<AdminNovos />} />
         <Route path="/admin/encaminhados" element={<AdminEncaminhados />} />
-        <Route path="/admin/resolvidos" element={<AdminResolvidos />} />
+        <Route path="/admin/resolvidos" element={<AdminArquivados />} />
         <Route path="/incident/:id" element={<NotificacaoDetalhe />} />
         <Route path="/incident/:id/encaminhamento" element={<Encaminhamento />} />
       </Route>

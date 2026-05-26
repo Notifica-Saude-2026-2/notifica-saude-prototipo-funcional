@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { EditIcon } from "../../../../assets/icons/EditIcon";
+import { PaperAirplaneIcon } from "../../../../assets/icons/PaperAirplaneIcon";
 import { useAuth } from "../../../../hooks/useAuth";
 import type { NotificacaoDetalheDTO } from "../../../../types/notificacaoDetalhe";
 import styles from "../NotificacaoDetalhe.module.css";
@@ -38,7 +38,7 @@ export function AnaliseSection({ detalhe, isOpen, onToggle }: Props) {
               onClick={() => navigate(`/incident/${detalhe.id}/encaminhamento`)}
               data-testid="btn-encaminhar-notificacao"
             >
-              <EditIcon width={15} stroke="ffffff" /> Encaminhar notificação
+              <PaperAirplaneIcon width={15} stroke="ffffff" /> Encaminhar notificação
             </button>
           )}
         </div>
