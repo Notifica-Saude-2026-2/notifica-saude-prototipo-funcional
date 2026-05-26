@@ -322,50 +322,70 @@ export function ClassificacaoModal({
   onClose,
   onSuccess,
 }: ClassificacaoModalProps) {
-  const [classificacao, setClassificacao] = useState(classificacaoExistente?.tipo_incidente ?? "");
-  const [grauDano, setGrauDano] = useState(classificacaoExistente?.grau_dano ?? "");
+  const rascunhoLocal = (() => {
+    try {
+      const raw = localStorage.getItem(`classificacao_rascunho_${notificacaoId}`);
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
+  })();
+  const fonte = rascunhoLocal ?? classificacaoExistente;
+
+  const [classificacao, setClassificacao] = useState(fonte?.tipo_incidente ?? "");
+  const [grauDano, setGrauDano] = useState(fonte?.grau_dano ?? "");
   const [tipoEspecifico, setTipoEspecifico] = useState(
-    classificacaoExistente?.tipo_especifico ?? "",
+    fonte?.tipo_especifico ?? "",
   );
   const [tiposIncidentes, setTiposIncidentes] = useState<string[]>(
-    classificacaoExistente?.tipos_incidentes ?? [],
+    fonte?.tipos_incidentes ?? [],
   );
   const [outroTipoIncidente, setOutroTipoIncidente] = useState(
-    classificacaoExistente?.outro_tipo_incidente ?? "",
+    fonte?.outro_tipo_incidente ?? "",
   );
-  const [envolvidos, setEnvolvidos] = useState<string[]>(classificacaoExistente?.envolvidos ?? []);
+  const [envolvidos, setEnvolvidos] = useState<string[]>(fonte?.envolvidos ?? []);
   const [outroEnvolvido, setOutroEnvolvido] = useState(
-    classificacaoExistente?.outro_envolvido ?? "",
+    fonte?.outro_envolvido ?? "",
   );
-  const [observacoes, setObservacoes] = useState(classificacaoExistente?.observacoes ?? "");
+  const [observacoes, setObservacoes] = useState(fonte?.observacoes ?? "");
   const [protocoloInvestigacao, setProtocoloInvestigacao] = useState(
-    classificacaoExistente?.protocolo_investigacao ?? "",
+    fonte?.protocolo_investigacao ?? "",
   );
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [rascunhoSalvo, setRascunhoSalvo] = useState(false);
 
   const isAdverso = classificacao === "EVENTO_ADVERSO";
   const isNeverEvent = grauDano === "NEVER_EVENT";
 
   const showTipoIncidente = !!classificacao && !isNeverEvent;
 
-  function sugerirProtocolo(clasf: string, grau: string): string {
-    if (!clasf) return "";
-    const isSistemico = clasf === "EVENTO_ADVERSO" && !!grau && grau !== "LEVE";
-    return isSistemico ? "INVESTIGACAO_SISTEMICA_PROFUNDA" : "INVESTIGACAO_DIRETA";
-  }
-
   function handleClassificacaoChange(v: string | string[]) {
-    const clasf = v as string;
-    setClassificacao(clasf);
+    setClassificacao(v as string);
     setGrauDano("");
-    setProtocoloInvestigacao(sugerirProtocolo(clasf, ""));
   }
 
   function handleGrauDanoChange(v: string | string[]) {
-    const grau = v as string;
-    setGrauDano(grau);
-    setProtocoloInvestigacao(sugerirProtocolo(classificacao, grau));
+    setGrauDano(v as string);
+  }
+
+  function handleSalvarRascunho() {
+    localStorage.setItem(
+      `classificacao_rascunho_${notificacaoId}`,
+      JSON.stringify({
+        tipo_incidente: classificacao,
+        grau_dano: grauDano,
+        tipo_especifico: tipoEspecifico,
+        tipos_incidentes: tiposIncidentes,
+        outro_tipo_incidente: outroTipoIncidente,
+        envolvidos,
+        outro_envolvido: outroEnvolvido,
+        observacoes,
+        protocolo_investigacao: protocoloInvestigacao,
+      }),
+    );
+    setRascunhoSalvo(true);
+    setTimeout(() => setRascunhoSalvo(false), 3000);
   }
   const isOutroTipoIncidente = tiposIncidentes.includes("OUTRO");
   const isOutroEnvolvido = envolvidos.includes("OUTRO");
@@ -448,6 +468,7 @@ export function ClassificacaoModal({
       const result = isRascunho
         ? await atualizarClassificacao(notificacaoId, payload)
         : await classificarNotificacao(notificacaoId, payload);
+      localStorage.removeItem(`classificacao_rascunho_${notificacaoId}`);
       onSuccess(result);
       onClose();
     } catch (e) {
@@ -625,14 +646,27 @@ export function ClassificacaoModal({
           <button className={styles.cancelBtn} data-testid="btn-classificacao-cancelar" onClick={onClose} disabled={saving}>
             Cancelar
           </button>
-          <button
-            className={styles.saveBtn}
-            onClick={() => handleSalvar(false)}
-            disabled={saving || !isFormValid}
-            data-testid="classificacao-salvar-button"
-          >
-            {saving ? "Salvando..." : "Salvar classificação"}
-          </button>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            {rascunhoSalvo && (
+              <span className={styles.rascunhoFeedback}>✓ Rascunho salvo</span>
+            )}
+            <button
+              className={styles.draftBtn}
+              onClick={handleSalvarRascunho}
+              disabled={saving}
+              data-testid="classificacao-salvar-rascunho-button"
+            >
+              Salvar rascunho
+            </button>
+            <button
+              className={styles.saveBtn}
+              onClick={() => handleSalvar(false)}
+              disabled={saving || !isFormValid}
+              data-testid="classificacao-salvar-button"
+            >
+              {saving ? "Salvando..." : "Salvar classificação"}
+            </button>
+          </div>
         </div>
       </div>
     </div>
