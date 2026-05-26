@@ -667,6 +667,35 @@
   cursor: not-allowed;
 }
 
+.draftBtn {
+  background: none;
+  border: 1.5px solid #2f4fff;
+  border-radius: 8px;
+  padding: 8px 20px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #2f4fff;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  transition: all 0.15s;
+}
+
+.draftBtn:hover:not(:disabled) {
+  background: #f0f3ff;
+}
+
+.draftBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.rascunhoFeedback {
+  font-size: 12px;
+  font-weight: 600;
+  color: #4caf50;
+  white-space: nowrap;
+}
+
 /* ─── Responsive ─── */
 @media (max-width: 640px) {
   .page {
@@ -751,6 +780,7 @@
   }
 
   .cancelBtn,
+  .draftBtn,
   .saveBtn {
     width: 100%;
     text-align: center;

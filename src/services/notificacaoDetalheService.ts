@@ -177,17 +177,11 @@ export function mapToNotificacaoDetalhe(raw: NotificacaoRaw): NotificacaoDetalhe
         rascunho: rawClassificacao.rascunho,
         // @db.Timestamptz — ISO 8601 com timezone
         dataClassificacao: formatDateTime(rawClassificacao.data_classificacao),
-        // @db.Timestamptz — exibe apenas a data; new Date() é seguro pois inclui timezone
+        // @db.Timestamptz — exibe data e hora exatas do vencimento
         dataValidade: rawClassificacao.data_validade
-          ? new Date(rawClassificacao.data_validade).toLocaleDateString("pt-BR")
+          ? formatDateTime(rawClassificacao.data_validade)
           : null,
-        diasValidade: rawClassificacao.data_validade
-          ? Math.round(
-              (new Date(rawClassificacao.data_validade).getTime() -
-                new Date(raw.data_registro).getTime()) /
-                (1000 * 60 * 60 * 24),
-            )
-          : null,
+        diasValidade: null,
         outroEnvolvido: rawClassificacao.outro_envolvido,
         outroTipoIncidente: rawClassificacao.outro_tipo_incidente,
       }

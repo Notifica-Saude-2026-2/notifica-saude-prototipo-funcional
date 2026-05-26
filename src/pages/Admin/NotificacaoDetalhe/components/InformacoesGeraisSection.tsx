@@ -1,3 +1,4 @@
+import Tooltip from "@mui/material/Tooltip";
 import { EditIcon } from "../../../../assets/icons/EditIcon";
 import { LockClosedIcon } from "../../../../assets/icons/LockClosedIcon";
 import { useAuth } from "../../../../hooks/useAuth";
@@ -31,20 +32,20 @@ export function InformacoesGeraisSection({ detalhe, isOpen, onToggle, onEdit }: 
       {isOpen && (
         <div className={styles.sectionContent} style={{ gap: 0 }}>
           <div className={styles.metaRow}>
-            <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
-              <span className={styles.metaText}>
-                Última modificação registrada em: {detalhe.dataAtualizacao}
-              </span>
-              {estaBloqueada && (
-                <span className={styles.bloqueadoBadge}>
-                  <LockClosedIcon width={11} fill="c8850a" /> Edição bloqueada — notificação encaminhada
-                </span>
-              )}
-            </div>
+            <span className={styles.metaText}>
+              Última modificação registrada em: {detalhe.dataAtualizacao}
+            </span>
             {podeEditar && (
               <button className={styles.editButton} data-testid="btn-edit-info-gerais" onClick={onEdit}>
                 <EditIcon width={15} stroke="484848" /> Editar
               </button>
+            )}
+            {estaBloqueada && (
+              <Tooltip title="Notificação encaminhada ao setor" placement="left">
+                <span className={styles.bloqueadoBadge}>
+                  <LockClosedIcon width={11} fill="c8850a" /> Edição bloqueada
+                </span>
+              </Tooltip>
             )}
           </div>
 

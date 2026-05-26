@@ -1,3 +1,4 @@
+import Tooltip from "@mui/material/Tooltip";
 import { EditIcon } from "../../../../assets/icons/EditIcon";
 import { LockClosedIcon } from "../../../../assets/icons/LockClosedIcon";
 import { useAuth } from "../../../../hooks/useAuth";
@@ -49,18 +50,9 @@ export function ClassificacaoSection({ detalhe, isOpen, onToggle, onClassificar 
                   {detalhe.classificacao.rascunho && (
                     <span className={styles.rascunhoBadge}>Classificação em andamento</span>
                   )}
-                  {/* CA05 — prazo de validade imediatamente após o texto */}
                   {!detalhe.classificacao.rascunho && detalhe.classificacao.dataValidade && (
                     <span className={styles.prazoBadge}>
                       Prazo para análise: {detalhe.classificacao.dataValidade}
-                      {detalhe.classificacao.diasValidade != null &&
-                        ` - ${detalhe.classificacao.diasValidade} dias`}
-                    </span>
-                  )}
-                  {/* CA06 — bloqueio quando encaminhada */}
-                  {foiEncaminhada && (
-                    <span className={styles.bloqueadoBadge}>
-                      <LockClosedIcon width={11} fill="c8850a" /> Edição bloqueada — notificação encaminhada
                     </span>
                   )}
                 </div>
@@ -68,6 +60,13 @@ export function ClassificacaoSection({ detalhe, isOpen, onToggle, onClassificar 
                   <button className={styles.editButton} data-testid="btn-edit-classificacao" onClick={onClassificar}>
                     <EditIcon width={15} stroke="484848" /> Editar
                   </button>
+                )}
+                {foiEncaminhada && (
+                  <Tooltip title="Notificação encaminhada ao setor" placement="left">
+                    <span className={styles.bloqueadoBadge}>
+                      <LockClosedIcon width={11} fill="c8850a" /> Edição bloqueada
+                    </span>
+                  </Tooltip>
                 )}
               </div>
 

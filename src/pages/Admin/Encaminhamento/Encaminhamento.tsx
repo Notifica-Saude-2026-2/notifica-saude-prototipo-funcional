@@ -6,9 +6,9 @@ import {
   getNotificacaoById,
   encaminharNotificacao,
 } from "../../../services/notificacaoDetalheService";
-import { fetchSetoresParaUnidade } from "../../../hooks/useCamposFormulario";
 import { ApiError } from "../../../services/api";
 import type { NotificacaoRaw } from "../../../types/notificacaoDetalhe";
+import { InfoField } from "../NotificacaoDetalhe/components/InfoField";
 import styles from "./Encaminhamento.module.css";
 
 export default function Encaminhamento() {
@@ -16,8 +16,6 @@ export default function Encaminhamento() {
   const navigate = useNavigate();
 
   const [rawData, setRawData] = useState<NotificacaoRaw | null>(null);
-  const [setores, setSetores] = useState<{ id: string; valor: string }[]>([]);
-  const [setorDestinoId, setSetorDestinoId] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [enviando, setEnviando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
@@ -26,22 +24,17 @@ export default function Encaminhamento() {
     if (!id) return;
     setLoading(true);
     getNotificacaoById(id)
-      .then(async (raw) => {
-        setRawData(raw);
-        const lista = await fetchSetoresParaUnidade(raw.unidade_id);
-        setSetores(lista);
-        if (raw.setor_id) setSetorDestinoId(raw.setor_id);
-      })
+      .then((raw) => setRawData(raw))
       .catch(() => setErro("Não foi possível carregar os dados da notificação."))
       .finally(() => setLoading(false));
   }, [id]);
 
   async function handleEncaminhar() {
-    if (!id || !setorDestinoId) return;
+    if (!id || !rawData?.setor_id) return;
     setEnviando(true);
     setErro(null);
     try {
-      await encaminharNotificacao(id, { setor_destino_id: setorDestinoId });
+      await encaminharNotificacao(id, { setor_destino_id: rawData.setor_id });
       navigate(`/incident/${id}`, { replace: true });
     } catch (err) {
       let msg = "Erro ao encaminhar. Tente novamente.";
@@ -79,28 +72,7 @@ export default function Encaminhamento() {
 
             <h1 className={styles.cardTitle}>Encaminhar notificação</h1>
 
-            <div className={styles.fieldGroup}>
-              <label className={styles.fieldLabel} htmlFor="setor-destinatario">
-                Setor destinatário
-              </label>
-              <select
-                id="setor-destinatario"
-                className={styles.fieldSelect}
-                value={setorDestinoId}
-                onChange={(e) => setSetorDestinoId(e.target.value)}
-                disabled={enviando}
-                data-testid="encaminhamento-select-setor"
-              >
-                <option value="" disabled hidden>
-                  Selecione o setor
-                </option>
-                {setores.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.valor}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <InfoField label="Setor destinatário" value={rawData.setor?.nome ?? null} />
 
             {erro && <p className={styles.error}>{erro}</p>}
 
@@ -116,7 +88,7 @@ export default function Encaminhamento() {
               <button
                 className={styles.submitBtn}
                 onClick={handleEncaminhar}
-                disabled={!setorDestinoId || enviando}
+                disabled={enviando}
                 data-testid="encaminhamento-btn-enviar"
               >
                 {enviando ? "Enviando..." : "Enviar"}

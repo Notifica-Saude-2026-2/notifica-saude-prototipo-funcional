@@ -14,7 +14,7 @@ import Tooltip from "@mui/material/Tooltip";
 import cubeIcon from "../../../assets/cube.svg";
 import fireIcon from "../../../assets/fire.svg";
 import airplaneIcon from "../../../assets/airplane.svg";
-import doneIcon from "../../../assets/done.svg";
+import archiveIcon from "../../../assets/archive.svg";
 import menuIcon from "../../../assets/menu-hamburguer.svg";
 import arrowExitIcon from "../../../assets/arrow-exit.svg";
 import { useAuth } from "../../../hooks/useAuth";
@@ -34,7 +34,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: "Todos incidentes", icon: cubeIcon, path: "/admin" },
   { label: "Novos incidentes", icon: fireIcon, path: "/admin/novos" },
   { label: "Encaminhados", icon: airplaneIcon, path: "/admin/encaminhados" },
-  { label: "Resolvidos", icon: doneIcon, path: "/admin/resolvidos" },
+  { label: "Arquivados", icon: archiveIcon, path: "/admin/resolvidos" },
 ];
 
 function getInitials(nome: string): string {
