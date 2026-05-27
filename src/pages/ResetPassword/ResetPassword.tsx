@@ -2,19 +2,26 @@ import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Input } from "../../components/common/ui/Input";
 import { Button } from "../../components/common/ui/Button";
+import { CheckCircleIcon } from "../../assets/icons/CheckCircleIcon";
 import { resetPasswordRequest } from "../../services/password.service";
 import { ApiError } from "../../services/api";
 import { validarSenha, rulesList } from "../../utils/passwordRules";
 import styles from "./ResetPassword.module.css";
 
-type Estado = "idle" | "loading" | "success" | "token_invalido" | "error";
+type Estado = "idle" | "loading" | "success" | "token_expirado" | "token_invalido" | "error";
 
-function resolverMensagemErro(err: unknown): { tipo: "token_invalido" | "error"; mensagem: string } {
+function resolverMensagemErro(err: unknown): { tipo: "token_expirado" | "token_invalido" | "error"; mensagem: string } {
   if (err instanceof ApiError) {
-    if (err.status === 400 || err.status === 404 || err.status === 410) {
+    if (err.status === 410) {
+      return {
+        tipo: "token_expirado",
+        mensagem: "Este link de recuperação expirou. Os links de recuperação são válidos por 1 hora.",
+      };
+    }
+    if (err.status === 400 || err.status === 404) {
       return {
         tipo: "token_invalido",
-        mensagem: "Este link de redefinição é inválido ou já expirou.",
+        mensagem: "Este link de recuperação é inválido. Verifique se copiou o link completo do e-mail.",
       };
     }
     if (err.status === 429) {
@@ -40,6 +47,8 @@ export default function ResetPassword() {
   const [confirmaSenha, setConfirmaSenha] = useState("");
   const [estado, setEstado] = useState<Estado>("idle");
   const [erro, setErro] = useState("");
+
+  const tokenComErro = estado === "token_expirado" || estado === "token_invalido";
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -72,7 +81,7 @@ export default function ResetPassword() {
       <div className={styles.page}>
         <div className={styles.card}>
           <div className={styles.successContent}>
-            <span className={styles.successIcon}>✅</span>
+            <CheckCircleIcon width={48} fill="#2e7d32" />
             <h1 className={styles.successTitle}>Senha redefinida</h1>
             <p className={styles.successText}>
               Sua senha foi alterada com sucesso. Você já pode fazer login com
@@ -132,7 +141,7 @@ export default function ResetPassword() {
             data-testid="reset-password-confirm-input"
           />
 
-          {estado === "token_invalido" && (
+          {tokenComErro && (
             <div className={styles.tokenErrorAlert} role="alert">
               <p className={styles.tokenErrorMessage}>
                 ⚠ {erro}
@@ -157,7 +166,7 @@ export default function ResetPassword() {
             fullWidth
             disabled={
               estado === "loading" ||
-              estado === "token_invalido" ||
+              tokenComErro ||
               novaSenha.trim() === "" ||
               confirmaSenha.trim() === ""
             }

@@ -2,9 +2,12 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Input } from "../../components/common/ui/Input";
 import { Button } from "../../components/common/ui/Button";
+import { EnvelopeIcon } from "../../assets/icons/EnvelopeIcon";
 import { forgotPasswordRequest } from "../../services/password.service";
 import { ApiError } from "../../services/api";
 import styles from "./ForgotPassword.module.css";
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 type Estado = "idle" | "loading" | "success" | "error";
 
@@ -41,7 +44,7 @@ export default function ForgotPassword() {
       <div className={styles.page}>
         <div className={styles.card}>
           <div className={styles.successContent}>
-            <span className={styles.successIcon}>✉️</span>
+            <EnvelopeIcon width={40} fill="#183eff" />
             <h1 className={styles.successTitle}>E-mail enviado</h1>
             <p className={styles.successText}>
               Se este e-mail estiver cadastrado no sistema, você receberá um
@@ -97,7 +100,7 @@ export default function ForgotPassword() {
             variant="contained"
             color="primary"
             fullWidth
-            disabled={estado === "loading" || email.trim() === ""}
+            disabled={estado === "loading" || !EMAIL_REGEX.test(email.trim())}
             className={styles.submitButton}
             data-testid="forgot-password-submit-button"
           />

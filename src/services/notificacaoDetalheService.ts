@@ -17,7 +17,7 @@ export const STATUS_LABEL: Record<string, string> = {
   NOVA: "Registrada",
   CLASSIFICADA: "Classificada",
   ANALISADA: "Em análise",
-  ENCAMINHADA_SETOR: "Encaminhada ao setor",
+  ENCAMINHADA_SETOR: "Encaminhada",
   ARQUIVADA: "Arquivada",
 };
 
