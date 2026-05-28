@@ -29,7 +29,7 @@ const STATUS_MAP: Record<string, IncidentStatus> = {
   CLASSIFICADA: "Classificado",
   ANALISADA: "Em análise",
   ENCAMINHADA_SETOR: "Encaminhado",
-  ARQUIVADA: "Resolvido",
+  ARQUIVADA: "Arquivado",
 };
 
 function formatDate(isoString: string): string {
