@@ -17,7 +17,7 @@ export const STATUS_LABEL: Record<string, string> = {
   NOVA: "Registrada",
   CLASSIFICADA: "Classificada",
   ANALISADA: "Em análise",
-  ENCAMINHADA_SETOR: "Encaminhada",
+  ENCAMINHADA_SETOR: "Encaminhado",
   ARQUIVADA: "Arquivada",
 };
 
@@ -343,13 +343,17 @@ export async function arquivarNotificacao(
 ): Promise<{ id: string; status: string }> {
   return apiFetch<{ id: string; status: string }>(`/api/notificacoes/${id}/arquivar`, {
     method: "POST",
-    body: JSON.stringify({ motivo: motivo ?? null }),
+    body: JSON.stringify(motivo ? { motivo } : {}),
   });
 }
 
 // --------------------------------------------------------------------------
 // Atualizar rascunho — PUT /api/notificacoes/:id/classificacao
 // --------------------------------------------------------------------------
+
+export async function getSetoresDisponiveis(): Promise<{ id: string; nome: string }[]> {
+  return apiFetch<{ id: string; nome: string }[]>("/api/notificacoes/setores-disponiveis");
+}
 
 export async function atualizarClassificacao(
   id: string,

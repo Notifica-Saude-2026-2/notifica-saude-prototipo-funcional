@@ -1,12 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AdminLayout } from "../../components/admin/AdminLayout/AdminLayout";
 import { FiltersBar } from "../../components/admin/FiltersBar/FiltersBar";
 import { IncidentList } from "../../components/admin/IncidentList/IncidentList";
 import { useIncidents } from "../../hooks/useIncidents";
-import { useAuth } from "../../hooks/useAuth";
-import { fetchSetoresParaUnidade } from "../../hooks/useCamposFormulario";
-import { useEffect } from "react";
 import type { FetchIncidentsParams } from "../../services/incidentService";
+import { getSetoresDisponiveis } from "../../services/notificacaoDetalheService";
 
 type Props = {
   defaultFilters?: FetchIncidentsParams;
@@ -14,16 +12,15 @@ type Props = {
 };
 
 export function IncidentPage({ defaultFilters = { sort: "recente" }, lockedFilters }: Props) {
-  const { usuario } = useAuth();
   const [filters, setFilters] = useState<FetchIncidentsParams>(defaultFilters);
   const [setores, setSetores] = useState<{ id: string; valor: string }[]>([]);
   const { incidents, loading, error } = useIncidents(filters);
 
   useEffect(() => {
-    if (usuario?.unidade_id) {
-      fetchSetoresParaUnidade(usuario.unidade_id).then(setSetores);
-    }
-  }, [usuario?.unidade_id]);
+    getSetoresDisponiveis()
+      .then((data) => setSetores(data.map((s) => ({ id: s.id, valor: s.nome }))))
+      .catch(() => setSetores([]));
+  }, []);
 
   function handleFilterChange(partial: Partial<FetchIncidentsParams>) {
     setFilters((prev) => ({ ...prev, ...partial, ...lockedFilters, page: 1 }));
