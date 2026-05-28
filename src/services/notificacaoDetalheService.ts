@@ -18,7 +18,7 @@ export const STATUS_LABEL: Record<string, string> = {
   CLASSIFICADA: "Classificada",
   ANALISADA: "Em análise",
   ENCAMINHADA_SETOR: "Encaminhado",
-  ARQUIVADA: "Arquivada",
+  ARQUIVADA: "Arquivado",
 };
 
 export const GRAU_DANO_LABEL: Record<string, string> = {
