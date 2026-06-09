@@ -45,18 +45,18 @@ O backend da aplicação está disponível em [`notifica-saude-backend`](https:/
 
 ### Épico 1 — Registro de notificações
 
-- [ ] Formulário de registro de incidente (identificado ou anônimo)
-- [ ] Exibição de confirmação de envio com identificador da notificação (RN-10)
+- [x] Formulário de registro de incidente (identificado ou anônimo)
+- [x] Exibição de confirmação de envio com identificador da notificação (RN-10)
 
 ### Épico 2 — Gestão e classificação
 
-- [ ] Painel de notificações registradas (NSP)
-- [ ] Visualização detalhada de uma notificação
-- [ ] Edição e complemento de informações da notificação (NSP)
-- [ ] Formulário de classificação de incidente por tipo e grau de dano (NSP)
-- [ ] Encaminhamento da notificação ao setor responsável (NSP)
-- [ ] Registro de investigação e causa raiz (Gestor de Área)
-- [ ] Registro de plano de ação e ações corretivas (Gestor de Área)
+- [x] Painel de notificações registradas (NSP)
+- [x] Visualização detalhada de uma notificação
+- [x] Edição e complemento de informações da notificação (NSP)
+- [x] Formulário de classificação de incidente por tipo e grau de dano (NSP)
+- [x] Encaminhamento da notificação ao setor responsável (NSP)
+- [x] Registro de investigação e causa raiz (Gestor de Área)
+- [x] Registro de plano de ação e ações corretivas (Gestor de Área)
 
 ### Transversal
 
@@ -146,12 +146,15 @@ A aplicação estará disponível em `http://localhost:5173`.
 
 ### Scripts disponíveis
 
-| Comando           | Descrição                                               |
-| ----------------- | ------------------------------------------------------- |
-| `npm run dev`     | Inicia o servidor de desenvolvimento (Vite)             |
-| `npm run build`   | Verifica os tipos TypeScript e gera o build de produção |
-| `npm run preview` | Pré-visualiza o build de produção localmente            |
-| `npm run lint`    | Executa o ESLint no código-fonte                        |
+| Comando             | Descrição                                                    |
+| ------------------- | ------------------------------------------------------------ |
+| `npm run dev`       | Inicia o servidor de desenvolvimento (Vite)                  |
+| `npm run build`     | Verifica os tipos TypeScript (`tsc --noEmit`) e gera o build |
+| `npm run preview`   | Pré-visualiza o build de produção localmente                 |
+| `npm run lint`      | Executa o oxlint no código-fonte                             |
+| `npm run lint:fix`  | Executa o oxlint corrigindo problemas automaticamente        |
+| `npm run fmt`       | Formata o código-fonte com oxfmt                             |
+| `npm run fmt:check` | Verifica a formatação do código sem alterar arquivos         |
 
 ---
 
@@ -159,45 +162,40 @@ A aplicação estará disponível em `http://localhost:5173`.
 
 ```
 notifica-saude-frontend/
-├── public/                         # Arquivos estáticos públicos
+├── public/                              # Arquivos estáticos públicos (favicon, icons)
 ├── src/
+│   ├── assets/                          # Imagens e ícones SVG
 │   ├── components/
-│   │   ├── common/                 # Componentes genéricos reutilizáveis
-│   │   │   ├── Header/
-│   │   │   ├── Sidebar/
-│   │   │   └── StatusBadge/
-│   │   └── forms/                  # Componentes de formulário
-│   ├── contexts/
-│   │   ├── AuthContext.tsx          # Contexto de autenticação e sessão
-│   │   └── TenantContext.tsx        # Contexto de unidade de saúde ativa
-│   ├── hooks/
-│   │   ├── useAuth.ts
-│   │   └── useNotificacao.ts
+│   │   ├── admin/                       # Componentes da área administrativa
+│   │   │   ├── AdminDrawer/  AdminLayout/  FiltersBar/
+│   │   │   └── IncidentCard/  IncidentList/
+│   │   ├── common/
+│   │   │   ├── layout/                  # Header, Footer, PublicLayout
+│   │   │   └── ui/                      # Button, Input, Select, Textarea, FileInput, AccessibilityWidget
+│   │   └── form/                        # FieldRenderer, StepForm, RadioGroup, CheckboxGroup, MultiSelect, DateInput
+│   ├── constants/                       # Constantes da aplicação (ex.: notificacaoStatus)
+│   ├── contexts/                        # AuthContext, AccessibilityContext
+│   ├── hooks/                           # useAuth, useNotificacao, useIncidents, useCamposFormulario, ...
 │   ├── pages/
-│   │   ├── Login/
+│   │   ├── Home/  Login/  ForgotPassword/  ResetPassword/
 │   │   ├── Notificacao/
-│   │   │   ├── RegistroNotificacao.tsx
-│   │   │   ├── ListaNotificacoes.tsx
-│   │   │   └── DetalheNotificacao.tsx
-│   │   ├── Classificacao/
-│   │   ├── Investigacao/
-│   │   ├── PlanoAcao/
-│   │   ├── Relatorios/
-│   │   └── Admin/
+│   │   └── Admin/NotificacaoDetalhe/
 │   ├── routes/
-│   │   ├── index.tsx               # Definição de rotas
-│   │   └── PrivateRoute.tsx        # Proteção de rotas por perfil (RBAC)
-│   ├── services/
-│   │   ├── api.ts                  # Configuração base do cliente HTTP
-│   │   ├── notificacao.service.ts
-│   │   ├── auth.service.ts
-│   │   └── usuario.service.ts
-│   ├── types/                      # Tipos e interfaces TypeScript
+│   │   ├── index.tsx                    # Definição de rotas
+│   │   └── PrivateRoute.tsx             # Proteção de rotas por perfil (RBAC)
+│   ├── services/                        # api.ts + serviços REST (auth, notificacao, incident, password, ...)
+│   ├── templates/                       # Templates (ex.: e-mail)
+│   ├── types/                           # Tipos e interfaces TypeScript
+│   ├── utils/                           # Utilitários (cookies, formatDate, statusColors, passwordRules)
 │   ├── App.tsx
 │   └── main.tsx
-├── .env.example
+├── .github/                             # Workflows de CI, Lighthouse e notificação Discord
+├── Dockerfile  docker-compose.yml  nginx.conf  .dockerignore
+├── lefthook.yml  lighthouserc.json
+├── .oxlintrc.json  .oxfmtrc.json  eslint.config.js
+├── .env.example  vite.config.ts  index.html
 ├── package.json
-└── tsconfig.json
+└── tsconfig.json  tsconfig.app.json  tsconfig.node.json
 ```
 
 ---
