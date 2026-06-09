@@ -40,6 +40,7 @@ type UseNotificacaoDetalheResult = {
   salvar: (payload: UpdateNotificacaoPayload) => Promise<boolean>;
   onClassificacaoSuccess: (classificacao: ClassificacaoRaw) => void;
   onArquivarSuccess: () => void;
+  onEncaminharSuccess: () => void;
 };
 
 export function useNotificacaoDetalhe(): UseNotificacaoDetalheResult {
@@ -143,6 +144,12 @@ export function useNotificacaoDetalhe(): UseNotificacaoDetalheResult {
     getNotificacaoHistorico(rawData.id).then((data) => setHistorico((h) => ({ ...h, data })));
   }
 
+  function onEncaminharSuccess() {
+    if (!rawData) return;
+    setRawData({ ...rawData, status: "ENCAMINHADA_SETOR" });
+    getNotificacaoHistorico(rawData.id).then((data) => setHistorico((h) => ({ ...h, data })));
+  }
+
   return {
     detalhe,
     rawData,
@@ -153,5 +160,6 @@ export function useNotificacaoDetalhe(): UseNotificacaoDetalheResult {
     salvar,
     onClassificacaoSuccess,
     onArquivarSuccess,
+    onEncaminharSuccess,
   };
 }

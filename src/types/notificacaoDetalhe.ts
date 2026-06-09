@@ -90,6 +90,7 @@ export type NotificacaoDetalheDTO = {
   statusLabel: string;
   dataIncidente: string;
   dataCadastro: string;
+  dataCadastroCompleto: string;
   dataAtualizacao: string; // Nova propriedade para incluir hora
   descricao: string | null;
   anonima: boolean;
@@ -98,6 +99,10 @@ export type NotificacaoDetalheDTO = {
   turno: string | null;
   papel: string | null;
   paciente: PacienteDTO;
+  notificante: {
+    nome: string | null;
+    contato: string | null;
+  };
   classificacao: ClassificacaoDTO | null;
 };
 

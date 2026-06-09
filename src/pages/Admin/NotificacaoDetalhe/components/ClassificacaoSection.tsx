@@ -22,7 +22,7 @@ export function ClassificacaoSection({ detalhe, isOpen, onToggle, onClassificar 
 
   return (
     <div className={styles.section}>
-      <div className={styles.sectionHeader} onClick={onToggle}>
+      <div className={styles.sectionHeader} onClick={onToggle} data-testid="section-classificacao-toggle">
         Classificação
         <div className={`${styles.collapseIcon} ${isOpen ? styles.open : styles.closed}`} />
       </div>
@@ -74,9 +74,7 @@ export function ClassificacaoSection({ detalhe, isOpen, onToggle, onClassificar 
                 <div className={styles.infoItem}>
                   <div className={styles.fieldHeader}>Classificação</div>
                   <div className={styles.fieldValue}>
-                    {detalhe.classificacao.tipoIncidente ?? (
-                      <span className={styles.emptyValue}>—</span>
-                    )}
+                    {detalhe.classificacao.tipoIncidente || "---"}
                   </div>
                 </div>
 
@@ -94,33 +92,35 @@ export function ClassificacaoSection({ detalhe, isOpen, onToggle, onClassificar 
                   </div>
                 )}
 
-                <div className={styles.infoItem}>
-                  <div className={styles.fieldHeader}>Tipo de incidente</div>
-                  <div className={styles.fieldValue}>
-                    {detalhe.classificacao.tiposIncidentes.length > 0
-                      ? detalhe.classificacao.tiposIncidentes.join(", ")
-                      : "—"}
+                {!detalhe.classificacao.tipoEspecifico && (
+                  <div className={styles.infoItem}>
+                    <div className={styles.fieldHeader}>Tipo de incidente</div>
+                    <div className={styles.fieldValue}>
+                      {detalhe.classificacao.tiposIncidentes.length > 0
+                        ? detalhe.classificacao.tiposIncidentes.join(", ")
+                        : "---"}
+                    </div>
                   </div>
-                </div>
+                )}
 
                 <div className={styles.infoItem}>
                   <div className={styles.fieldHeader}>Envolve</div>
                   <div className={styles.fieldValue}>
                     {detalhe.classificacao.envolvidos.length > 0
                       ? detalhe.classificacao.envolvidos.join(", ")
-                      : "—"}
+                      : "---"}
                   </div>
                 </div>
 
                 {detalhe.classificacao.observacoes && (
-                  <div className={`${styles.infoItem} ${styles.infoItemFull}`}>
+                  <div className={styles.infoItem}>
                     <div className={styles.fieldHeader}>Observações do NSP</div>
                     <div className={styles.fieldValue}>{detalhe.classificacao.observacoes}</div>
                   </div>
                 )}
 
                 {detalhe.classificacao.protocoloInvestigacao && (
-                  <div className={`${styles.infoItem} ${styles.infoItemFull}`}>
+                  <div className={styles.infoItem}>
                     <div className={styles.fieldHeader}>Protocolo de investigação sugerido</div>
                     <div className={styles.fieldValue}>
                       {detalhe.classificacao.protocoloInvestigacao}

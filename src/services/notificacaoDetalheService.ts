@@ -146,10 +146,14 @@ export function mapToNotificacaoDetalhe(raw: NotificacaoRaw): NotificacaoDetalhe
   const rawClassificacao = raw.classificacao;
   const classificacao: ClassificacaoDTO | null = rawClassificacao
     ? {
+        // Quando o backend retorna tipo_incidente nulo em Never Events, inferimos "Evento adverso"
+        // pois Never Event é sempre uma subcategoria de Evento Adverso
         tipoIncidente: rawClassificacao.tipo_incidente
           ? (TIPO_INCIDENTE_LABEL[rawClassificacao.tipo_incidente] ??
             rawClassificacao.tipo_incidente)
-          : null,
+          : rawClassificacao.grau_dano === "NEVER_EVENT"
+            ? TIPO_INCIDENTE_LABEL["EVENTO_ADVERSO"]
+            : null,
         tipoEspecifico: rawClassificacao.tipo_especifico
           ? (TIPO_ESPECIFICO_LABEL[rawClassificacao.tipo_especifico] ??
             rawClassificacao.tipo_especifico)
@@ -194,8 +198,10 @@ export function mapToNotificacaoDetalhe(raw: NotificacaoRaw): NotificacaoDetalhe
     statusLabel: STATUS_LABEL[raw.status] ?? raw.status,
     // @db.Date — Prisma serializa como UTC midnight; formatDateOnly extrai a parte da data sem converter timezone
     dataIncidente: formatDateOnly(raw.data_incidente),
-    // @db.Timestamptz — ISO 8601 com timezone
-    dataCadastro: formatDateTime(raw.data_registro),
+    // @db.Date — exibe apenas a data de criação, sem horário
+    dataCadastro: formatDateOnly(raw.data_registro),
+    // @db.Timestamptz — ISO 8601 com timezone; usado no histórico para mostrar data e hora
+    dataCadastroCompleto: formatDateTime(raw.data_registro),
     // @db.Timestamptz — ISO 8601 com timezone
     dataAtualizacao: formatDateTime(raw.updated_at ?? raw.data_registro),
     descricao: raw.descricao,
@@ -223,6 +229,10 @@ export function mapToNotificacaoDetalhe(raw: NotificacaoRaw): NotificacaoDetalhe
             return sexoValor;
           })()
         : null,
+    },
+    notificante: {
+      nome: getRespostaValor(respostas, CAMPO_IDS.NOME_OPC),
+      contato: getRespostaValor(respostas, CAMPO_IDS.CONTATO_OPC),
     },
     classificacao,
   };

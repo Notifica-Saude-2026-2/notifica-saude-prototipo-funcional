@@ -6,6 +6,7 @@ import {
 } from "../../../services/notificacaoDetalheService";
 import type { ClassificacaoRaw } from "../../../types/notificacaoDetalhe";
 import { ApiError } from "../../../services/api";
+import { ModalBase } from "./components/ModalBase";
 import styles from "./NotificacaoDetalhe.module.css";
 
 // --------------------------------------------------------------------------
@@ -484,13 +485,13 @@ export function ClassificacaoModal({
   }
 
   return (
-    <div className={styles.overlay} role="dialog" aria-modal="true" aria-label="Registar análise">
-      <div className={styles.modal}>
+    <ModalBase onClose={onClose} ariaLabel="Registrar classificação">
+      <>
         {/* Header */}
         <div className={styles.modalHeader}>
           <div style={{ display: "flex", flexDirection: "column" }}>
             <h2 className={styles.modalTitle}>
-              {isRascunho ? "Continuar classificação" : "Registrar análise"}
+              {isRascunho ? "Continuar classificação" : "Registrar classificação"}
             </h2>
             {classificacaoExistente &&
               !classificacaoExistente.rascunho &&
@@ -668,7 +669,7 @@ export function ClassificacaoModal({
             </button>
           </div>
         </div>
-      </div>
-    </div>
+      </>
+    </ModalBase>
   );
 }

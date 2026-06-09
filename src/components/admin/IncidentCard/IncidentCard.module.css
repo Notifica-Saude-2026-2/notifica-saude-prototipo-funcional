@@ -1,6 +1,6 @@
 .card {
   display: grid;
-  grid-template-columns: 5px 1fr 220px;
+  grid-template-columns: 5px 4fr 2fr;
   background: #fff;
   border-radius: 0;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
@@ -124,6 +124,11 @@
   align-items: baseline;
   gap: 4px;
   flex-wrap: wrap;
+}
+
+.rightItem .label {
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .rightValue {

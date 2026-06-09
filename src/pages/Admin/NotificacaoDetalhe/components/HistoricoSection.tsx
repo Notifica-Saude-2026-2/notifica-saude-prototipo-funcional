@@ -20,7 +20,7 @@ type Props = {
   onToggle: () => void;
 };
 
-const HISTORICO_PAGE_SIZE = 5;
+const HISTORICO_PAGE_SIZE = 10;
 
 type HistoricoGrupo = {
   key: string;
@@ -75,7 +75,7 @@ export function HistoricoSection({ detalhe, historico, isOpen, onToggle }: Props
   const criacaoGrupo: HistoricoGrupo = {
     key: "criacao",
     data_alteracao: "",
-    formattedDate: detalhe.dataCadastro,
+    formattedDate: detalhe.dataCadastroCompleto,
     usuario: { nome: "Notificante" },
     campos: [],
     val_anterior: null,
@@ -88,7 +88,7 @@ export function HistoricoSection({ detalhe, historico, isOpen, onToggle }: Props
 
   return (
     <div className={styles.section}>
-      <div className={styles.sectionHeader} onClick={onToggle}>
+      <div className={styles.sectionHeader} onClick={onToggle} data-testid="section-historico-toggle">
         Histórico de modificações
         <div className={`${styles.collapseIcon} ${isOpen ? styles.open : styles.closed}`} />
       </div>

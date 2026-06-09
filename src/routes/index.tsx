@@ -11,7 +11,6 @@ import AdminArquivados from "../pages/Admin/AdminArquivados";
 import AdminNovos from "../pages/Admin/AdminNovos";
 import AdminEncaminhados from "../pages/Admin/AdminEncaminhados";
 import NotificacaoDetalhe from "../pages/Admin/NotificacaoDetalhe/NotificacaoDetalhe";
-import Encaminhamento from "../pages/Admin/Encaminhamento/Encaminhamento";
 
 export function AppRoutes() {
   return (
@@ -29,7 +28,6 @@ export function AppRoutes() {
         <Route path="/admin/encaminhados" element={<AdminEncaminhados />} />
         <Route path="/admin/resolvidos" element={<AdminArquivados />} />
         <Route path="/incident/:id" element={<NotificacaoDetalhe />} />
-        <Route path="/incident/:id/encaminhamento" element={<Encaminhamento />} />
       </Route>
     </Routes>
   );

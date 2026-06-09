@@ -3,6 +3,7 @@ import { fetchSetoresParaUnidade } from "../../../../hooks/useCamposFormulario";
 import type { UpdateNotificacaoPayload } from "../../../../services/notificacaoDetalheService";
 import type { NotificacaoDetalheDTO, NotificacaoRaw } from "../../../../types/notificacaoDetalhe";
 import { CAMPO_IDS } from "../../../../types/notificacaoDetalhe";
+import { ModalBase } from "./ModalBase";
 import styles from "../NotificacaoDetalhe.module.css";
 
 // --------------------------------------------------------------------------
@@ -73,6 +74,12 @@ export function EditModal({
   const [sexoId, setSexoId] = useState(findOpcaoId(CAMPO_IDS.SEXO));
   const [sexoOutroText, setSexoOutroText] = useState<string>(
     rawData.respostas.find((r) => r.campo_id === CAMPO_IDS.SEXO)?.valor_texto ?? "",
+  );
+  const [nomeNotificante, setNomeNotificante] = useState<string>(
+    rawData.respostas.find((r) => r.campo_id === CAMPO_IDS.NOME_OPC)?.valor_texto ?? "",
+  );
+  const [contatoNotificante, setContatoNotificante] = useState<string>(
+    rawData.respostas.find((r) => r.campo_id === CAMPO_IDS.CONTATO_OPC)?.valor_texto ?? "",
   );
 
   const [localError, setLocalError] = useState<string | null>(null);
@@ -156,6 +163,14 @@ export function EditModal({
       });
     }
 
+    if (nomeNotificante.trim()) {
+      respostas.push({ campo_id: CAMPO_IDS.NOME_OPC, valor: nomeNotificante.trim() });
+    }
+
+    if (contatoNotificante.trim()) {
+      respostas.push({ campo_id: CAMPO_IDS.CONTATO_OPC, valor: contatoNotificante.trim() });
+    }
+
     onSave({
       data_incidente: dataIncidente ? new Date(dataIncidente).toISOString() : undefined,
       unidade_id: unidadeId,
@@ -165,13 +180,8 @@ export function EditModal({
   }
 
   return (
-    <div
-      className={styles.overlay}
-      role="dialog"
-      aria-modal="true"
-      aria-label="Editar informações gerais"
-    >
-      <div className={styles.modal}>
+    <ModalBase onClose={onClose} ariaLabel="Editar informações gerais">
+      <>
         {/* Cabeçalho do modal */}
         <div className={styles.modalHeader}>
           <h2 className={styles.modalTitle}>Editar informações gerais</h2>
@@ -327,6 +337,34 @@ export function EditModal({
             </div>
           )}
 
+          {/* Nome e contato do notificante (opcionais) */}
+          <div className={styles.modalGrid}>
+            <div>
+              <p className={styles.formQuestion}>Nome do notificante</p>
+              <input
+                type="text"
+                className={styles.modalInput}
+                data-testid="field-nome-notificante"
+                value={nomeNotificante}
+                onChange={(e) => setNomeNotificante(e.target.value)}
+                placeholder="Nome do notificante (opcional)"
+                disabled={saving}
+              />
+            </div>
+            <div>
+              <p className={styles.formQuestion}>Celular/E-mail</p>
+              <input
+                type="text"
+                className={styles.modalInput}
+                data-testid="field-contato-notificante"
+                value={contatoNotificante}
+                onChange={(e) => setContatoNotificante(e.target.value)}
+                placeholder="Celular ou e-mail (opcional)"
+                disabled={saving}
+              />
+            </div>
+          </div>
+
           {(localError || saveError) && (
             <p className={styles.modalError}>{localError || saveError}</p>
           )}
@@ -342,7 +380,7 @@ export function EditModal({
             {saving ? "Salvando..." : "Salvar alterações"}
           </button>
         </div>
-      </div>
-    </div>
+      </>
+    </ModalBase>
   );
 }

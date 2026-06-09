@@ -1,4 +1,3 @@
-import { useNavigate } from "react-router-dom";
 import { PaperAirplaneIcon } from "../../../../assets/icons/PaperAirplaneIcon";
 import { useAuth } from "../../../../hooks/useAuth";
 import type { NotificacaoDetalheDTO } from "../../../../types/notificacaoDetalhe";
@@ -8,10 +7,10 @@ type Props = {
   detalhe: NotificacaoDetalheDTO;
   isOpen: boolean;
   onToggle: () => void;
+  onEncaminhar: () => void;
 };
 
-export function AnaliseSection({ detalhe, isOpen, onToggle }: Props) {
-  const navigate = useNavigate();
+export function AnaliseSection({ detalhe, isOpen, onToggle, onEncaminhar }: Props) {
   const { usuario } = useAuth();
 
   const podeEncaminhar =
@@ -20,7 +19,7 @@ export function AnaliseSection({ detalhe, isOpen, onToggle }: Props) {
 
   return (
     <div className={styles.section}>
-      <div className={styles.sectionHeader} onClick={onToggle}>
+      <div className={styles.sectionHeader} onClick={onToggle} data-testid="section-analise-toggle">
         Análise
         <div className={`${styles.collapseIcon} ${isOpen ? styles.open : styles.closed}`} />
       </div>
@@ -35,7 +34,7 @@ export function AnaliseSection({ detalhe, isOpen, onToggle }: Props) {
           {podeEncaminhar && (
             <button
               className={styles.primaryButton}
-              onClick={() => navigate(`/incident/${detalhe.id}/encaminhamento`)}
+              onClick={onEncaminhar}
               data-testid="btn-encaminhar-notificacao"
             >
               <PaperAirplaneIcon width={15} stroke="ffffff" /> Encaminhar notificação

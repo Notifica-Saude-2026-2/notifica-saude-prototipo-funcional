@@ -15,6 +15,7 @@ import { ClassificacaoSection } from "./components/ClassificacaoSection";
 import { AnaliseSection } from "./components/AnaliseSection";
 import { HistoricoSection } from "./components/HistoricoSection";
 import { EditModal } from "./components/EditModal";
+import { EncaminhamentoModal } from "./components/EncaminhamentoModal";
 
 export default function NotificacaoDetalhe() {
   const navigate = useNavigate();
@@ -28,6 +29,7 @@ export default function NotificacaoDetalhe() {
     salvar,
     onClassificacaoSuccess,
     onArquivarSuccess,
+    onEncaminharSuccess,
   } = useNotificacaoDetalhe();
 
   type SectionKey = "info" | "classification" | "analysis" | "history";
@@ -40,6 +42,7 @@ export default function NotificacaoDetalhe() {
 
   const [editOpen, setEditOpen] = useState(false);
   const [classificacaoOpen, setClassificacaoOpen] = useState(false);
+  const [encaminhamentoOpen, setEncaminhamentoOpen] = useState(false);
 
   const toggleSection = (key: SectionKey) =>
     setOpenSections((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -104,6 +107,7 @@ export default function NotificacaoDetalhe() {
             detalhe={detalhe}
             isOpen={openSections.analysis}
             onToggle={() => toggleSection("analysis")}
+            onEncaminhar={() => setEncaminhamentoOpen(true)}
           />
 
           <HistoricoSection
@@ -136,6 +140,16 @@ export default function NotificacaoDetalhe() {
               onClassificacaoSuccess(classificacao);
               setClassificacaoOpen(false);
             }}
+          />
+        )}
+
+        {encaminhamentoOpen && rawData && (
+          <EncaminhamentoModal
+            notificacaoId={detalhe.id}
+            setorNome={rawData.setor?.nome ?? null}
+            setorDestinoId={rawData.setor_id}
+            onClose={() => setEncaminhamentoOpen(false)}
+            onSuccess={onEncaminharSuccess}
           />
         )}
       </div>

@@ -24,7 +24,7 @@ export function InformacoesGeraisSection({ detalhe, isOpen, onToggle, onEdit }: 
 
   return (
     <div className={styles.section}>
-      <div className={styles.sectionHeader} onClick={onToggle}>
+      <div className={styles.sectionHeader} onClick={onToggle} data-testid="section-info-gerais-toggle">
         Informações gerais
         <div className={`${styles.collapseIcon} ${isOpen ? styles.open : styles.closed}`} />
       </div>
@@ -53,7 +53,7 @@ export function InformacoesGeraisSection({ detalhe, isOpen, onToggle, onEdit }: 
             <div className={`${styles.infoItem} ${styles.infoItemFull}`}>
               <div className={styles.fieldHeader}>Descrição</div>
               <div className={styles.fieldValue}>
-                {detalhe.descricao ?? <span className={styles.emptyValue}>—</span>}
+                {detalhe.descricao || "---"}
               </div>
             </div>
           </div>
@@ -83,6 +83,11 @@ export function InformacoesGeraisSection({ detalhe, isOpen, onToggle, onEdit }: 
               </div>
             </div>
           )}
+
+          <div className={styles.infoGrid}>
+            <InfoField label="Nome do notificante" value={detalhe.notificante.nome} />
+            <InfoField label="Celular/E-mail" value={detalhe.notificante.contato} />
+          </div>
         </div>
       )}
     </div>

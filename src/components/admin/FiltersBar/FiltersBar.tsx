@@ -7,6 +7,26 @@ import Select from "@mui/material/Select";
 import FormControl from "@mui/material/FormControl";
 import styles from "./FiltersBar.module.css";
 
+function ChevronIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="#A8AEBE"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
+      <polyline points="6 9 12 15 18 9" />
+    </svg>
+  );
+}
+
 const PAGE_TITLES: Record<string, string> = {
   "/admin": "Todos incidentes",
   "/admin/novos": "Novos incidentes",
@@ -138,6 +158,7 @@ export function FiltersBar({
             value={tipoIncidente}
             onChange={(e) => onTipoIncidenteChange(e.target.value)}
             displayEmpty
+            IconComponent={ChevronIcon}
             sx={{
               backgroundColor: "#fff",
               borderRadius: "8px",
@@ -167,6 +188,7 @@ export function FiltersBar({
               value={grauDano}
               onChange={(e) => onGrauDanoChange(e.target.value)}
               displayEmpty
+              IconComponent={ChevronIcon}
               sx={{
                 backgroundColor: "#fff",
                 borderRadius: "8px",
@@ -196,6 +218,7 @@ export function FiltersBar({
             value={setorId}
             onChange={(e) => onSetorChange(e.target.value)}
             displayEmpty
+            IconComponent={ChevronIcon}
             sx={{
               backgroundColor: "#fff",
               borderRadius: "8px",
@@ -227,6 +250,7 @@ export function FiltersBar({
             inputProps={{ "data-testid": "admin-sort" }}
             value={sort}
             onChange={(e) => onSortChange(e.target.value as "recente" | "antigo")}
+            IconComponent={ChevronIcon}
             sx={{
               backgroundColor: "#fff",
               borderRadius: "8px",

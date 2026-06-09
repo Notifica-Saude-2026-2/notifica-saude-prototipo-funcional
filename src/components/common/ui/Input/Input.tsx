@@ -7,10 +7,12 @@ type InputProps = {
   labelClassName?: string;
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
   placeholder?: string;
   type?: string;
   disabled?: boolean;
   error?: string;
+  errorTestId?: string;
   fullWidth?: boolean;
   max?: string;
   required?: boolean;
@@ -23,10 +25,12 @@ export const Input: React.FC<InputProps> = ({
   labelClassName,
   value,
   onChange,
+  onBlur,
   placeholder,
   type = "text",
   disabled = false,
   error,
+  errorTestId,
   fullWidth = false,
   max,
   required = false,
@@ -61,6 +65,7 @@ export const Input: React.FC<InputProps> = ({
           type={resolvedType}
           value={value}
           onChange={onChange}
+          onBlur={onBlur}
           placeholder={placeholder}
           disabled={disabled}
           max={max}
@@ -81,7 +86,7 @@ export const Input: React.FC<InputProps> = ({
         )}
       </div>
 
-      {hasError && <span className={styles.errorMessage}>{error}</span>}
+      {hasError && <span className={styles.errorMessage} data-testid={errorTestId}>{error}</span>}
     </div>
   );
 };
