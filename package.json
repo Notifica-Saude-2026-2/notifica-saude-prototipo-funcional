@@ -1,7 +1,19 @@
 {
   "name": "notifica-saude-frontend",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "private": true,
+  "description": "Frontend do Notifica Saúde — React 18 + TypeScript + Vite",
+  "keywords": [],
+  "homepage": "https://github.com/Notifica-Saude/notifica-saude-frontend#readme",
+  "bugs": {
+    "url": "https://github.com/Notifica-Saude/notifica-saude-frontend/issues"
+  },
+  "license": "ISC",
+  "author": "",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Notifica-Saude/notifica-saude-frontend.git"
+  },
   "type": "module",
   "scripts": {
     "dev": "vite",
