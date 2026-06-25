@@ -247,4 +247,4 @@ Proponentes:
 
 ## Licença
 
-Inserir
+Disponível sob a licença BSD disponível em [LICENSE](./LICENSE).
