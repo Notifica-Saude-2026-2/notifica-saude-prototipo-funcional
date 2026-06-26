@@ -202,7 +202,7 @@ notifica-saude-frontend/
 
 ## Documentação
 
-Os artefatos de documentação do projeto estão disponíveis em [`docs/`](docs/): — Inserir link do repositório de documentação
+Os artefatos de documentação do projeto estão disponíveis em [`docs/`](docs/).
 
 ---
 
