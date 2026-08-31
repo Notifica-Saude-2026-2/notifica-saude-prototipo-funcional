@@ -1,5 +1,3 @@
-import { apiFetch } from "./api";
-
 export type LoginPayload = {
   email: string;
   senha: string;
@@ -19,8 +17,18 @@ export type LoginResponse = {
 };
 
 export async function loginRequest(payload: LoginPayload): Promise<LoginResponse> {
-  return apiFetch<LoginResponse>("/api/auth/login", {
-    method: "POST",
-    body: JSON.stringify(payload),
-  });
+  // Protótipo local: qualquer credencial com formato válido dá acesso ao ambiente demonstrativo.
+  if (!payload.email.trim() || !payload.senha.trim()) throw new Error("Informe e-mail e senha.");
+  return {
+    token: "sessao-local",
+    expiresIn: "8h",
+    usuario: {
+      id: "usuario-demo",
+      nome: "Administrador do protótipo",
+      email: payload.email.trim(),
+      perfil: "ADMINISTRADOR",
+      unidade_id: "unidade-hospital-regional",
+      setor_id: "setor-emergencia",
+    },
+  };
 }

@@ -1,15 +1,7 @@
-import { apiFetch } from "./api";
-
 export async function forgotPasswordRequest(email: string): Promise<void> {
-  return apiFetch<void>("/api/auth/forgot-password", {
-    method: "POST",
-    body: JSON.stringify({ email }),
-  });
+  if (!email) throw new Error("Informe um e-mail válido.");
 }
 
 export async function resetPasswordRequest(token: string, novaSenha: string): Promise<void> {
-  return apiFetch<void>("/api/auth/reset-password", {
-    method: "POST",
-    body: JSON.stringify({ token, novaSenha }),
-  });
+  if (!token || !novaSenha) throw new Error("Dados inválidos.");
 }

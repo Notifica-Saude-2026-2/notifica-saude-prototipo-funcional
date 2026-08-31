@@ -1,6 +1,6 @@
 import type { CampoDinamico } from "../types/formulario";
-import { apiFetch } from "./api";
+import { camposFormulario } from "./localStore";
 
 export function getCamposFormularioAtivos(): Promise<CampoDinamico[]> {
-  return apiFetch<CampoDinamico[]>("/api/campos-formulario/ativos");
+  return Promise.resolve(camposFormulario);
 }

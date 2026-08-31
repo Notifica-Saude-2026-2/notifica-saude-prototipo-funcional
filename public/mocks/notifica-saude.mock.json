@@ -1,0 +1,143 @@
+{
+  "unidades": [
+    { "id": "unidade-hospital-regional", "nome": "Hospital Regional de Mato Grosso do Sul" },
+    { "id": "unidade-hospital-universitario", "nome": "Hospital Universitário" }
+  ],
+  "setores": [
+    { "id": "setor-emergencia", "nome": "Emergência" },
+    { "id": "setor-enfermaria", "nome": "Enfermaria" },
+    { "id": "setor-uti", "nome": "UTI" },
+    { "id": "setor-centro-cirurgico", "nome": "Centro cirúrgico" }
+  ],
+  "notificacoes": [
+    {
+      "id": "notificacao-1001",
+      "codigo": "1001",
+      "status": "NOVA",
+      "dataIncidente": "2026-08-20",
+      "dataRegistro": "2026-08-21T12:00:00.000Z",
+      "unidadeId": "unidade-hospital-regional",
+      "setorId": "setor-emergencia",
+      "descricao": "Paciente apresentou risco de queda durante transferência para o leito.",
+      "classificacao": null,
+      "historico": [
+        {
+          "data": "2026-08-21T12:00:00.000Z",
+          "autor": "Maria da Silva",
+          "acao": "criou a notificação"
+        }
+      ],
+      "planosAcao": []
+    },
+    {
+      "id": "notificacao-1002",
+      "codigo": "1002",
+      "status": "CLASSIFICADA",
+      "dataIncidente": "2026-08-22",
+      "dataRegistro": "2026-08-22T14:30:00.000Z",
+      "unidadeId": "unidade-hospital-regional",
+      "setorId": "setor-enfermaria",
+      "descricao": "Queda sem dano durante deslocamento no corredor.",
+      "classificacao": {
+        "tipo": "Evento adverso",
+        "grauDano": "Leve",
+        "tiposIncidentes": ["Queda"],
+        "envolvidos": ["Paciente"]
+      },
+      "historico": [
+        {
+          "data": "2026-08-22T14:30:00.000Z",
+          "autor": "Administrador do protótipo",
+          "acao": "registrou a classificação"
+        }
+      ],
+      "planosAcao": [
+        {
+          "id": "acao-1002-1",
+          "what": "Reforçar a conferência do risco de queda antes do deslocamento.",
+          "where": "Corredor da enfermaria",
+          "responsible": "Enfermeira responsável pelo turno",
+          "startDate": "2026-08-25",
+          "conclusionDate": "2026-09-05",
+          "status": "Em andamento",
+          "resource": "Não",
+          "approval": "Não",
+          "proof": "Checklist de deslocamento preenchido.",
+          "expectedResult": "Reduzir o risco de quedas durante o transporte.",
+          "verification": "Auditoria semanal dos checklists.",
+          "verificationDate": "2026-09-12",
+          "indicator": "Sim",
+          "indicatorDetail": "Percentual de checklists preenchidos",
+          "realStartDate": "2026-08-25",
+          "realConclusionDate": "",
+          "completionDescription": "",
+          "observedResult": "",
+          "effectiveness": "",
+          "effectivenessReason": "",
+          "delayReason": "",
+          "newConclusionDate": "",
+          "cancellationReason": "",
+          "evidenceLocation": "Pasta compartilhada / Segurança do Paciente",
+          "attachments": [],
+          "updatedAt": "2026-08-31T16:37:00.000Z"
+        }
+      ]
+    },
+    {
+      "id": "notificacao-1003",
+      "codigo": "1003",
+      "status": "ENCAMINHADA_SETOR",
+      "dataIncidente": "2026-08-23",
+      "dataRegistro": "2026-08-23T09:15:00.000Z",
+      "unidadeId": "unidade-hospital-regional",
+      "setorId": "setor-uti",
+      "descricao": "Equipamento apresentou falha durante atendimento.",
+      "classificacao": {
+        "tipo": "Incidente sem dano",
+        "grauDano": "Sem dano",
+        "tiposIncidentes": ["Falha de equipamento"],
+        "envolvidos": ["Profissional"]
+      },
+      "historico": [
+        {
+          "data": "2026-08-23T09:15:00.000Z",
+          "autor": "Administrador do protótipo",
+          "acao": "encaminhou a notificação para o setor"
+        }
+      ],
+      "planosAcao": [
+        {
+          "id": "acao-1003-1",
+          "what": "Solicitar manutenção preventiva do equipamento.",
+          "where": "UTI adulto",
+          "responsible": "Coordenação de manutenção",
+          "startDate": "2026-08-24",
+          "conclusionDate": "2026-08-29",
+          "status": "Atrasada",
+          "resource": "Sim",
+          "resourceDetail": "Peças de reposição e visita técnica.",
+          "approval": "Não",
+          "proof": "Ordem de serviço assinada.",
+          "expectedResult": "Equipamento disponível e seguro para uso.",
+          "verification": "Teste funcional após a manutenção.",
+          "verificationDate": "2026-09-02",
+          "indicator": "Não",
+          "realStartDate": "2026-08-24",
+          "realConclusionDate": "",
+          "completionDescription": "",
+          "observedResult": "Aguardando a chegada da peça.",
+          "effectiveness": "Parcialmente",
+          "effectivenessReason": "A manutenção foi iniciada, mas ainda não finalizada.",
+          "delayReason": "Atraso no fornecimento da peça.",
+          "newConclusionDate": "2026-09-06",
+          "cancellationReason": "",
+          "evidenceLocation": "Sistema de manutenção, OS 2026-448",
+          "attachments": [
+            { "name": "ordem-servico-2026-448.pdf", "type": "application/pdf", "size": 245760 }
+          ],
+          "updatedAt": "2026-08-31T14:10:00.000Z"
+        }
+      ]
+    }
+  ]
+}

@@ -16,6 +16,8 @@ export function AnaliseSection({ detalhe, isOpen, onToggle, onEncaminhar }: Prop
   const podeEncaminhar =
     (usuario?.perfil === "NSP" || usuario?.perfil === "ADMINISTRADOR") &&
     detalhe.statusRaw === "CLASSIFICADA";
+  const analiseConcluida =
+    detalhe.statusRaw === "ANALISADA" || detalhe.statusRaw === "ENCAMINHADA_SETOR";
 
   return (
     <div className={styles.section}>
@@ -27,9 +29,11 @@ export function AnaliseSection({ detalhe, isOpen, onToggle, onEncaminhar }: Prop
       {isOpen && (
         <div className={styles.sectionContent}>
           <span className={styles.sectionValue}>
-            {detalhe.classificacao
-              ? "Esse incidente ainda está pendente de análise."
-              : "Não é possível registrar análises em um incidente sem classificação."}
+            {analiseConcluida
+              ? "A análise deste incidente foi concluída."
+              : detalhe.classificacao
+                ? "Esse incidente ainda está pendente de análise."
+                : "Não é possível registrar análises em um incidente sem classificação."}
           </span>
           {podeEncaminhar && (
             <button

@@ -822,6 +822,34 @@
   border-color: #2f4fff;
 }
 
+.actionPlanIntro { margin: 0; font-size: 13px; color: #222; }
+.actionPlanChoice { border: 0; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 20px; }
+.actionPlanChoice legend { width: 100%; }
+.actionPlanChoice label { font-size: 13px; cursor: pointer; }
+.actionPlanCard { border: 1px solid #dfe3ee; border-radius: 8px; padding: 12px; background: #fafbff; font-size: 13px; }
+.actionPlanCard p { margin: 8px 0 0; }
+.actionCardsGrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.actionCardHeader, .actionCardControls { display: flex; align-items: center; gap: 6px; }
+.actionCardHeader { justify-content: space-between; }
+.actionStatus { padding: 4px 7px; font-size: 11px; border-radius: 6px; white-space: nowrap; }
+.actionStatusInProgress { color: #2855a6; background: #e5edff; }
+.actionStatusCompleted { color: #26734d; background: #e3f5eb; }
+.actionStatusPartial { color: #946200; background: #fff2cc; }
+.actionStatusLate { color: #b42318; background: #fee4e2; }
+.actionStatusCancelled { color: #5b6475; background: #edf0f5; }
+.actionIconButton { width: 28px; height: 25px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid #656565; border-radius: 5px; background: #fff; cursor: pointer; color: #333; }
+.actionIconButton:hover { color: #2f4fff; border-color: #2f4fff; }
+.actionCardLabel { color: #68708a; font-weight: 600; margin-top: 11px !important; }
+.actionCardValue { margin-top: 2px !important; }
+.actionCardDates { font-size: 12px; }
+.actionCardUpdated { font-size: 11px; font-weight: 600; }
+.actionDetails { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 16px; margin-top: 12px; padding-top: 12px; border-top: 1px solid #e3e6ef; }
+.actionDetails span { display: block; color: #68708a; font-size: 11px; font-weight: 600; }
+.actionDetails p { margin-top: 3px; font-size: 12px; }
+.actionAttachmentInput { margin-top: 2px; font-size: 13px; }
+.actionAttachmentList { display: flex; flex-direction: column; gap: 3px; margin-top: 8px; font-size: 12px; color: #68708a; }
+
+
 /* ─── Menu de contexto de status ─── */
 .contextMenuWrapper {
   position: relative;

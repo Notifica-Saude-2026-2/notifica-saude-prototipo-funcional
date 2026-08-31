@@ -1,4 +1,14 @@
-import { apiFetch } from "./api";
+import {
+  addHistorico,
+  arquivarLocal,
+  atualizarLocal,
+  classificarLocal,
+  encaminharLocal,
+  getHistorico,
+  getNotificacoes,
+  newLocalId,
+  setores,
+} from "./localStore";
 import {
   CAMPO_IDS,
   type NotificacaoRaw,
@@ -51,13 +61,14 @@ export const TIPO_ESPECIFICO_LABEL: Record<string, string> = {
   LESAO_PRESSAO_ESTAGIO_3: "Lesão por Pressão estágio 3 (perda total da espessura da pele)",
   LESAO_PRESSAO_ESTAGIO_4:
     "Lesão por Pressão estágio 4 (perda total da espessura da pele e perda tissular)",
-  LESAO_PRESSAO_NAO_CLASSIFICAVEL: "Lesão por Pressão Não Classificável (perda tissular não visível)",
-  OBITO_QUEDA_DURANTE_CUIDADOS:
-    "Óbito associado à queda do paciente durante prestação de cuidados",
+  LESAO_PRESSAO_NAO_CLASSIFICAVEL:
+    "Lesão por Pressão Não Classificável (perda tissular não visível)",
+  OBITO_QUEDA_DURANTE_CUIDADOS: "Óbito associado à queda do paciente durante prestação de cuidados",
   OBITO_INTRAOPERATORIO_POS_OPERATORIO_ASA_CLASSE_1:
     "Óbito intraoperatório ou pós-operatório em paciente ASA Classe 1",
   OBITO_LESAO_GRAVE_FUGA_PACIENTE: "Óbito ou lesão grave associado à fuga do paciente",
-  OBITO_LESAO_GRAVE_CHOQUE_ELETRICO: "Óbito ou lesão grave por choque elétrico durante a assistência",
+  OBITO_LESAO_GRAVE_CHOQUE_ELETRICO:
+    "Óbito ou lesão grave por choque elétrico durante a assistência",
   OBITO_LESAO_GRAVE_OBJETO_METALICO_RESSONANCIA_MAGNETICA:
     "Óbito ou lesão grave por objeto metálico em área de Ressonância Magnética",
   OBITO_LESAO_GRAVE_CONTENCAO_FISICA_GRADES:
@@ -131,7 +142,6 @@ function getRespostaValor(respostas: RespostaItemRaw[], campoId: string): string
 function getRespostaTexto(respostas: RespostaItemRaw[], campoId: string): string | null {
   return respostas.find((r) => r.campo_id === campoId)?.valor_texto ?? null;
 }
-
 
 // --------------------------------------------------------------------------
 // Mapper: raw → DTO
@@ -261,17 +271,16 @@ export type UpdateNotificacaoPayload = {
 // --------------------------------------------------------------------------
 
 export async function getNotificacaoById(id: string): Promise<NotificacaoRaw> {
-  return apiFetch<NotificacaoRaw>(`/api/notificacoes/${id}`);
+  const item = getNotificacoes().find((notificacao) => notificacao.id === id);
+  if (!item) throw new Error("Notificação não encontrada.");
+  return item;
 }
 
 export async function updateNotificacao(
   id: string,
   payload: UpdateNotificacaoPayload,
 ): Promise<NotificacaoRaw> {
-  return apiFetch<NotificacaoRaw>(`/api/notificacoes/${id}`, {
-    method: "PUT",
-    body: JSON.stringify(payload),
-  });
+  return atualizarLocal(id, payload);
 }
 
 export type HistoricoItemAPI = {
@@ -284,7 +293,7 @@ export type HistoricoItemAPI = {
 };
 
 export async function getNotificacaoHistorico(id: string): Promise<HistoricoItemAPI[]> {
-  return apiFetch<HistoricoItemAPI[]>(`/api/notificacoes/${id}/historico`);
+  return getHistorico(id);
 }
 
 // --------------------------------------------------------------------------
@@ -311,10 +320,7 @@ export async function classificarNotificacao(
   id: string,
   payload: ClassificarPayload,
 ): Promise<ClassificacaoRaw> {
-  return apiFetch<ClassificacaoRaw>(`/api/notificacoes/${id}/classificacao`, {
-    method: "POST",
-    body: JSON.stringify(payload),
-  });
+  return classificarLocal(id, payload);
 }
 
 // --------------------------------------------------------------------------
@@ -337,10 +343,18 @@ export async function encaminharNotificacao(
   id: string,
   payload: { mensagem?: string; setor_destino_id?: string } = {},
 ): Promise<EncaminhamentoResponse> {
-  return apiFetch<EncaminhamentoResponse>(`/api/notificacoes/${id}/encaminhamento`, {
-    method: "POST",
-    body: JSON.stringify(payload),
-  });
+  const notificacao = encaminharLocal(id, payload.setor_destino_id);
+  return {
+    encaminhamento: {
+      id: newLocalId(),
+      notificacao_id: id,
+      setor_destino_id: payload.setor_destino_id ?? notificacao.setor_id,
+      responsavel_nsp_id: "usuario-demo",
+      mensagem: payload.mensagem ?? null,
+      data_envio: new Date().toISOString(),
+    },
+    notificacao: { id, status: notificacao.status },
+  };
 }
 
 // --------------------------------------------------------------------------
@@ -351,10 +365,9 @@ export async function arquivarNotificacao(
   id: string,
   motivo?: string | null,
 ): Promise<{ id: string; status: string }> {
-  return apiFetch<{ id: string; status: string }>(`/api/notificacoes/${id}/arquivar`, {
-    method: "POST",
-    body: JSON.stringify(motivo ? { motivo } : {}),
-  });
+  const notificacao = arquivarLocal(id);
+  if (motivo?.trim()) addHistorico(id, "motivo do arquivamento", null, motivo.trim());
+  return { id: notificacao.id, status: notificacao.status };
 }
 
 // --------------------------------------------------------------------------
@@ -362,15 +375,12 @@ export async function arquivarNotificacao(
 // --------------------------------------------------------------------------
 
 export async function getSetoresDisponiveis(): Promise<{ id: string; nome: string }[]> {
-  return apiFetch<{ id: string; nome: string }[]>("/api/notificacoes/setores-disponiveis");
+  return setores;
 }
 
 export async function atualizarClassificacao(
   id: string,
   payload: ClassificarPayload,
 ): Promise<ClassificacaoRaw> {
-  return apiFetch<ClassificacaoRaw>(`/api/notificacoes/${id}/classificacao`, {
-    method: "PUT",
-    body: JSON.stringify(payload),
-  });
+  return classificarLocal(id, payload);
 }

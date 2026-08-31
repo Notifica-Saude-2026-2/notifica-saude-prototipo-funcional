@@ -1,4 +1,4 @@
-import { apiFetch } from "./api";
+import { getNotificacoes } from "./localStore";
 import type { Incident, IncidentStatus } from "../types/incident";
 import type { NotificacaoRaw } from "../types/notificacaoDetalhe";
 import { CAMPO_IDS } from "../types/notificacaoDetalhe";
@@ -101,24 +101,31 @@ export async function fetchIncidents(
     sort,
   } = params;
 
-  const query = new URLSearchParams({
-    page: String(page),
-    limit: String(limit),
-  });
-
-  if (status) query.set("status", status);
-  if (unidade_id) query.set("unidade_id", unidade_id);
-  if (setor_id) query.set("setor_id", setor_id);
-  if (tipo_incidente) query.set("tipo_incidente", tipo_incidente);
-  if (grau_dano) query.set("grau_dano", grau_dano);
-  if (search) query.set("search", search);
-  if (sort) query.set("sort", sort);
-
-  const response = await apiFetch<ListNotificacoesResponse>(`/api/notificacoes?${query}`);
+  let data = getNotificacoes();
+  if (status) data = data.filter((item) => item.status === status);
+  if (unidade_id) data = data.filter((item) => item.unidade_id === unidade_id);
+  if (setor_id) data = data.filter((item) => item.setor_id === setor_id);
+  if (tipo_incidente)
+    data = data.filter((item) => item.classificacao?.tipo_incidente === tipo_incidente);
+  if (grau_dano) data = data.filter((item) => item.classificacao?.grau_dano === grau_dano);
+  if (search) {
+    const query = search.toLowerCase();
+    data = data.filter(
+      (item) =>
+        item.descricao?.toLowerCase().includes(query) || item.codigo_formatado?.includes(query),
+    );
+  }
+  data.sort((a, b) =>
+    sort === "antigo"
+      ? a.data_registro.localeCompare(b.data_registro)
+      : b.data_registro.localeCompare(a.data_registro),
+  );
+  const total = data.length;
+  data = data.slice((page - 1) * limit, page * limit);
 
   return {
-    incidents: response.data.map(mapToIncident),
-    rawItems: response.data,
-    total: response.total,
+    incidents: data.map(mapToIncident),
+    rawItems: data,
+    total,
   };
 }
