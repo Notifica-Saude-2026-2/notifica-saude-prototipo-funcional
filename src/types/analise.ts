@@ -25,7 +25,7 @@ export function normalizeOption(opt: ChoiceOption): ChoiceOptionObj {
   return typeof opt === "string" ? { value: opt, label: opt } : opt;
 }
 
-export type TableColumnType = "text" | "textarea" | "date" | "time" | "choice";
+export type TableColumnType = "text" | "textarea" | "date" | "time" | "choice" | "currency";
 
 export type TableColumn = {
   id: string;

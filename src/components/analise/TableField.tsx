@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import type { AnaliseField, ChoiceOption, TableColumnType } from "../../types/analise";
+import { formatCurrencyInput } from "../../utils/currency";
 import { normalizeOption } from "../../types/analise";
 import styles from "./Analise.module.css";
 
@@ -25,6 +26,7 @@ const COLUMN_WIDTH: Record<TableColumnType, string> = {
   choice: "180px",
   text: "200px",
   textarea: "260px",
+  currency: "140px",
 };
 
 export function TableField({ field, value, onChange, readOnly, "data-testid": dataTestId }: Props) {
@@ -258,6 +260,20 @@ function TableCell({
         type="time"
         value={value}
         onChange={(e) => onChange(e.target.value)}
+        disabled={readOnly}
+        data-testid={testId}
+      />
+    );
+  }
+  if (type === "currency") {
+    return (
+      <input
+        className={styles.cellInput}
+        type="text"
+        inputMode="numeric"
+        placeholder="R$ 0,00"
+        value={value}
+        onChange={(e) => onChange(formatCurrencyInput(e.target.value))}
         disabled={readOnly}
         data-testid={testId}
       />

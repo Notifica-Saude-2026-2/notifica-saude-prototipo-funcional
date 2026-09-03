@@ -144,7 +144,7 @@ export function ActionPlanModal({ onClose, onSave, initialWhat, origemRecomendac
                 minRows: 1,
                 columns: [
                   { id: "pedido", label: "Pedido / item", type: "text" },
-                  { id: "preco", label: "Preço estimado", type: "text" },
+                  { id: "preco", label: "Preço estimado", type: "currency" },
                 ],
               }}
               value={plan.resourceItems}
