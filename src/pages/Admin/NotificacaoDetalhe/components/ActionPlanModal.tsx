@@ -1,87 +1,36 @@
 import { useState } from "react";
 import { ModalBase } from "./ModalBase";
 import styles from "../NotificacaoDetalhe.module.css";
+import { createEmptyActionPlan } from "../../../../types/actionPlan";
+import type {
+  ActionAttachment,
+  ActionEffect,
+  ActionPlan,
+  ActionStatus,
+} from "../../../../types/actionPlan";
+import { TableField } from "../../../../components/analise/TableField";
 
-export type ActionPlan = {
-  id: string;
-  what: string;
-  where: string;
-  responsible: string;
-  startDate: string;
-  conclusionDate: string;
-  resource: "Sim" | "Não";
-  resourceDetail: string;
-  approval: "Sim" | "Não";
-  approvalDetail: string;
-  proof: string;
-  expectedResult: string;
-  verification: string;
-  verificationDate: string;
-  indicator: "Sim" | "Não";
-  indicatorDetail: string;
-  status: ActionStatus;
-  realStartDate: string;
-  realConclusionDate: string;
-  completionDescription: string;
-  observedResult: string;
-  effectiveness: ActionEffect;
-  effectivenessReason: string;
-  delayReason: string;
-  newConclusionDate: string;
-  cancellationReason: string;
-  evidenceLocation: string;
-  attachments: ActionAttachment[];
-  updatedAt: string;
-};
-
-export type ActionStatus =
-  | "Em andamento"
-  | "Parcialmente concluído"
-  | "Concluído"
-  | "Atrasada"
-  | "Cancelada";
-export type ActionEffect = "" | "Sim" | "Parcialmente" | "Não";
-export type ActionAttachment = { name: string; type: string; size: number };
+export type {
+  ActionPlan,
+  ActionStatus,
+  ActionEffect,
+  ActionAttachment,
+} from "../../../../types/actionPlan";
 
 type Props = {
   onClose: () => void;
   onSave: (plan: ActionPlan) => void;
+  /** Pré-preenche "O que será feito" (ex.: recomendação vinda da Análise ACR/Londres). */
+  initialWhat?: string;
+  /** Marca a ação como originada de uma recomendação da Análise, para não sugeri-la de novo. */
+  origemRecomendacao?: string;
 };
 
-const emptyPlan: ActionPlan = {
-  id: "",
-  what: "",
-  where: "",
-  responsible: "",
-  startDate: "",
-  conclusionDate: "",
-  resource: "Não",
-  resourceDetail: "",
-  approval: "Não",
-  approvalDetail: "",
-  proof: "",
-  expectedResult: "",
-  verification: "",
-  verificationDate: "",
-  indicator: "Não",
-  indicatorDetail: "",
-  status: "Em andamento",
-  realStartDate: "",
-  realConclusionDate: "",
-  completionDescription: "",
-  observedResult: "",
-  effectiveness: "",
-  effectivenessReason: "",
-  delayReason: "",
-  newConclusionDate: "",
-  cancellationReason: "",
-  evidenceLocation: "",
-  attachments: [],
-  updatedAt: "",
-};
-
-export function ActionPlanModal({ onClose, onSave }: Props) {
-  const [plan, setPlan] = useState<ActionPlan>(emptyPlan);
+export function ActionPlanModal({ onClose, onSave, initialWhat, origemRecomendacao }: Props) {
+  const [plan, setPlan] = useState<ActionPlan>({
+    ...createEmptyActionPlan(),
+    what: initialWhat ?? "",
+  });
   const [error, setError] = useState("");
 
   function update<K extends keyof ActionPlan>(field: K, value: ActionPlan[K]) {
@@ -101,8 +50,11 @@ export function ActionPlanModal({ onClose, onSave }: Props) {
       plan.verification,
       plan.verificationDate,
     ];
+    const resourceItemsPreenchidos =
+      plan.resourceItems.length > 0 &&
+      plan.resourceItems.every((item) => (item.pedido ?? "").trim() && (item.preco ?? "").trim());
     const missingConditionalDetail =
-      (plan.resource === "Sim" && !plan.resourceDetail.trim()) ||
+      (plan.resource === "Sim" && !resourceItemsPreenchidos) ||
       (plan.approval === "Sim" && !plan.approvalDetail.trim()) ||
       (plan.indicator === "Sim" && !plan.indicatorDetail.trim());
 
@@ -111,7 +63,7 @@ export function ActionPlanModal({ onClose, onSave }: Props) {
       return;
     }
 
-    onSave(plan);
+    onSave(origemRecomendacao ? { ...plan, origemRecomendacao } : plan);
   }
 
   return (
@@ -181,12 +133,25 @@ export function ActionPlanModal({ onClose, onSave }: Props) {
           onChange={(value) => update("resource", value)}
         />
         {plan.resource === "Sim" && (
-          <TextField
-            label="Se sim, qual e quanto irá custar?"
-            value={plan.resourceDetail}
-            onChange={(value) => update("resourceDetail", value)}
-            required
-          />
+          <div>
+            <p className={styles.formQuestion}>Se sim, qual e quanto irá custar? *</p>
+            <TableField
+              field={{
+                id: "resource_items",
+                label: "",
+                type: "table",
+                repeatable: true,
+                minRows: 1,
+                columns: [
+                  { id: "pedido", label: "Pedido / item", type: "text" },
+                  { id: "preco", label: "Preço estimado", type: "text" },
+                ],
+              }}
+              value={plan.resourceItems}
+              onChange={(rows) => update("resourceItems", rows)}
+              data-testid="action-plan-resource-items"
+            />
+          </div>
         )}
         <ChoiceField
           label="7. Depende da aprovação da Alta Gestão?"

@@ -12,6 +12,7 @@ import type {
   NotificacaoDetalheDTO,
   ClassificacaoRaw,
 } from "../types/notificacaoDetalhe";
+import type { MetodologiaAbordagem } from "../types/analise";
 import { ApiError } from "../services/api";
 import { useEffect } from "react";
 
@@ -38,9 +39,16 @@ type UseNotificacaoDetalheResult = {
   update: UpdateState;
   historico: { data: HistoricoItem[]; loading: boolean; error: string | null };
   salvar: (payload: UpdateNotificacaoPayload) => Promise<boolean>;
-  onClassificacaoSuccess: (classificacao: ClassificacaoRaw) => void;
+  onClassificacaoSuccess: (
+    classificacao: ClassificacaoRaw,
+    metodologia?: MetodologiaAbordagem,
+  ) => void;
   onArquivarSuccess: () => void;
   onEncaminharSuccess: () => void;
+  onDecisaoPosAnaliseSuccess: () => void;
+  onMetodologiaEscolhida: (metodologia: MetodologiaAbordagem) => void;
+  onPlanoAcaoRegistrado: (raw: NotificacaoRaw) => void;
+  onPlanoAcaoAtualizado: (raw: NotificacaoRaw) => void;
 };
 
 export function useNotificacaoDetalhe(): UseNotificacaoDetalheResult {
@@ -127,12 +135,16 @@ export function useNotificacaoDetalhe(): UseNotificacaoDetalheResult {
     }
   }
 
-  function onClassificacaoSuccess(classificacao: ClassificacaoRaw) {
+  function onClassificacaoSuccess(
+    classificacao: ClassificacaoRaw,
+    metodologia?: MetodologiaAbordagem,
+  ) {
     if (!rawData) return;
     const updated: NotificacaoRaw = {
       ...rawData,
       status: classificacao.rascunho ? rawData.status : "CLASSIFICADA",
       classificacao,
+      ...(metodologia ? { metodologia_analise: metodologia } : {}),
     };
     setRawData(updated);
     getNotificacaoHistorico(rawData.id).then((data) => setHistorico((h) => ({ ...h, data })));
@@ -150,6 +162,26 @@ export function useNotificacaoDetalhe(): UseNotificacaoDetalheResult {
     getNotificacaoHistorico(rawData.id).then((data) => setHistorico((h) => ({ ...h, data })));
   }
 
+  function onDecisaoPosAnaliseSuccess() {
+    if (!rawData) return;
+    setRawData({ ...rawData, status: "ANALISADA" });
+    getNotificacaoHistorico(rawData.id).then((data) => setHistorico((h) => ({ ...h, data })));
+  }
+
+  function onMetodologiaEscolhida(metodologia: MetodologiaAbordagem) {
+    if (!rawData) return;
+    setRawData({ ...rawData, metodologia_analise: metodologia });
+  }
+
+  function onPlanoAcaoRegistrado(raw: NotificacaoRaw) {
+    setRawData(raw);
+    getNotificacaoHistorico(raw.id).then((data) => setHistorico((h) => ({ ...h, data })));
+  }
+
+  function onPlanoAcaoAtualizado(raw: NotificacaoRaw) {
+    setRawData(raw);
+  }
+
   return {
     detalhe,
     rawData,
@@ -161,5 +193,9 @@ export function useNotificacaoDetalhe(): UseNotificacaoDetalheResult {
     onClassificacaoSuccess,
     onArquivarSuccess,
     onEncaminharSuccess,
+    onDecisaoPosAnaliseSuccess,
+    onMetodologiaEscolhida,
+    onPlanoAcaoRegistrado,
+    onPlanoAcaoAtualizado,
   };
 }

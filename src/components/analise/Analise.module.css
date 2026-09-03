@@ -1,0 +1,501 @@
+.fieldBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.fieldLabel {
+  font-weight: 600;
+  color: var(--text-h);
+  font-size: 14px;
+  /* Este seletor também é usado em <p> (ex.: EscolhaMetodologiaStep) — o espaçamento entre
+     campos já é controlado pelo gap do .fieldBlock/flex pai, então zeramos a margem padrão
+     do navegador para <p> pra não somar dois espaçamentos e abrir um vão grande no topo. */
+  margin: 0;
+}
+
+.helpText {
+  font-size: 12px;
+  color: var(--text);
+  opacity: 0.85;
+  margin: 0;
+}
+
+.infoBox {
+  background: #eef2ff;
+  border: 1px solid #d6ddfd;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 13px;
+  color: #33395c;
+}
+
+.readonlyBox {
+  background: #f6f6f8;
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: 13px;
+  color: var(--text);
+}
+
+/* -------------------------------- Tabela -------------------------------- */
+
+.tableWrap {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  min-width: 480px;
+}
+
+/* table-layout: fixed + colgroup (ver TableField.tsx) — largura de coluna estável e padronizada,
+   independente do conteúdo digitado em cada célula. */
+.tableFixed {
+  table-layout: fixed;
+}
+
+.tableFixed td,
+.tableFixed th {
+  overflow-wrap: break-word;
+}
+
+.table th {
+  text-align: left;
+  background: #f6f6f8;
+  padding: 8px 10px;
+  font-weight: 600;
+  color: var(--text-h);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.table td {
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+.rowLabelCell {
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--text-h);
+}
+
+.cellInput {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-size: 13px;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.cellInput:focus {
+  outline: 2px solid #2f4fff33;
+  border-color: #2f4fff;
+}
+
+.cellInput:disabled {
+  background: #f6f6f8;
+  color: var(--text-h);
+  opacity: 1;
+  resize: none;
+}
+
+.cellSelect {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-size: 13px;
+  font-family: inherit;
+  background: #fff;
+}
+
+.cellSelect:disabled {
+  background: #f6f6f8;
+  color: var(--text-h);
+  opacity: 1;
+}
+
+.removeRowBtn {
+  background: none;
+  border: none;
+  color: #b3261e;
+  cursor: pointer;
+  font-size: 13px;
+  padding: 4px 6px;
+}
+
+.removeRowBtn:hover {
+  text-decoration: underline;
+}
+
+.addRowBtn {
+  border: 1px dashed #2f4fff;
+  background: #f4f6ff;
+  color: #2f4fff;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 13px;
+  cursor: pointer;
+  align-self: flex-start;
+  margin-top: 8px;
+}
+
+.addRowBtn:hover {
+  background: #e8ecff;
+}
+
+/* ---------------- Tabela com campo de texto longo -> lista de cards --------------- */
+/* Um campo textarea numa célula de tabela fica sempre espremido/feio, então quando alguma coluna
+   é do tipo "textarea" a linha vira um card em vez de <tr>: os campos curtos (nº, data, escolha)
+   ficam lado a lado (2 por linha) e os de texto longo ocupam a largura toda, cada um embaixo do
+   outro, com espaço de verdade pra escrever. Tabelas só com campos curtos continuam como tabela. */
+.tableCardList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tableCard {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px;
+  background: #fafbff;
+}
+
+.tableCardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.tableCardTitle {
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--text-h);
+}
+
+.tableCardBody {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.tableCardShortGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 14px;
+}
+
+.tableCardField {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tableCardFieldLabel {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+@media (max-width: 560px) {
+  .tableCardShortGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* --------------------------- Checklist com detalhe ------------------------ */
+
+/* Um pouco mais de respiro entre a pergunta e a 1ª opção (margin-top) — o espaçamento entre as
+   opções em si continua o mesmo (gap: 4px), só a distância até a pergunta acima aumenta. */
+.checklistList {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.checklistItem {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: #fff;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+/* Sinaliza que o card inteiro é clicável antes da seleção (afordância visual — hoje só existia
+   feedback depois de já ter marcado a opção). */
+.checklistItem:hover:not(.checklistItemChecked) {
+  border-color: #b7c2ff;
+  background: #fafbff;
+}
+
+.checklistItemChecked {
+  border-color: #2f4fff;
+  background: #f8f9ff;
+}
+
+.checklistHeaderRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.checklistCheckbox {
+  margin-top: 3px;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.checklistItemLabel {
+  font-weight: 600;
+  color: var(--text-h);
+  font-size: 13px;
+}
+
+.checklistItemExample {
+  font-size: 12px;
+  color: var(--text);
+  opacity: 0.8;
+  margin: 2px 0 0;
+}
+
+.checklistDetailGrid {
+  margin: 10px 0 2px 26px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ----------------------------- Aprofundamento ----------------------------- */
+
+.groupItemCard {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 12px;
+  background: #fafbff;
+}
+
+.groupItemHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.groupItemTitle {
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--text-h);
+}
+
+.toolOption {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  margin-bottom: 6px;
+}
+
+.toolOptionSelected {
+  border-color: #2f4fff;
+  background: #f4f6ff;
+}
+
+.toolOptionLabel {
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--text-h);
+}
+
+.toolOptionWhen {
+  font-size: 12px;
+  color: var(--text);
+  opacity: 0.85;
+  margin: 2px 0 0;
+}
+
+.addItemBtn {
+  border: 1px dashed #2f4fff;
+  background: #f4f6ff;
+  color: #2f4fff;
+  border-radius: 6px;
+  padding: 8px 14px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.removeItemBtn {
+  background: none;
+  border: none;
+  color: #b3261e;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+/* ----------------------- Navegação entre passos (steps) -------------------- */
+/* Mesma linguagem visual dos botões de ação do restante do admin (ver .saveBtn/.cancelBtn
+   em NotificacaoDetalhe.module.css) — usados para avançar/voltar dentro de um passo (ex.:
+   Escolha da metodologia), sem tomar emprestado o estilo tracejado de "adicionar item" nem
+   o vermelho de "remover", que sinalizam ações bem diferentes de uma navegação comum. */
+.stepPrimaryBtn {
+  background: linear-gradient(90deg, #2f4fff 0%, #1d2fd6 100%);
+  border: none;
+  border-radius: 8px;
+  padding: 8px 20px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  transition: opacity 0.15s;
+}
+
+.stepPrimaryBtn:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.stepPrimaryBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.stepSecondaryBtn {
+  background: none;
+  border: 1.5px solid #ddd;
+  border-radius: 8px;
+  padding: 8px 20px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #555;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  transition: all 0.15s;
+}
+
+.stepSecondaryBtn:hover {
+  border-color: #2f4fff;
+  color: #2f4fff;
+}
+
+/* -------------------------------- Ishikawa -------------------------------- */
+
+.ishikawaWrap {
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+  padding: 14px;
+  background: #fbfbfd;
+}
+
+.ishikawaEmpty {
+  font-size: 13px;
+  color: var(--text);
+  opacity: 0.75;
+}
+
+.ishikawaSpine {
+  border-left: 3px solid #2f4fff;
+  padding-left: 10px;
+  margin-bottom: 10px;
+}
+
+.ishikawaSpineTitle {
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--text-h);
+  margin-bottom: 4px;
+}
+
+.ishikawaFinding {
+  font-size: 12px;
+  color: var(--text);
+  margin: 2px 0;
+}
+
+/* ------------------------------ Sugestão banner ---------------------------- */
+
+.suggestionBanner {
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: 13px;
+  margin-bottom: 16px;
+  border: 1px solid #ffd48a;
+  background: #fff8ec;
+  color: #6b4a05;
+}
+
+.suggestionBannerStrong {
+  border-color: #f3a53d;
+  background: #fff2dc;
+}
+
+/* ------------------------------- Flow chrome ------------------------------- */
+
+.flowPage {
+  /* Mesma área útil da tela de detalhe da notificação (NotificacaoDetalhe .page) — a análise é
+     mais uma etapa da mesma jornada e deve ocupar o mesmo espaço, não ficar num cartão estreito
+     centralizado. */
+  padding: 30px 40px 60px;
+  box-sizing: border-box;
+}
+
+.flowHeader {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 10px;
+}
+
+.flowHeader h1 {
+  align-self: stretch;
+}
+
+/* Subtítulo simples abaixo do título da análise — sem caixa/fundo, pra alinhar exatamente com a
+   margem esquerda do h1 acima (uma caixa com padding lateral deslocava o texto pra direita). */
+.flowNote {
+  font-size: 12.5px;
+  color: var(--text);
+  margin-bottom: 18px;
+}
+
+/* Resumo da notificação/classificação fixo entre o subtítulo e o card branco do formulário. Fundo
+   mais claro/destacado (mesma linguagem de .infoBox) em vez do cinza neutro usado dentro da Seção
+   1 — aqui ele precisa chamar mais atenção, já que fica sempre visível acima do formulário. */
+.flowResumoFixed {
+  background: #eef2ff;
+  border: 1px solid #d6ddfd;
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: 13px;
+  color: #33395c;
+  margin-bottom: 18px;
+}
+
+.sectionDescription {
+  font-size: 13px;
+  color: var(--text);
+  margin-bottom: 14px;
+}
+

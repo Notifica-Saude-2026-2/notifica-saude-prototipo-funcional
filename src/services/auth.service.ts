@@ -24,7 +24,7 @@ export async function loginRequest(payload: LoginPayload): Promise<LoginResponse
     expiresIn: "8h",
     usuario: {
       id: "usuario-demo",
-      nome: "Administrador do protótipo",
+      nome: "Administrador",
       email: payload.email.trim(),
       perfil: "ADMINISTRADOR",
       unidade_id: "unidade-hospital-regional",

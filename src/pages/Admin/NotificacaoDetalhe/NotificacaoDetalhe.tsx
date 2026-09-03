@@ -3,8 +3,12 @@ import { useNavigate } from "react-router-dom";
 import { AdminLayout } from "../../../components/admin/AdminLayout/AdminLayout";
 import { useNotificacaoDetalhe } from "../../../hooks/useNotificacaoDetalhe";
 import { ClassificacaoModal } from "./ClassificacaoModal";
-import { ArrowLeftIcon } from "../../../assets/icons/ArrowLeftIcon";
-import type { UpdateNotificacaoPayload } from "../../../services/notificacaoDetalheService";
+import { BackButton } from "../../../components/common/ui/BackButton";
+import {
+  registrarPlanoAcao,
+  atualizarPlanoAcao,
+  type UpdateNotificacaoPayload,
+} from "../../../services/notificacaoDetalheService";
 import styles from "./NotificacaoDetalhe.module.css";
 import { STATUS_EDITAVEIS } from "../../../constants/notificacaoStatus";
 
@@ -16,6 +20,9 @@ import { AnaliseSection } from "./components/AnaliseSection";
 import { HistoricoSection } from "./components/HistoricoSection";
 import { EditModal } from "./components/EditModal";
 import { EncaminhamentoModal } from "./components/EncaminhamentoModal";
+import { JustificarNaoEncaminharModal } from "./components/JustificarNaoEncaminharModal";
+import { EscolherMetodologiaModal } from "./components/EscolherMetodologiaModal";
+import { AnaliseResumoModal } from "./components/AnaliseResumoModal";
 import { ActionPlanSection } from "./components/ActionPlanSection";
 import { ActionPlanModal, type ActionPlan } from "./components/ActionPlanModal";
 import { ActionUpdateModal } from "./components/ActionUpdateModal";
@@ -33,6 +40,10 @@ export default function NotificacaoDetalhe() {
     onClassificacaoSuccess,
     onArquivarSuccess,
     onEncaminharSuccess,
+    onDecisaoPosAnaliseSuccess,
+    onMetodologiaEscolhida,
+    onPlanoAcaoRegistrado,
+    onPlanoAcaoAtualizado,
   } = useNotificacaoDetalhe();
 
   type SectionKey = "info" | "classification" | "analysis" | "actionPlan" | "history";
@@ -47,12 +58,24 @@ export default function NotificacaoDetalhe() {
   const [editOpen, setEditOpen] = useState(false);
   const [classificacaoOpen, setClassificacaoOpen] = useState(false);
   const [encaminhamentoOpen, setEncaminhamentoOpen] = useState(false);
+  const [encaminhamentoPosAnaliseOpen, setEncaminhamentoPosAnaliseOpen] = useState(false);
+  const [justificarNaoEncaminharOpen, setJustificarNaoEncaminharOpen] = useState(false);
+  const [escolherMetodologiaOpen, setEscolherMetodologiaOpen] = useState(false);
+  const [analiseResumoOpen, setAnaliseResumoOpen] = useState(false);
   const [actionPlanOpen, setActionPlanOpen] = useState(false);
-  const [actionPlans, setActionPlans] = useState<ActionPlan[]>([]);
   const [visibleActionId, setVisibleActionId] = useState<string | null>(null);
   const [actionToUpdate, setActionToUpdate] = useState<ActionPlan | null>(null);
-  const analysisCompleted =
-    detalhe?.statusRaw === "ANALISADA" || detalhe?.statusRaw === "ENCAMINHADA_SETOR";
+
+  const actionPlans = detalhe?.planosAcao ?? [];
+  // O plano de ação só pode ser registrado depois que a análise (núcleo ou setor) foi concluída.
+  const analysisCompleted = detalhe?.statusRaw === "ANALISADA" || detalhe?.statusRaw === "EM_ACAO";
+
+  // Próxima recomendação da Análise (ACR/Londres) ainda sem um plano de ação vinculado —
+  // usada para pré-preencher o modal de novo plano de ação.
+  const recomendacoesPendentes = (detalhe?.analise?.recomendacoes ?? []).filter(
+    (r) => !actionPlans.some((p) => p.origemRecomendacao === r.texto),
+  );
+  const proximaRecomendacao = recomendacoesPendentes[0]?.texto;
 
   const toggleSection = (key: SectionKey) =>
     setOpenSections((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -80,13 +103,9 @@ export default function NotificacaoDetalhe() {
         <div className={styles.page}>
           <div className={styles.notFound}>
             <p>Notificação não encontrada ou sessão expirada.</p>
-            <button
-              className={styles.backLink}
-              data-testid="btn-voltar"
-              onClick={() => navigate("/admin")}
-            >
-              <ArrowLeftIcon width={14} stroke="6b6375" /> Voltar para a listagem
-            </button>
+            <BackButton data-testid="btn-voltar" onClick={() => navigate("/admin")}>
+              Voltar para a listagem
+            </BackButton>
           </div>
         </div>
       </AdminLayout>
@@ -96,13 +115,13 @@ export default function NotificacaoDetalhe() {
   return (
     <AdminLayout>
       <div className={styles.page}>
-        <button
-          className={styles.backLink}
+        <BackButton
+          className={styles.backButtonSpacing}
           data-testid="btn-voltar"
           onClick={() => navigate("/admin")}
         >
-          <ArrowLeftIcon width={14} stroke="6b6375" /> Voltar
-        </button>
+          Voltar
+        </BackButton>
 
         <div className={styles.detailsCard}>
           <NotificacaoHeader detalhe={detalhe} onArquivarSuccess={onArquivarSuccess} />
@@ -126,6 +145,10 @@ export default function NotificacaoDetalhe() {
             isOpen={openSections.analysis}
             onToggle={() => toggleSection("analysis")}
             onEncaminhar={() => setEncaminhamentoOpen(true)}
+            onEncaminharPosAnalise={() => setEncaminhamentoPosAnaliseOpen(true)}
+            onJustificarNaoEncaminhar={() => setJustificarNaoEncaminharOpen(true)}
+            onEscolherMetodologia={() => setEscolherMetodologiaOpen(true)}
+            onVerAnalise={() => setAnaliseResumoOpen(true)}
           />
 
           <ActionPlanSection
@@ -163,9 +186,10 @@ export default function NotificacaoDetalhe() {
           <ClassificacaoModal
             notificacaoId={detalhe.id}
             classificacaoExistente={detalhe.classificacao ? rawData?.classificacao : null}
+            metodologiaAtual={rawData?.metodologia_analise ?? null}
             onClose={() => setClassificacaoOpen(false)}
-            onSuccess={(classificacao) => {
-              onClassificacaoSuccess(classificacao);
+            onSuccess={(classificacao, metodologia) => {
+              onClassificacaoSuccess(classificacao, metodologia);
               setClassificacaoOpen(false);
             }}
           />
@@ -181,15 +205,59 @@ export default function NotificacaoDetalhe() {
           />
         )}
 
+        {encaminhamentoPosAnaliseOpen && rawData && (
+          <EncaminhamentoModal
+            notificacaoId={detalhe.id}
+            setorNome={rawData.setor?.nome ?? null}
+            setorDestinoId={rawData.setor_id}
+            mode="pos-analise"
+            onClose={() => setEncaminhamentoPosAnaliseOpen(false)}
+            onSuccess={onDecisaoPosAnaliseSuccess}
+          />
+        )}
+
+        {justificarNaoEncaminharOpen && (
+          <JustificarNaoEncaminharModal
+            notificacaoId={detalhe.id}
+            onClose={() => setJustificarNaoEncaminharOpen(false)}
+            onSuccess={onDecisaoPosAnaliseSuccess}
+          />
+        )}
+
+        {escolherMetodologiaOpen && (
+          <EscolherMetodologiaModal
+            notificacaoId={detalhe.id}
+            onClose={() => setEscolherMetodologiaOpen(false)}
+            onSuccess={onMetodologiaEscolhida}
+          />
+        )}
+
+        {analiseResumoOpen && detalhe.analise && (
+          <AnaliseResumoModal
+            analise={detalhe.analise}
+            detalhe={detalhe}
+            onClose={() => setAnaliseResumoOpen(false)}
+          />
+        )}
+
         {actionPlanOpen && (
           <ActionPlanModal
+            initialWhat={proximaRecomendacao}
+            origemRecomendacao={proximaRecomendacao}
             onClose={() => setActionPlanOpen(false)}
-            onSave={(plan) => {
-              setActionPlans((plans) => [
-                ...plans,
-                { ...plan, id: createActionId(), updatedAt: new Date().toISOString() },
-              ]);
-              setActionPlanOpen(false);
+            onSave={async (plan) => {
+              try {
+                const planoComId: ActionPlan = {
+                  ...plan,
+                  id: createActionId(),
+                  updatedAt: new Date().toISOString(),
+                };
+                const raw = await registrarPlanoAcao(detalhe.id, planoComId);
+                onPlanoAcaoRegistrado(raw);
+                setActionPlanOpen(false);
+              } catch {
+                window.alert("Erro ao registrar o plano de ação. Tente novamente.");
+              }
             }}
           />
         )}
@@ -198,11 +266,15 @@ export default function NotificacaoDetalhe() {
           <ActionUpdateModal
             action={actionToUpdate}
             onClose={() => setActionToUpdate(null)}
-            onSave={(updatedAction) => {
-              setActionPlans((plans) =>
-                plans.map((action) => (action.id === updatedAction.id ? updatedAction : action)),
-              );
-              setActionToUpdate(null);
+            onSave={async (updatedAction) => {
+              try {
+                const raw = await atualizarPlanoAcao(detalhe.id, updatedAction);
+                onPlanoAcaoAtualizado(raw);
+              } catch {
+                // A ação continua visível com o valor anterior — o usuário pode tentar novamente.
+              } finally {
+                setActionToUpdate(null);
+              }
             }}
           />
         )}

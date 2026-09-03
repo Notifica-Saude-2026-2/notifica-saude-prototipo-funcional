@@ -27,8 +27,10 @@ export type ListNotificacoesResponse = {
 const STATUS_MAP: Record<string, IncidentStatus> = {
   NOVA: "Novo",
   CLASSIFICADA: "Classificado",
-  ANALISADA: "Em análise",
   ENCAMINHADA_SETOR: "Encaminhado",
+  EM_ANALISE: "Em análise",
+  ANALISADA: "Analisado",
+  EM_ACAO: "Em ação",
   ARQUIVADA: "Arquivado",
 };
 
@@ -64,8 +66,10 @@ function mapToIncident(n: BackendNotificacao): Incident {
 export type BackendStatus =
   | "NOVA"
   | "CLASSIFICADA"
-  | "ANALISADA"
   | "ENCAMINHADA_SETOR"
+  | "EM_ANALISE"
+  | "ANALISADA"
+  | "EM_ACAO"
   | "ARQUIVADA";
 
 export type FetchIncidentsParams = {

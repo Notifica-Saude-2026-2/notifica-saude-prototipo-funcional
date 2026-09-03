@@ -1,3 +1,6 @@
+import type { AnaliseRaw, MetodologiaAbordagem } from "./analise";
+import type { ActionPlan } from "./actionPlan";
+
 // --------------------------------------------------------------------------
 // Tipos que espelham a resposta do GET /api/notificacoes (payload bruto)
 // --------------------------------------------------------------------------
@@ -55,6 +58,11 @@ export type NotificacaoRaw = {
   setor: { nome: string } | null;
   classificacao: ClassificacaoRaw | null;
   respostas: RespostaItemRaw[];
+  metodologia_analise?: MetodologiaAbordagem | null;
+  analise?: AnaliseRaw | null;
+  /** true = análise feita direto pelo núcleo (sem encaminhamento prévio); false = veio de um encaminhamento. */
+  analise_via_encaminhamento?: boolean | null;
+  planos_acao?: ActionPlan[];
 };
 
 // --------------------------------------------------------------------------
@@ -104,6 +112,11 @@ export type NotificacaoDetalheDTO = {
     contato: string | null;
   };
   classificacao: ClassificacaoDTO | null;
+  metodologiaAnalise: MetodologiaAbordagem | null;
+  analise: AnaliseRaw | null;
+  /** true quando o núcleo concluiu a análise sozinho e ainda precisa decidir se encaminha ou justifica. */
+  aguardandoDecisaoEncaminhamento: boolean;
+  planosAcao: ActionPlan[];
 };
 
 // IDs fixos dos campos do formulário (conforme seed.ts do backend)

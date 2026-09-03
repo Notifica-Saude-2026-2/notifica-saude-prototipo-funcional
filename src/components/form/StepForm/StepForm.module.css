@@ -66,6 +66,16 @@
   padding: 16px 16px 24px;
 }
 
+/* Botão compacto (design system do admin) — sobrepõe o padding grande/"touch-friendly" do
+   componente Button, pensado para as telas públicas (login, notificação do cidadão). O seletor
+   "button.compactBtn" tem especificidade maior que ".button" (inclusive dentro dos breakpoints
+   responsivos do Button.module.css), então funciona independente da ordem de carregamento do CSS. */
+button.compactBtn {
+  padding: 8px 20px;
+  font-size: 13px;
+  border-radius: 8px;
+}
+
 @media (min-width: 768px) {
   .progressBar {
     padding: 12px 12px 0;

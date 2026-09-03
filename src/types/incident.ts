@@ -1,4 +1,11 @@
-export type IncidentStatus = "Novo" | "Classificado" | "Em análise" | "Encaminhado" | "Arquivado";
+export type IncidentStatus =
+  | "Novo"
+  | "Classificado"
+  | "Encaminhado"
+  | "Em análise"
+  | "Analisado"
+  | "Em ação"
+  | "Arquivado";
 
 export type Incident = {
   id: string;

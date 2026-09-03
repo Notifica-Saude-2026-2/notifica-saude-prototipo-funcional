@@ -2,7 +2,7 @@ import Tooltip from "@mui/material/Tooltip";
 import { EditIcon } from "../../../../assets/icons/EditIcon";
 import { LockClosedIcon } from "../../../../assets/icons/LockClosedIcon";
 import { useAuth } from "../../../../hooks/useAuth";
-import { STATUS_EDITAVEIS } from "../../../../constants/notificacaoStatus";
+import { STATUS_EDITAVEIS, motivoEdicaoBloqueada } from "../../../../constants/notificacaoStatus";
 import type { NotificacaoDetalheDTO } from "../../../../types/notificacaoDetalhe";
 import { InfoField } from "./InfoField";
 import styles from "../NotificacaoDetalhe.module.css";
@@ -24,7 +24,11 @@ export function InformacoesGeraisSection({ detalhe, isOpen, onToggle, onEdit }: 
 
   return (
     <div className={styles.section}>
-      <div className={styles.sectionHeader} onClick={onToggle} data-testid="section-info-gerais-toggle">
+      <div
+        className={styles.sectionHeader}
+        onClick={onToggle}
+        data-testid="section-info-gerais-toggle"
+      >
         Informações gerais
         <div className={`${styles.collapseIcon} ${isOpen ? styles.open : styles.closed}`} />
       </div>
@@ -36,12 +40,16 @@ export function InformacoesGeraisSection({ detalhe, isOpen, onToggle, onEdit }: 
               Última modificação registrada em: {detalhe.dataAtualizacao}
             </span>
             {podeEditar && (
-              <button className={styles.editButton} data-testid="btn-edit-info-gerais" onClick={onEdit}>
+              <button
+                className={styles.editButton}
+                data-testid="btn-edit-info-gerais"
+                onClick={onEdit}
+              >
                 <EditIcon width={15} stroke="484848" /> Editar
               </button>
             )}
             {estaBloqueada && (
-              <Tooltip title="Notificação encaminhada ao setor" placement="left">
+              <Tooltip title={motivoEdicaoBloqueada(detalhe.statusRaw)} placement="left">
                 <span className={styles.bloqueadoBadge}>
                   <LockClosedIcon width={11} fill="c8850a" /> Edição bloqueada
                 </span>
@@ -52,9 +60,7 @@ export function InformacoesGeraisSection({ detalhe, isOpen, onToggle, onEdit }: 
           <div className={styles.infoGrid}>
             <div className={`${styles.infoItem} ${styles.infoItemFull}`}>
               <div className={styles.fieldHeader}>Descrição</div>
-              <div className={styles.fieldValue}>
-                {detalhe.descricao || "---"}
-              </div>
+              <div className={styles.fieldValue}>{detalhe.descricao || "---"}</div>
             </div>
           </div>
 

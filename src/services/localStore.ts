@@ -5,6 +5,18 @@ import type {
   RespostaItemRaw,
 } from "../types/notificacaoDetalhe";
 import type { ClassificarPayload, UpdateNotificacaoPayload } from "./notificacaoDetalheService";
+import type { ActionPlan } from "../types/actionPlan";
+import { createEmptyActionPlan } from "../types/actionPlan";
+import type {
+  AnaliseFlowId,
+  AnaliseRaw,
+  AnaliseValues,
+  MetodologiaAbordagem,
+  RecomendacaoExtraida,
+} from "../types/analise";
+// METODOLOGIA_LABEL: texto amigável pro histórico (ex.: "Protocolo de Londres — Investigação
+// completa").
+import { METODOLOGIA_LABEL } from "../types/analise";
 
 const NOTIFICACOES_KEY = "notifica_saude_prototipo_notificacoes";
 const HISTORICO_KEY = "notifica_saude_prototipo_historico";
@@ -199,7 +211,7 @@ function seed(): NotificacaoRaw[] {
     id: "classificacao-2",
     notificacao_id: "notificacao-2",
     profissional_nsp_id: "usuario-demo",
-    profissional_nsp_nome: "Administrador do protótipo",
+    profissional_nsp_nome: "Administrador",
     tipo_incidente: "EVENTO_ADVERSO",
     tipo_especifico: null,
     tipos_incidentes: ["QUEDA"],
@@ -230,28 +242,122 @@ function seed(): NotificacaoRaw[] {
       setores[1],
       classificada,
     ),
-    base(
-      "notificacao-3",
-      1003,
-      "ENCAMINHADA_SETOR",
-      "Equipamento apresentou falha durante atendimento.",
-      setores[2],
-      classificada,
-    ),
-    base(
-      "notificacao-4",
-      1004,
-      "ANALISADA",
-      "Análise concluída após falha na identificação do paciente.",
-      setores[3],
-      {
-        ...classificada,
-        id: "classificacao-4",
+    {
+      ...base(
+        "notificacao-3",
+        1003,
+        "ENCAMINHADA_SETOR",
+        "Equipamento apresentou falha durante atendimento.",
+        setores[2],
+        classificada,
+      ),
+      metodologia_analise: "LONDRES_RAPIDO" as MetodologiaAbordagem,
+    },
+    {
+      ...base(
+        "notificacao-4",
+        1004,
+        "EM_ACAO",
+        "Análise concluída após falha na identificação do paciente.",
+        setores[3],
+        {
+          ...classificada,
+          id: "classificacao-4",
+          notificacao_id: "notificacao-4",
+          tipos_incidentes: ["IDENTIFICACAO"],
+          observacoes: "Análise concluída e ações corretivas necessárias foram definidas.",
+        },
+      ),
+      metodologia_analise: "ACR" as MetodologiaAbordagem,
+      analise_via_encaminhamento: true,
+      analise: {
+        id: "analise-4",
         notificacao_id: "notificacao-4",
-        tipos_incidentes: ["IDENTIFICACAO"],
-        observacoes: "Análise concluída e ações corretivas necessárias foram definidas.",
-      },
-    ),
+        metodologia: "ACR",
+        flowAtivo: "acr",
+        concluida: true,
+        valores: {},
+        recomendacoes: [
+          {
+            texto:
+              "Implementar dupla checagem de identificação do paciente antes de procedimentos.",
+          },
+        ],
+        data_inicio: "2026-08-23T10:00:00.000Z",
+        data_conclusao: "2026-08-24T16:00:00.000Z",
+        responsavel_nome: "Administrador",
+      } as AnaliseRaw,
+      planos_acao: [
+        {
+          id: "plano-4-1",
+          what: "Implementar dupla checagem de identificação do paciente antes de procedimentos.",
+          where: "Setor de Enfermagem",
+          responsible: "Coordenação de Enfermagem",
+          startDate: "2026-08-25",
+          conclusionDate: "2026-09-25",
+          resource: "Não",
+          resourceItems: [],
+          approval: "Não",
+          approvalDetail: "",
+          proof: "Checklist assinado em prontuário.",
+          expectedResult: "Redução de erros de identificação a zero no setor.",
+          verification: "Auditoria mensal de prontuários.",
+          verificationDate: "2026-10-25",
+          indicator: "Sim",
+          indicatorDetail: "Nº de eventos de identificação incorreta por mês.",
+          status: "Em andamento",
+          realStartDate: "",
+          realConclusionDate: "",
+          completionDescription: "",
+          observedResult: "",
+          effectiveness: "",
+          effectivenessReason: "",
+          delayReason: "",
+          newConclusionDate: "",
+          cancellationReason: "",
+          evidenceLocation: "",
+          attachments: [],
+          updatedAt: "2026-08-24T16:30:00.000Z",
+          origemRecomendacao:
+            "Implementar dupla checagem de identificação do paciente antes de procedimentos.",
+        },
+      ],
+    },
+    {
+      ...base(
+        "notificacao-5",
+        1005,
+        "EM_ANALISE",
+        "Medicamento administrado em horário incorreto durante troca de plantão.",
+        setores[1],
+        {
+          ...classificada,
+          id: "classificacao-5",
+          notificacao_id: "notificacao-5",
+          tipos_incidentes: ["ERRO_MEDICACAO"],
+          observacoes: "Núcleo optou por analisar diretamente, sem encaminhar ao setor.",
+        },
+      ),
+      metodologia_analise: "ACR" as MetodologiaAbordagem,
+      analise_via_encaminhamento: false,
+      analise: {
+        id: "analise-5",
+        notificacao_id: "notificacao-5",
+        metodologia: "ACR",
+        flowAtivo: "acr",
+        concluida: true,
+        valores: {},
+        recomendacoes: [
+          {
+            texto:
+              "Revisar o processo de passagem de plantão para conferência de horários de medicação.",
+          },
+        ],
+        data_inicio: "2026-08-27T09:00:00.000Z",
+        data_conclusao: "2026-08-27T15:00:00.000Z",
+        responsavel_nome: "Administrador",
+      } as AnaliseRaw,
+    },
   ];
 }
 
@@ -293,7 +399,7 @@ export function addHistorico(
       valor_anterior: anterior,
       valor_novo: novo,
       data_alteracao: now(),
-      usuario: { nome: "Administrador do protótipo" },
+      usuario: { nome: "Administrador" },
     },
     ...(all[id] ?? []),
   ];
@@ -442,7 +548,7 @@ export function classificarLocal(id: string, payload: ClassificarPayload): Class
     id: item.classificacao?.id ?? newLocalId(),
     notificacao_id: id,
     profissional_nsp_id: "usuario-demo",
-    profissional_nsp_nome: "Administrador do protótipo",
+    profissional_nsp_nome: "Administrador",
     tipo_incidente: payload.tipo_incidente ?? null,
     tipo_especifico: payload.tipo_especifico ?? null,
     tipos_incidentes: payload.tipos_incidentes ?? [],
@@ -462,16 +568,197 @@ export function classificarLocal(id: string, payload: ClassificarPayload): Class
   return clone(classificacao);
 }
 
+export function escolherMetodologiaLocal(
+  id: string,
+  metodologia: MetodologiaAbordagem,
+): NotificacaoRaw {
+  const { items, index, item } = requireNotificacao(id);
+  if (!item.classificacao || item.classificacao.rascunho)
+    throw new Error("Classifique a notificação antes de escolher a metodologia de investigação.");
+  items[index] = { ...item, metodologia_analise: metodologia, updated_at: now() };
+  saveNotificacoes(items);
+  addHistorico(id, `metodologia de investigação escolhida: ${METODOLOGIA_LABEL[metodologia]}`);
+  return clone(items[index]);
+}
+
+/** Encaminha a notificação para o setor ANTES da análise (setor é quem vai analisar). */
 export function encaminharLocal(id: string, setorDestinoId?: string) {
   const { items, index, item } = requireNotificacao(id);
   if (!item.classificacao || item.classificacao.rascunho)
     throw new Error("Classifique a notificação antes de encaminhá-la.");
+  if (!item.metodologia_analise)
+    throw new Error("Escolha a metodologia de investigação antes de encaminhar.");
   items[index] = { ...item, status: "ENCAMINHADA_SETOR", updated_at: now() };
   saveNotificacoes(items);
   addHistorico(
     id,
-    `notificação encaminhada para ${setores.find((s) => s.id === setorDestinoId)?.nome ?? "o setor responsável"}`,
+    `notificação encaminhada para ${setores.find((s) => s.id === setorDestinoId)?.nome ?? "o setor responsável"} analisar`,
   );
+  return clone(items[index]);
+}
+
+// --------------------------------------------------------------------------
+// Análise de incidente (ACR / Protocolo de Londres) — rascunho e conclusão
+// --------------------------------------------------------------------------
+
+export function salvarAnaliseRascunhoLocal(
+  id: string,
+  flowAtivo: AnaliseFlowId,
+  valores: AnaliseValues,
+): AnaliseRaw {
+  const { items, index, item } = requireNotificacao(id);
+  const metodologia = item.metodologia_analise;
+  if (!metodologia)
+    throw new Error("Escolha a metodologia de investigação antes de iniciar a análise.");
+
+  // Primeira gravação: registra a origem (veio de um encaminhamento ao setor, ou o núcleo está
+  // analisando direto) e move o status para "em análise".
+  const viaEncaminhamento = item.status === "ENCAMINHADA_SETOR";
+  const analiseViaEncaminhamento = item.analise
+    ? item.analise_via_encaminhamento
+    : viaEncaminhamento;
+  const novoStatus =
+    item.status === "CLASSIFICADA" || item.status === "ENCAMINHADA_SETOR"
+      ? "EM_ANALISE"
+      : item.status;
+
+  const analise: AnaliseRaw = {
+    id: item.analise?.id ?? newLocalId(),
+    notificacao_id: id,
+    metodologia,
+    flowAtivo,
+    concluida: false,
+    valores,
+    recomendacoes: item.analise?.recomendacoes ?? [],
+    data_inicio: item.analise?.data_inicio ?? now(),
+    data_conclusao: null,
+    responsavel_nome: "Administrador",
+  };
+  items[index] = {
+    ...item,
+    analise,
+    status: novoStatus,
+    analise_via_encaminhamento: analiseViaEncaminhamento,
+    updated_at: now(),
+  };
+  saveNotificacoes(items);
+  return clone(analise);
+}
+
+/**
+ * A última seção de cada fluxo de análise ("Plano de Ação") já pede ação/responsável/prazo de
+ * cada recomendação — se a pessoa preencheu isso ali, não faz sentido pedir de novo na aba
+ * "Plano de ação" da notificação. Aqui a gente converte essas linhas (campo "acoes_resumo" do
+ * schema) em planos de ação de verdade, com o que já foi preenchido; os campos SMART que essa
+ * etapa não coleta (onde, comprovação, resultado esperado...) ficam em branco pra completar depois
+ * pelo "Editar" normal do plano de ação.
+ */
+function extrairPlanosDeAcaoPreenchidos(valores: AnaliseValues): ActionPlan[] {
+  const linhas =
+    (valores["acoes_resumo"] as
+      | { acao?: string; responsavel?: string; prazo?: string }[]
+      | undefined) ?? [];
+  return linhas
+    .filter((linha) => (linha.acao ?? "").trim().length > 0)
+    .map((linha) => ({
+      ...createEmptyActionPlan(),
+      id: newLocalId(),
+      what: linha.acao?.trim() ?? "",
+      responsible: linha.responsavel?.trim() ?? "",
+      conclusionDate: linha.prazo ?? "",
+      updatedAt: now(),
+    }));
+}
+
+export function concluirAnaliseLocal(
+  id: string,
+  flowAtivo: AnaliseFlowId,
+  valores: AnaliseValues,
+  recomendacoes: RecomendacaoExtraida[],
+): { notificacao: NotificacaoRaw; analise: AnaliseRaw } {
+  const { items, index, item } = requireNotificacao(id);
+  const metodologia = item.metodologia_analise;
+  if (!metodologia)
+    throw new Error("Escolha a metodologia de investigação antes de concluir a análise.");
+  const analise: AnaliseRaw = {
+    id: item.analise?.id ?? newLocalId(),
+    notificacao_id: id,
+    metodologia,
+    flowAtivo,
+    concluida: true,
+    valores,
+    recomendacoes,
+    data_inicio: item.analise?.data_inicio ?? now(),
+    data_conclusao: now(),
+    responsavel_nome: "Administrador",
+  };
+  // Se a análise veio de um encaminhamento (o setor já sabia do caso), concluir já finaliza como
+  // "analisado". Se o núcleo analisou direto, falta decidir se encaminha ou justifica antes disso —
+  // o status continua "em análise" até essa decisão (ver decidirEncaminhamentoPosAnaliseLocal).
+  const status = item.analise_via_encaminhamento ? "ANALISADA" : "EM_ANALISE";
+  const planosPreCriados = extrairPlanosDeAcaoPreenchidos(valores);
+  const planosAcao = [...(item.planos_acao ?? []), ...planosPreCriados];
+  items[index] = { ...item, analise, status, planos_acao: planosAcao, updated_at: now() };
+  saveNotificacoes(items);
+  addHistorico(id, `análise concluída (${METODOLOGIA_LABEL[metodologia]})`);
+  if (planosPreCriados.length > 0) {
+    addHistorico(
+      id,
+      `${planosPreCriados.length} ${planosPreCriados.length === 1 ? "plano de ação pré-criado" : "planos de ação pré-criados"} a partir do plano de ação preenchido na análise`,
+    );
+  }
+  return { notificacao: clone(items[index]), analise: clone(analise) };
+}
+
+/**
+ * Decisão do núcleo após concluir a análise sozinho (sem encaminhamento prévio): encaminhar o
+ * resultado para o setor (apenas ciência/registro, não muda quem analisa) ou justificar por que
+ * não vai encaminhar. Nos dois casos o status vira "analisado".
+ */
+export function decidirEncaminhamentoPosAnaliseLocal(
+  id: string,
+  decisao:
+    | { encaminhar: true; setorDestinoId?: string; mensagem?: string }
+    | { encaminhar: false; justificativa: string },
+): NotificacaoRaw {
+  const { items, index, item } = requireNotificacao(id);
+  if (!item.analise?.concluida)
+    throw new Error("Conclua a análise antes de registrar esta decisão.");
+  items[index] = { ...item, status: "ANALISADA", updated_at: now() };
+  saveNotificacoes(items);
+  if (decisao.encaminhar) {
+    addHistorico(
+      id,
+      `análise encaminhada para ${setores.find((s) => s.id === decisao.setorDestinoId)?.nome ?? "o setor responsável"}` +
+        (decisao.mensagem?.trim() ? ` — ${decisao.mensagem.trim()}` : ""),
+    );
+  } else {
+    addHistorico(id, `análise não encaminhada ao setor — motivo: ${decisao.justificativa}`);
+  }
+  return clone(items[index]);
+}
+
+// --------------------------------------------------------------------------
+// Plano de ação — registro e atualização (persistidos por notificação)
+// --------------------------------------------------------------------------
+
+export function registrarPlanoAcaoLocal(id: string, plan: ActionPlan): NotificacaoRaw {
+  const { items, index, item } = requireNotificacao(id);
+  if (item.status !== "ANALISADA" && item.status !== "EM_ACAO")
+    throw new Error("A análise precisa estar concluída para registrar um plano de ação.");
+  const planos = [...(item.planos_acao ?? []), plan];
+  items[index] = { ...item, planos_acao: planos, status: "EM_ACAO", updated_at: now() };
+  saveNotificacoes(items);
+  addHistorico(id, `plano de ação registrado: ${plan.what}`);
+  return clone(items[index]);
+}
+
+export function atualizarPlanoAcaoLocal(id: string, plano: ActionPlan): NotificacaoRaw {
+  const { items, index, item } = requireNotificacao(id);
+  const planos = (item.planos_acao ?? []).map((p) => (p.id === plano.id ? plano : p));
+  items[index] = { ...item, planos_acao: planos, updated_at: now() };
+  saveNotificacoes(items);
+  addHistorico(id, `plano de ação atualizado: ${plano.what} (${plano.status})`);
   return clone(items[index]);
 }
 

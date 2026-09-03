@@ -4,7 +4,7 @@ import { LockClosedIcon } from "../../../../assets/icons/LockClosedIcon";
 import { useAuth } from "../../../../hooks/useAuth";
 import type { NotificacaoDetalheDTO } from "../../../../types/notificacaoDetalhe";
 import styles from "../NotificacaoDetalhe.module.css";
-import { STATUS_EDITAVEIS } from "../../../../constants/notificacaoStatus";
+import { STATUS_EDITAVEIS, motivoEdicaoBloqueada } from "../../../../constants/notificacaoStatus";
 const PERFIS_CLASSIFICADORES = new Set(["NSP", "ADMINISTRADOR"]);
 
 type Props = {
@@ -22,7 +22,11 @@ export function ClassificacaoSection({ detalhe, isOpen, onToggle, onClassificar 
 
   return (
     <div className={styles.section}>
-      <div className={styles.sectionHeader} onClick={onToggle} data-testid="section-classificacao-toggle">
+      <div
+        className={styles.sectionHeader}
+        onClick={onToggle}
+        data-testid="section-classificacao-toggle"
+      >
         Classificação
         <div className={`${styles.collapseIcon} ${isOpen ? styles.open : styles.closed}`} />
       </div>
@@ -35,7 +39,11 @@ export function ClassificacaoSection({ detalhe, isOpen, onToggle, onClassificar 
                 Esse incidente ainda está pendente de classificação.
               </span>
               {podeEditar && (
-                <button className={styles.primaryButton} data-testid="btn-classificar-incidente" onClick={onClassificar}>
+                <button
+                  className={styles.primaryButton}
+                  data-testid="btn-classificar-incidente"
+                  onClick={onClassificar}
+                >
                   <EditIcon width={15} stroke="ffffff" /> Classificar incidente
                 </button>
               )}
@@ -43,7 +51,9 @@ export function ClassificacaoSection({ detalhe, isOpen, onToggle, onClassificar 
           ) : (
             <>
               <div className={styles.metaRow}>
-                <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+                <div
+                  style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}
+                >
                   <span className={styles.metaText}>
                     Última classificação em: {detalhe.classificacao.dataClassificacao}
                   </span>
@@ -57,12 +67,16 @@ export function ClassificacaoSection({ detalhe, isOpen, onToggle, onClassificar 
                   )}
                 </div>
                 {podeEditar && (
-                  <button className={styles.editButton} data-testid="btn-edit-classificacao" onClick={onClassificar}>
+                  <button
+                    className={styles.editButton}
+                    data-testid="btn-edit-classificacao"
+                    onClick={onClassificar}
+                  >
                     <EditIcon width={15} stroke="484848" /> Editar
                   </button>
                 )}
                 {foiEncaminhada && (
-                  <Tooltip title="Notificação encaminhada ao setor" placement="left">
+                  <Tooltip title={motivoEdicaoBloqueada(detalhe.statusRaw)} placement="left">
                     <span className={styles.bloqueadoBadge}>
                       <LockClosedIcon width={11} fill="c8850a" /> Edição bloqueada
                     </span>
@@ -116,15 +130,6 @@ export function ClassificacaoSection({ detalhe, isOpen, onToggle, onClassificar 
                   <div className={styles.infoItem}>
                     <div className={styles.fieldHeader}>Observações do NSP</div>
                     <div className={styles.fieldValue}>{detalhe.classificacao.observacoes}</div>
-                  </div>
-                )}
-
-                {detalhe.classificacao.protocoloInvestigacao && (
-                  <div className={styles.infoItem}>
-                    <div className={styles.fieldHeader}>Protocolo de investigação sugerido</div>
-                    <div className={styles.fieldValue}>
-                      {detalhe.classificacao.protocoloInvestigacao}
-                    </div>
                   </div>
                 )}
               </div>

@@ -7,6 +7,10 @@ import {
 import type { ClassificacaoRaw } from "../../../types/notificacaoDetalhe";
 import { ApiError } from "../../../services/api";
 import { ModalBase } from "./components/ModalBase";
+import { Toast } from "../../../components/common/ui/Toast";
+import { EscolhaMetodologiaStep } from "../../../components/analise/EscolhaMetodologiaStep";
+import { escolherMetodologiaAnalise } from "../../../services/notificacaoDetalheService";
+import type { MetodologiaAbordagem } from "../../../types/analise";
 import styles from "./NotificacaoDetalhe.module.css";
 
 // --------------------------------------------------------------------------
@@ -214,21 +218,6 @@ const ENVOLVIDOS_OPTIONS = [
   { value: "OUTRO", label: "Outro" },
 ];
 
-const PROTOCOLO_OPTIONS = [
-  {
-    value: "INVESTIGACAO_DIRETA",
-    label: "Investigação Direta",
-    desc: "ACR + Ishikawa + 5 Porquês + SMART — Para circunstâncias notificáveis, near misses, incidentes sem dano e incidentes com dano leve",
-    title:
-      "Se você estiver diante de um near miss (quase erro) ou de um incidente sem dano, mas que possua altíssimo potencial de dano ou grande oportunidade de aprendizado organizacional, mude a ferramenta e utilize o Protocolo de Londres",
-  },
-  {
-    value: "INVESTIGACAO_SISTEMICA_PROFUNDA",
-    label: "Investigação Sistêmica Profunda",
-    desc: "Protocolo de Londres + SMART — Para incidentes com dano moderado, grave, óbitos e Never Events",
-  },
-];
-
 // --------------------------------------------------------------------------
 // SelectCardGroup — single ou múltiplo, igual ao protótipo
 // --------------------------------------------------------------------------
@@ -309,8 +298,10 @@ function SelectCardGroup({
 type ClassificacaoModalProps = {
   notificacaoId: string;
   classificacaoExistente?: ClassificacaoRaw | null;
+  /** Metodologia de investigação já escolhida anteriormente (se houver) — pula o passo de escolha. */
+  metodologiaAtual?: MetodologiaAbordagem | null;
   onClose: () => void;
-  onSuccess: (classificacao: ClassificacaoRaw) => void;
+  onSuccess: (classificacao: ClassificacaoRaw, metodologia?: MetodologiaAbordagem) => void;
 };
 
 // --------------------------------------------------------------------------
@@ -320,9 +311,12 @@ type ClassificacaoModalProps = {
 export function ClassificacaoModal({
   notificacaoId,
   classificacaoExistente,
+  metodologiaAtual,
   onClose,
   onSuccess,
 }: ClassificacaoModalProps) {
+  const [stage, setStage] = useState<"form" | "metodologia">("form");
+  const [classificacaoSalva, setClassificacaoSalva] = useState<ClassificacaoRaw | null>(null);
   const rascunhoLocal = (() => {
     try {
       const raw = localStorage.getItem(`classificacao_rascunho_${notificacaoId}`);
@@ -335,23 +329,12 @@ export function ClassificacaoModal({
 
   const [classificacao, setClassificacao] = useState(fonte?.tipo_incidente ?? "");
   const [grauDano, setGrauDano] = useState(fonte?.grau_dano ?? "");
-  const [tipoEspecifico, setTipoEspecifico] = useState(
-    fonte?.tipo_especifico ?? "",
-  );
-  const [tiposIncidentes, setTiposIncidentes] = useState<string[]>(
-    fonte?.tipos_incidentes ?? [],
-  );
-  const [outroTipoIncidente, setOutroTipoIncidente] = useState(
-    fonte?.outro_tipo_incidente ?? "",
-  );
+  const [tipoEspecifico, setTipoEspecifico] = useState(fonte?.tipo_especifico ?? "");
+  const [tiposIncidentes, setTiposIncidentes] = useState<string[]>(fonte?.tipos_incidentes ?? []);
+  const [outroTipoIncidente, setOutroTipoIncidente] = useState(fonte?.outro_tipo_incidente ?? "");
   const [envolvidos, setEnvolvidos] = useState<string[]>(fonte?.envolvidos ?? []);
-  const [outroEnvolvido, setOutroEnvolvido] = useState(
-    fonte?.outro_envolvido ?? "",
-  );
+  const [outroEnvolvido, setOutroEnvolvido] = useState(fonte?.outro_envolvido ?? "");
   const [observacoes, setObservacoes] = useState(fonte?.observacoes ?? "");
-  const [protocoloInvestigacao, setProtocoloInvestigacao] = useState(
-    fonte?.protocolo_investigacao ?? "",
-  );
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [rascunhoSalvo, setRascunhoSalvo] = useState(false);
@@ -382,7 +365,6 @@ export function ClassificacaoModal({
         envolvidos,
         outro_envolvido: outroEnvolvido,
         observacoes,
-        protocolo_investigacao: protocoloInvestigacao,
       }),
     );
     setRascunhoSalvo(true);
@@ -400,7 +382,6 @@ export function ClassificacaoModal({
     (!showTipoIncidente || !isOutroTipoIncidente || !!outroTipoIncidente.trim()) &&
     envolvidos.length > 0 &&
     (!isOutroEnvolvido || !!outroEnvolvido.trim()) &&
-    !!protocoloInvestigacao &&
     observacoes.length <= 400;
 
   // data_validade: @db.Timestamptz — ISO 8601 com timezone; new Date() é seguro
@@ -438,10 +419,6 @@ export function ClassificacaoModal({
         setError("Especifique o envolvido 'Outro'.");
         return;
       }
-      if (!protocoloInvestigacao) {
-        setError("Selecione o protocolo de investigação.");
-        return;
-      }
     }
 
     if (observacoes.length > 400) {
@@ -462,7 +439,6 @@ export function ClassificacaoModal({
       outro_envolvido: isOutroEnvolvido ? outroEnvolvido.trim() : null,
       grau_dano: isAdverso && grauDano ? grauDano : null,
       observacoes: observacoes.trim() || null,
-      protocolo_investigacao: protocoloInvestigacao || null,
     };
 
     try {
@@ -470,8 +446,16 @@ export function ClassificacaoModal({
         ? await atualizarClassificacao(notificacaoId, payload)
         : await classificarNotificacao(notificacaoId, payload);
       localStorage.removeItem(`classificacao_rascunho_${notificacaoId}`);
-      onSuccess(result);
-      onClose();
+      if (metodologiaAtual) {
+        // Metodologia já escolhida anteriormente (edição de uma classificação existente) — não repete o passo.
+        onSuccess(result);
+        onClose();
+      } else {
+        // Fim da Classificação: a última etapa agora é escolher a metodologia de investigação.
+        setClassificacaoSalva(result);
+        setSaving(false);
+        setStage("metodologia");
+      }
     } catch (e) {
       let msg = "Erro ao salvar classificação.";
       if (e instanceof ApiError) {
@@ -482,6 +466,32 @@ export function ClassificacaoModal({
       setError(msg);
       setSaving(false);
     }
+  }
+
+  if (stage === "metodologia") {
+    return (
+      <ModalBase onClose={onClose} ariaLabel="Escolha da metodologia de investigação">
+        <>
+          <div className={styles.modalHeader}>
+            <h2 className={styles.modalTitle}>Escolha da metodologia de investigação</h2>
+          </div>
+          <div className={styles.modalBody}>
+            <EscolhaMetodologiaStep
+              onComplete={async ({ abordagem }) => {
+                try {
+                  await escolherMetodologiaAnalise(notificacaoId, abordagem);
+                } catch (e) {
+                  // A classificação já foi salva com sucesso; um eventual erro aqui não deve travar o fluxo.
+                  console.error(e);
+                }
+                if (classificacaoSalva) onSuccess(classificacaoSalva, abordagem);
+                onClose();
+              }}
+            />
+          </div>
+        </>
+      </ModalBase>
+    );
   }
 
   return (
@@ -625,32 +635,20 @@ export function ClassificacaoModal({
             <small style={{ color: "#666" }}>{observacoes.length}/400</small>
           </div>
 
-          {/* 7. Sugestão de protocolo de investigação */}
-          {!!classificacao && (
-            <div>
-              <p className={styles.formQuestion}>Sugestão de protocolo de investigação</p>
-              <SelectCardGroup
-                options={PROTOCOLO_OPTIONS}
-                value={protocoloInvestigacao}
-                onChange={(v) => setProtocoloInvestigacao(v as string)}
-                disabled={saving}
-                testId="classificacao-protocolo-input"
-              />
-            </div>
-          )}
-
           {error && <p className={styles.modalError}>{error}</p>}
         </div>
 
         {/* Footer */}
         <div className={styles.modalFooter}>
-          <button className={styles.cancelBtn} data-testid="btn-classificacao-cancelar" onClick={onClose} disabled={saving}>
+          <button
+            className={styles.cancelBtn}
+            data-testid="btn-classificacao-cancelar"
+            onClick={onClose}
+            disabled={saving}
+          >
             Cancelar
           </button>
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            {rascunhoSalvo && (
-              <span className={styles.rascunhoFeedback}>✓ Rascunho salvo</span>
-            )}
             <button
               className={styles.draftBtn}
               onClick={handleSalvarRascunho}
@@ -670,6 +668,7 @@ export function ClassificacaoModal({
           </div>
         </div>
       </>
+      <Toast message="✓ Rascunho salvo" show={rascunhoSalvo} />
     </ModalBase>
   );
 }

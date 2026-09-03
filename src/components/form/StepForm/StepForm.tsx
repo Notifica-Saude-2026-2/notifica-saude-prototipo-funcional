@@ -12,6 +12,14 @@ type StepFormProps = {
   onPrev?: () => void;
   isLastStep?: boolean;
   canAdvance?: boolean;
+  /** Rótulo do botão no último passo. Padrão: "Enviar notificação" (fluxo de notificação pública). */
+  submitLabel?: string;
+  /**
+   * Usa botões de navegação no tamanho do design system interno (admin), em vez do botão grande
+   * e "touch-friendly" pensado para o formulário público de notificação. Ative em telas internas
+   * (ex.: fluxo de Análise) para não destoar do resto do admin.
+   */
+  compact?: boolean;
 };
 
 export const StepForm: React.FC<StepFormProps> = ({
@@ -24,6 +32,8 @@ export const StepForm: React.FC<StepFormProps> = ({
   onPrev,
   isLastStep = false,
   canAdvance = true,
+  submitLabel = "Enviar notificação",
+  compact = false,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -58,15 +68,17 @@ export const StepForm: React.FC<StepFormProps> = ({
             variant="outlined"
             color="gray"
             onClick={onPrev}
+            className={compact ? styles.compactBtn : undefined}
             data-testid="stepform-btn-prev"
           />
         )}
         <Button
-          title={isLastStep ? "Enviar notificação" : "Próximo"}
+          title={isLastStep ? submitLabel : "Próximo"}
           variant="contained"
           color={isLastStep ? "green" : "primary"}
           onClick={onNext}
           disabled={!canAdvance}
+          className={compact ? styles.compactBtn : undefined}
           data-testid={isLastStep ? "stepform-btn-submit" : "stepform-btn-next"}
         />
       </div>

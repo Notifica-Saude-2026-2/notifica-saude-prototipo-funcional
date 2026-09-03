@@ -47,7 +47,7 @@
       "historico": [
         {
           "data": "2026-08-22T14:30:00.000Z",
-          "autor": "Administrador do protótipo",
+          "autor": "Administrador",
           "acao": "registrou a classificação"
         }
       ],
@@ -101,7 +101,7 @@
       "historico": [
         {
           "data": "2026-08-23T09:15:00.000Z",
-          "autor": "Administrador do protótipo",
+          "autor": "Administrador",
           "acao": "encaminhou a notificação para o setor"
         }
       ],

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import type { NotificacaoDetalheDTO } from "../../../../types/notificacaoDetalhe";
+import { ANALISE_FLOW_LABEL } from "../../../../types/analise";
 import styles from "../NotificacaoDetalhe.module.css";
 
 type HistoricoItem = {
@@ -39,18 +40,20 @@ export function HistoricoSection({ detalhe, historico, isOpen, onToggle }: Props
     setPage(1);
   }, [historico.data]);
 
-  const formatFieldName = (name: string) => {
-    const cleanName = name.replace("resposta_campo:", "");
-    const mapping: Record<string, string> = {
-      setor_id: "Setor",
-      unidade_id: "Instituição",
-      data_incidente: "Data do Incidente",
-      observacoes: "Observações",
-      "Em qual Turno ocorreu o incidente?": "Turno",
-      "Sexo:": "Sexo",
-      "Idade:": "Idade",
-    };
-    return mapping[cleanName] || cleanName;
+  /** Troca o id técnico do fluxo (ex.: "londres_completo") pelo nome de verdade (ex.: "Protocolo
+      de Londres — Investigação completa") — aplicado na exibição, então corrige também entradas
+      de histórico já salvas antes desse mapeamento existir, sem precisar migrar dado nenhum. */
+  const traduzirIdsTecnicos = (texto: string) =>
+    Object.entries(ANALISE_FLOW_LABEL).reduce(
+      (acc, [flowId, label]) => acc.replace(new RegExp(`\\b${flowId}\\b`, "g"), label),
+      texto,
+    );
+
+  /** Deixa a 1ª letra maiúscula e garante o ponto final — sem mexer no resto do texto. */
+  const formatAcao = (texto: string) => {
+    const semPrefixo = traduzirIdsTecnicos(texto.replace("resposta_campo:", ""));
+    const comMaiuscula = semPrefixo.charAt(0).toUpperCase() + semPrefixo.slice(1);
+    return comMaiuscula.endsWith(".") ? comMaiuscula : `${comMaiuscula}.`;
   };
 
   function agruparHistorico(items: HistoricoItem[]): HistoricoGrupo[] {
@@ -71,7 +74,11 @@ export function HistoricoSection({ detalhe, historico, isOpen, onToggle }: Props
     return Array.from(map.values());
   }
 
-  const gruposFromApi = agruparHistorico(historico.data);
+  // O histórico é gravado com o mais recente primeiro (ver addHistorico em localStore.ts);
+  // aqui invertemos para exibir do mais antigo para o mais novo.
+  const gruposFromApi = agruparHistorico(historico.data).sort(
+    (a, b) => new Date(a.data_alteracao).getTime() - new Date(b.data_alteracao).getTime(),
+  );
   const criacaoGrupo: HistoricoGrupo = {
     key: "criacao",
     data_alteracao: "",
@@ -88,7 +95,11 @@ export function HistoricoSection({ detalhe, historico, isOpen, onToggle }: Props
 
   return (
     <div className={styles.section}>
-      <div className={styles.sectionHeader} onClick={onToggle} data-testid="section-historico-toggle">
+      <div
+        className={styles.sectionHeader}
+        onClick={onToggle}
+        data-testid="section-historico-toggle"
+      >
         Histórico de modificações
         <div className={`${styles.collapseIcon} ${isOpen ? styles.open : styles.closed}`} />
       </div>
@@ -112,9 +123,7 @@ export function HistoricoSection({ detalhe, historico, isOpen, onToggle }: Props
 
                 const dateObj = new Date(g.data_alteracao);
                 const fullDateTime = `${dateObj.toLocaleDateString("pt-BR")} - ${dateObj.toLocaleTimeString("pt-BR")}`;
-                const camposLabel = g.campos.map(formatFieldName).join(", ");
-                const acao =
-                  g.val_anterior === null ? `criou ${camposLabel}.` : `alterou ${camposLabel}.`;
+                const acao = formatAcao(g.campos.join("; "));
                 return (
                   <div key={g.key} className={styles.historyItem}>
                     <span className={styles.historyTime}>{fullDateTime}</span>

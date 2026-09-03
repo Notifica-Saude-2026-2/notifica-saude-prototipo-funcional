@@ -8,31 +8,10 @@
 }
 
 /* ─── Botão Voltar ─── */
-.backLink {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: #fff;
-  border: 1.5px solid #e5e4e7;
-  border-radius: 6px;
-  color: #6b6375;
-  font-size: 13px;
-  font-weight: 500;
-  font-family: 'Inter', sans-serif;
-  cursor: pointer;
-  padding: 5px 12px;
+/* O botão em si agora é o componente compartilhado <BackButton> (sem fundo/borda). Esta classe só
+   cobre o espaçamento abaixo dele quando ele não está dentro de um container flex com gap. */
+.backButtonSpacing {
   margin-bottom: 16px;
-  transition: all 0.15s ease;
-}
-
-.backLink:hover {
-  background: #f3f4fc;
-  border-color: #2f4fff;
-  color: #2f4fff;
-}
-
-.backLink:active {
-  transform: scale(0.98);
 }
 
 /* ─── Card principal ─── */
@@ -123,6 +102,12 @@
   font-family: 'Inter', sans-serif;
   overflow: hidden;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  /* No modal "Análise completa" essas seções ficam dentro de um container flex (.modalBody) que
+     rola o conteúdo (overflow-y: auto). Sem isso, um flex item pode ser espremido mais estreito
+     que o próprio conteúdo, e o "overflow: hidden" acima corta o texto em vez de deixar o modal
+     rolar até ele. Não afeta o uso de .section fora de um container flex (a propriedade só faz
+     efeito em itens flex). */
+  flex-shrink: 0;
 }
 
 .sectionHeader {
@@ -494,7 +479,9 @@
 .modalBody {
   flex: 1;
   overflow-y: auto;
-  padding: 2rem;
+  /* Topo mais enxuto que os demais lados — o cabeçalho do modal já tem sua própria borda/padding
+     logo acima, então um padding-top igual ao resto criava um vão grande antes da 1ª pergunta. */
+  padding: 1.25rem 2rem 2rem;
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -515,7 +502,9 @@
   background: #e1e4f1;
   color: #222;
   padding: 5px 13px;
-  margin: 0 0 10px 0;
+  /* Só a margem inferior aumenta (espaço até a 1ª opção) — o espaçamento entre as opções em si
+     é controlado por .selectGroup { gap } e não deve mudar. */
+  margin: 0 0 16px 0;
   border-radius: 6px;
   font-weight: 700;
 }
@@ -563,6 +552,14 @@
   color: #2e7d32;
   font-size: 12.5px;
   font-family: 'Inter', sans-serif;
+}
+
+.formHint {
+  margin: 0;
+  color: #6b7280;
+  font-size: 12px;
+  font-family: 'Inter', sans-serif;
+  line-height: 1.4;
 }
 
 /* ─── SelectItem — checkbox estilizado (igual protótipo) ─── */
@@ -689,13 +686,6 @@
   cursor: not-allowed;
 }
 
-.rascunhoFeedback {
-  font-size: 12px;
-  font-weight: 600;
-  color: #4caf50;
-  white-space: nowrap;
-}
-
 /* ─── Responsive ─── */
 @media (max-width: 640px) {
   .page {
@@ -770,7 +760,7 @@
   }
 
   .modalBody {
-    padding: 1rem;
+    padding: 0.85rem 1rem 1rem;
     gap: 14px;
   }
 

@@ -11,6 +11,7 @@ import AdminArquivados from "../pages/Admin/AdminArquivados";
 import AdminNovos from "../pages/Admin/AdminNovos";
 import AdminEncaminhados from "../pages/Admin/AdminEncaminhados";
 import NotificacaoDetalhe from "../pages/Admin/NotificacaoDetalhe/NotificacaoDetalhe";
+import AnaliseFlowPage from "../pages/Admin/Analise/AnaliseFlowPage";
 
 export function AppRoutes() {
   return (
@@ -28,6 +29,7 @@ export function AppRoutes() {
         <Route path="/admin/encaminhados" element={<AdminEncaminhados />} />
         <Route path="/admin/resolvidos" element={<AdminArquivados />} />
         <Route path="/incident/:id" element={<NotificacaoDetalhe />} />
+        <Route path="/incident/:id/analise" element={<AnaliseFlowPage />} />
       </Route>
     </Routes>
   );

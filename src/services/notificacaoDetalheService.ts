@@ -2,13 +2,27 @@ import {
   addHistorico,
   arquivarLocal,
   atualizarLocal,
+  atualizarPlanoAcaoLocal,
   classificarLocal,
+  concluirAnaliseLocal,
+  decidirEncaminhamentoPosAnaliseLocal,
   encaminharLocal,
+  escolherMetodologiaLocal,
   getHistorico,
   getNotificacoes,
   newLocalId,
+  registrarPlanoAcaoLocal,
+  salvarAnaliseRascunhoLocal,
   setores,
 } from "./localStore";
+import type {
+  AnaliseFlowId,
+  AnaliseRaw,
+  AnaliseValues,
+  MetodologiaAbordagem,
+  RecomendacaoExtraida,
+} from "../types/analise";
+import type { ActionPlan } from "../types/actionPlan";
 import {
   CAMPO_IDS,
   type NotificacaoRaw,
@@ -26,8 +40,10 @@ import { formatDateOnly, formatDateTime } from "../utils/formatDate";
 export const STATUS_LABEL: Record<string, string> = {
   NOVA: "Novo",
   CLASSIFICADA: "Classificada",
-  ANALISADA: "Em análise",
   ENCAMINHADA_SETOR: "Encaminhado",
+  EM_ANALISE: "Em análise",
+  ANALISADA: "Analisado",
+  EM_ACAO: "Em ação",
   ARQUIVADA: "Arquivado",
 };
 
@@ -245,6 +261,13 @@ export function mapToNotificacaoDetalhe(raw: NotificacaoRaw): NotificacaoDetalhe
       contato: getRespostaValor(respostas, CAMPO_IDS.CONTATO_OPC),
     },
     classificacao,
+    metodologiaAnalise: raw.metodologia_analise ?? null,
+    analise: raw.analise ?? null,
+    aguardandoDecisaoEncaminhamento:
+      raw.status === "EM_ANALISE" &&
+      !!raw.analise?.concluida &&
+      raw.analise_via_encaminhamento === false,
+    planosAcao: raw.planos_acao ?? [],
   };
 }
 
@@ -366,7 +389,7 @@ export async function arquivarNotificacao(
   motivo?: string | null,
 ): Promise<{ id: string; status: string }> {
   const notificacao = arquivarLocal(id);
-  if (motivo?.trim()) addHistorico(id, "motivo do arquivamento", null, motivo.trim());
+  if (motivo?.trim()) addHistorico(id, `motivo do arquivamento: ${motivo.trim()}`);
   return { id: notificacao.id, status: notificacao.status };
 }
 
@@ -383,4 +406,53 @@ export async function atualizarClassificacao(
   payload: ClassificarPayload,
 ): Promise<ClassificacaoRaw> {
   return classificarLocal(id, payload);
+}
+
+// --------------------------------------------------------------------------
+// Análise de incidente — rascunho (autosave) e conclusão da investigação
+// --------------------------------------------------------------------------
+
+export async function salvarAnaliseRascunho(
+  id: string,
+  flowAtivo: AnaliseFlowId,
+  valores: AnaliseValues,
+): Promise<AnaliseRaw> {
+  return salvarAnaliseRascunhoLocal(id, flowAtivo, valores);
+}
+
+export async function concluirAnalise(
+  id: string,
+  flowAtivo: AnaliseFlowId,
+  valores: AnaliseValues,
+  recomendacoes: RecomendacaoExtraida[],
+): Promise<{ notificacao: NotificacaoRaw; analise: AnaliseRaw }> {
+  return concluirAnaliseLocal(id, flowAtivo, valores, recomendacoes);
+}
+
+export async function escolherMetodologiaAnalise(
+  id: string,
+  metodologia: MetodologiaAbordagem,
+): Promise<NotificacaoRaw> {
+  return escolherMetodologiaLocal(id, metodologia);
+}
+
+export async function decidirEncaminhamentoPosAnalise(
+  id: string,
+  decisao:
+    | { encaminhar: true; setorDestinoId?: string; mensagem?: string }
+    | { encaminhar: false; justificativa: string },
+): Promise<NotificacaoRaw> {
+  return decidirEncaminhamentoPosAnaliseLocal(id, decisao);
+}
+
+// --------------------------------------------------------------------------
+// Plano de ação — POST/PUT mockados (persistidos por notificação)
+// --------------------------------------------------------------------------
+
+export async function registrarPlanoAcao(id: string, plan: ActionPlan): Promise<NotificacaoRaw> {
+  return registrarPlanoAcaoLocal(id, plan);
+}
+
+export async function atualizarPlanoAcao(id: string, plan: ActionPlan): Promise<NotificacaoRaw> {
+  return atualizarPlanoAcaoLocal(id, plan);
 }
