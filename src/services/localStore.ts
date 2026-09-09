@@ -591,10 +591,6 @@ export function encaminharLocal(id: string, setorDestinoId?: string) {
   return clone(items[index]);
 }
 
-// --------------------------------------------------------------------------
-// Análise de incidente (ACR / Protocolo de Londres) — rascunho e conclusão
-// --------------------------------------------------------------------------
-
 export function salvarAnaliseRascunhoLocal(
   id: string,
   flowAtivo: AnaliseFlowId,
@@ -605,8 +601,6 @@ export function salvarAnaliseRascunhoLocal(
   if (!metodologia)
     throw new Error("Escolha a metodologia de investigação antes de iniciar a análise.");
 
-  // Primeira gravação: registra a origem (veio de um encaminhamento ao setor, ou o núcleo está
-  // analisando direto) e move o status para "em análise".
   const viaEncaminhamento = item.status === "ENCAMINHADA_SETOR";
   const analiseViaEncaminhamento = item.analise
     ? item.analise_via_encaminhamento
@@ -639,14 +633,6 @@ export function salvarAnaliseRascunhoLocal(
   return clone(analise);
 }
 
-/**
- * A última seção de cada fluxo de análise ("Plano de Ação") já pede ação/responsável/prazo de
- * cada recomendação — se a pessoa preencheu isso ali, não faz sentido pedir de novo na aba
- * "Plano de ação" da notificação. Aqui a gente converte essas linhas (campo "acoes_resumo" do
- * schema) em planos de ação de verdade, com o que já foi preenchido; os campos SMART que essa
- * etapa não coleta (onde, comprovação, resultado esperado...) ficam em branco pra completar depois
- * pelo "Editar" normal do plano de ação.
- */
 function extrairPlanosDeAcaoPreenchidos(valores: AnaliseValues): ActionPlan[] {
   const linhas =
     (valores["acoes_resumo"] as
@@ -686,9 +672,7 @@ export function concluirAnaliseLocal(
     data_conclusao: now(),
     responsavel_nome: "Administrador",
   };
-  // Se a análise veio de um encaminhamento (o setor já sabia do caso), concluir já finaliza como
-  // "analisado". Se o núcleo analisou direto, falta decidir se encaminha ou justifica antes disso —
-  // o status continua "em análise" até essa decisão (ver decidirEncaminhamentoPosAnaliseLocal).
+
   const status = item.analise_via_encaminhamento ? "ANALISADA" : "EM_ANALISE";
   const planosPreCriados = extrairPlanosDeAcaoPreenchidos(valores);
   const planosAcao = [...(item.planos_acao ?? []), ...planosPreCriados];
@@ -704,11 +688,6 @@ export function concluirAnaliseLocal(
   return { notificacao: clone(items[index]), analise: clone(analise) };
 }
 
-/**
- * Decisão do núcleo após concluir a análise sozinho (sem encaminhamento prévio): encaminhar o
- * resultado para o setor (apenas ciência/registro, não muda quem analisa) ou justificar por que
- * não vai encaminhar. Nos dois casos o status vira "analisado".
- */
 export function decidirEncaminhamentoPosAnaliseLocal(
   id: string,
   decisao:
@@ -731,10 +710,6 @@ export function decidirEncaminhamentoPosAnaliseLocal(
   }
   return clone(items[index]);
 }
-
-// --------------------------------------------------------------------------
-// Plano de ação — registro e atualização (persistidos por notificação)
-// --------------------------------------------------------------------------
 
 export function registrarPlanoAcaoLocal(id: string, plan: ActionPlan): NotificacaoRaw {
   const { items, index, item } = requireNotificacao(id);
@@ -774,8 +749,6 @@ export function arquivarLocal(id: string) {
   return clone(items[index]);
 }
 
-/** Fecha o incidente como concluído — só faz sentido depois que a análise foi feita (com ou sem
-    plano de ação registrado); ver AnaliseSection/NotificacaoHeader pra quando o botão aparece. */
 export function concluirIncidenteLocal(id: string) {
   const { items, index, item } = requireNotificacao(id);
   if (item.status !== "ANALISADA" && item.status !== "EM_ACAO")
