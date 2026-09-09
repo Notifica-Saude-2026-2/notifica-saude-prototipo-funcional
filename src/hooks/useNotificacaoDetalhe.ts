@@ -44,11 +44,13 @@ type UseNotificacaoDetalheResult = {
     metodologia?: MetodologiaAbordagem,
   ) => void;
   onArquivarSuccess: () => void;
+  onConcluirSuccess: () => void;
   onEncaminharSuccess: () => void;
   onDecisaoPosAnaliseSuccess: () => void;
   onMetodologiaEscolhida: (metodologia: MetodologiaAbordagem) => void;
   onPlanoAcaoRegistrado: (raw: NotificacaoRaw) => void;
   onPlanoAcaoAtualizado: (raw: NotificacaoRaw) => void;
+  onPlanoAcaoExcluido: (raw: NotificacaoRaw) => void;
 };
 
 export function useNotificacaoDetalhe(): UseNotificacaoDetalheResult {
@@ -156,6 +158,12 @@ export function useNotificacaoDetalhe(): UseNotificacaoDetalheResult {
     getNotificacaoHistorico(rawData.id).then((data) => setHistorico((h) => ({ ...h, data })));
   }
 
+  function onConcluirSuccess() {
+    if (!rawData) return;
+    setRawData({ ...rawData, status: "CONCLUIDA" });
+    getNotificacaoHistorico(rawData.id).then((data) => setHistorico((h) => ({ ...h, data })));
+  }
+
   function onEncaminharSuccess() {
     if (!rawData) return;
     setRawData({ ...rawData, status: "ENCAMINHADA_SETOR" });
@@ -182,6 +190,10 @@ export function useNotificacaoDetalhe(): UseNotificacaoDetalheResult {
     setRawData(raw);
   }
 
+  function onPlanoAcaoExcluido(raw: NotificacaoRaw) {
+    setRawData(raw);
+  }
+
   return {
     detalhe,
     rawData,
@@ -192,10 +204,12 @@ export function useNotificacaoDetalhe(): UseNotificacaoDetalheResult {
     salvar,
     onClassificacaoSuccess,
     onArquivarSuccess,
+    onConcluirSuccess,
     onEncaminharSuccess,
     onDecisaoPosAnaliseSuccess,
     onMetodologiaEscolhida,
     onPlanoAcaoRegistrado,
     onPlanoAcaoAtualizado,
+    onPlanoAcaoExcluido,
   };
 }

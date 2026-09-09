@@ -53,37 +53,113 @@ function extrairRecomendacoes(values: AnaliseValues): RecomendacaoExtraida[] {
     .map((texto) => ({ texto }));
 }
 
-function ResumoNotificacao({ detalhe }: { detalhe: NotificacaoDetalheDTO }) {
-  const grauDanoColor = getGrauDanoColorByLabel(detalhe.classificacao?.grauDano);
+function GrauDanoTag({ label }: { label: string }) {
+  const cor = getGrauDanoColorByLabel(label);
   return (
-    <div>
-      <p style={{ margin: "0 0 6px" }}>
+    <span
+      style={{
+        fontWeight: 700,
+        color: cor?.text,
+        background: cor?.bg,
+        padding: cor ? "1px 8px" : undefined,
+        borderRadius: cor ? 4 : undefined,
+      }}
+    >
+      {label}
+    </span>
+  );
+}
+
+function ResumoItem({
+  label,
+  value,
+  full,
+}: {
+  label: string;
+  value: React.ReactNode;
+  full?: boolean;
+}) {
+  if (!value) return null;
+  return (
+    <div className={full ? `${styles.resumoItemFull}` : undefined}>
+      <div className={styles.resumoLabel}>{label}</div>
+      <div className={styles.resumoValue}>{value}</div>
+    </div>
+  );
+}
+
+/**
+ * Resumo da notificação + classificação — mesmo conteúdo nos dois lugares em que aparece (Seção 1
+ * e o resumo fixo que gruda acima do formulário a partir da Seção 2), só que o fixo é mais enxuto:
+ * fonte/espaçamento menores (classe .resumoCompact) e sem os dados do notificante (não é essencial
+ * pra quem já está no meio da análise, e ajuda a ocupar menos altura fixa na tela).
+ */
+function ResumoNotificacao({
+  detalhe,
+  compact,
+}: {
+  detalhe: NotificacaoDetalheDTO;
+  compact?: boolean;
+}) {
+  const classificacao = detalhe.classificacao;
+  return (
+    <div className={compact ? styles.resumoCompact : undefined}>
+      <p style={{ margin: "0 0 4px" }}>
         <strong>Notificação #{detalhe.codigo}</strong> — {detalhe.unidade} · {detalhe.setor}
       </p>
-      <p style={{ margin: "0 0 6px" }}>{detalhe.descricao}</p>
-      {detalhe.classificacao && (
-        <p style={{ margin: 0 }}>
-          Classificação: {detalhe.classificacao.tipoIncidente ?? "—"}
-          {detalhe.classificacao.grauDano && (
+
+      <div className={styles.resumoGrid}>
+        <ResumoItem label="Descrição" value={detalhe.descricao} full />
+        <ResumoItem label="Data do incidente" value={detalhe.dataIncidente} />
+        <ResumoItem label="Turno" value={detalhe.turno} />
+        {detalhe.paciente.envolvido ? (
+          <>
+            <ResumoItem label="Faixa etária do paciente" value={detalhe.paciente.idade} />
+            <ResumoItem label="Sexo do paciente" value={detalhe.paciente.sexo} />
+          </>
+        ) : (
+          <ResumoItem label="Paciente" value="Não envolve o paciente" full />
+        )}
+        {!compact &&
+          (detalhe.anonima ? (
+            <ResumoItem label="Notificante" value="Notificação anônima" full />
+          ) : (
             <>
-              {" · Grau do dano: "}
-              <span
-                style={{
-                  fontWeight: 700,
-                  color: grauDanoColor?.text,
-                  background: grauDanoColor?.bg,
-                  padding: grauDanoColor ? "1px 8px" : undefined,
-                  borderRadius: grauDanoColor ? 4 : undefined,
-                }}
-              >
-                {detalhe.classificacao.grauDano}
-              </span>
+              <ResumoItem label="Nome do notificante" value={detalhe.notificante.nome} />
+              <ResumoItem label="Celular/E-mail" value={detalhe.notificante.contato} />
             </>
-          )}
-          {detalhe.classificacao.tiposIncidentes.length > 0
-            ? ` · Tipo: ${detalhe.classificacao.tiposIncidentes.join(", ")}`
-            : ""}
-        </p>
+          ))}
+      </div>
+
+      {classificacao && (
+        <>
+          <hr className={styles.resumoDivider} />
+          <div className={styles.resumoGrid}>
+            <ResumoItem label="Classificação" value={classificacao.tipoIncidente} />
+            <ResumoItem
+              label="Grau do dano"
+              value={classificacao.grauDano && <GrauDanoTag label={classificacao.grauDano} />}
+            />
+            {classificacao.tipoEspecifico ? (
+              <ResumoItem
+                label="Tipo específico (Never Event)"
+                value={classificacao.tipoEspecifico}
+              />
+            ) : (
+              <ResumoItem
+                label="Tipo de incidente"
+                value={classificacao.tiposIncidentes.join(", ")}
+              />
+            )}
+            <ResumoItem label="Envolve" value={classificacao.envolvidos.join(", ")} />
+            <ResumoItem
+              label="Protocolo de investigação"
+              value={classificacao.protocoloInvestigacao}
+            />
+            <ResumoItem label="Data da classificação" value={classificacao.dataClassificacao} />
+            <ResumoItem label="Observações do NSP" value={classificacao.observacoes} full />
+          </div>
+        </>
       )}
     </div>
   );
@@ -118,8 +194,12 @@ export default function AnaliseFlowPage() {
   const flow = flowId ? ANALISE_FLOWS[flowId] : null;
   const section = flow?.sections[sectionIndex];
 
-  const resumoNotificacao = useMemo(
+  const resumoNotificacaoCompleto = useMemo(
     () => (detalhe ? <ResumoNotificacao detalhe={detalhe} /> : null),
+    [detalhe],
+  );
+  const resumoNotificacaoCompacto = useMemo(
+    () => (detalhe ? <ResumoNotificacao detalhe={detalhe} compact /> : null),
     [detalhe],
   );
 
@@ -250,8 +330,8 @@ export default function AnaliseFlowPage() {
         {/* Resumo da notificação e classificação: na Seção 1 ele já é o próprio conteúdo da seção
             (ver schema); a partir da Seção 2 esse campo não existe mais, então fixamos o mesmo
             resumo acima do formulário pra ele não sumir da tela quando o usuário avança. */}
-        {resumoNotificacao && sectionIndex > 0 && (
-          <div className={styles.flowResumoFixed}>{resumoNotificacao}</div>
+        {resumoNotificacaoCompacto && sectionIndex > 0 && (
+          <div className={styles.flowResumoFixed}>{resumoNotificacaoCompacto}</div>
         )}
 
         <StepForm
@@ -269,7 +349,7 @@ export default function AnaliseFlowPage() {
             section={section}
             values={values}
             onFieldChange={updateField}
-            resumoNotificacao={resumoNotificacao}
+            resumoNotificacao={resumoNotificacaoCompleto}
           />
         </StepForm>
 

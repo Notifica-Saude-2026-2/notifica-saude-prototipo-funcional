@@ -5,6 +5,7 @@ export type IncidentStatus =
   | "Em análise"
   | "Analisado"
   | "Em ação"
+  | "Concluído"
   | "Arquivado";
 
 export type Incident = {

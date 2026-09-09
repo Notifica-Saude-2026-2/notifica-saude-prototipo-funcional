@@ -13,7 +13,11 @@ import Divider from "@mui/material/Divider";
 import Tooltip from "@mui/material/Tooltip";
 import cubeIcon from "../../../assets/cube.svg";
 import fireIcon from "../../../assets/fire.svg";
+import step1Icon from "../../../assets/step1.svg";
 import airplaneIcon from "../../../assets/airplane.svg";
+import step2Icon from "../../../assets/step2.svg";
+import step3Icon from "../../../assets/step3.svg";
+import doneIcon from "../../../assets/done.svg";
 import archiveIcon from "../../../assets/archive.svg";
 import menuIcon from "../../../assets/menu-hamburguer.svg";
 import arrowExitIcon from "../../../assets/arrow-exit.svg";
@@ -33,7 +37,11 @@ type NavItem = {
 const NAV_ITEMS: NavItem[] = [
   { label: "Todos incidentes", icon: cubeIcon, path: "/admin" },
   { label: "Novos incidentes", icon: fireIcon, path: "/admin/novos" },
+  { label: "Classificados", icon: step1Icon, path: "/admin/classificados" },
   { label: "Encaminhados", icon: airplaneIcon, path: "/admin/encaminhados" },
+  { label: "Em análise", icon: step2Icon, path: "/admin/em-analise" },
+  { label: "Em ação", icon: step3Icon, path: "/admin/em-acao" },
+  { label: "Concluídos", icon: doneIcon, path: "/admin/concluidos" },
   { label: "Arquivados", icon: archiveIcon, path: "/admin/resolvidos" },
 ];
 

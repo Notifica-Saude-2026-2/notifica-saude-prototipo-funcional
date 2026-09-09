@@ -487,10 +487,64 @@
   background: #eef2ff;
   border: 1px solid #d6ddfd;
   border-radius: 8px;
-  padding: 12px 14px;
-  font-size: 13px;
+  padding: 9px 14px;
+  font-size: 12px;
   color: #33395c;
   margin-bottom: 18px;
+}
+
+/* Resumo completo (Seção 1) — todos os dados da notificação e da classificação, em grade de
+   label/valor. No resumo fixo (compacto, acima do formulário a partir da Seção 2) isso não é
+   usado — lá fica só o texto corrido original, mais enxuto. */
+.resumoGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 24px;
+  margin-top: 10px;
+}
+
+.resumoItemFull {
+  grid-column: 1 / -1;
+}
+
+.resumoLabel {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: #7a7f8c;
+  margin-bottom: 2px;
+}
+
+.resumoValue {
+  font-size: 13px;
+  color: var(--text);
+}
+
+.resumoDivider {
+  border: none;
+  border-top: 1px dashed var(--border);
+  margin: 12px 0;
+}
+
+/* Versão enxuta do mesmo resumo (usada no resumo fixo, que fica grudado acima do formulário a
+   partir da Seção 2) — mesmo conteúdo, só com fonte e espaçamentos reduzidos pra ocupar menos
+   altura fixa na tela. */
+.resumoCompact .resumoGrid {
+  gap: 3px 18px;
+  margin-top: 6px;
+}
+
+.resumoCompact .resumoLabel {
+  font-size: 10px;
+  margin-bottom: 0;
+}
+
+.resumoCompact .resumoValue {
+  font-size: 12px;
+}
+
+.resumoCompact .resumoDivider {
+  margin: 8px 0;
 }
 
 .sectionDescription {

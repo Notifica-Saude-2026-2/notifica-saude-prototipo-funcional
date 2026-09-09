@@ -14,12 +14,13 @@ import type {
   MetodologiaAbordagem,
   RecomendacaoExtraida,
 } from "../types/analise";
-// METODOLOGIA_LABEL: texto amigável pro histórico (ex.: "Protocolo de Londres — Investigação
-// completa").
 import { METODOLOGIA_LABEL } from "../types/analise";
 
 const NOTIFICACOES_KEY = "notifica_saude_prototipo_notificacoes";
 const HISTORICO_KEY = "notifica_saude_prototipo_historico";
+const SEED_VERSION_KEY = "notifica_saude_prototipo_seed_versao";
+
+const SEED_VERSION = "2";
 
 export const unidades = [
   { id: "unidade-hospital-regional", nome: "Hospital Regional de Mato Grosso do Sul" },
@@ -244,17 +245,6 @@ function seed(): NotificacaoRaw[] {
     ),
     {
       ...base(
-        "notificacao-3",
-        1003,
-        "ENCAMINHADA_SETOR",
-        "Equipamento apresentou falha durante atendimento.",
-        setores[2],
-        classificada,
-      ),
-      metodologia_analise: "LONDRES_RAPIDO" as MetodologiaAbordagem,
-    },
-    {
-      ...base(
         "notificacao-4",
         1004,
         "EM_ACAO",
@@ -363,13 +353,17 @@ function seed(): NotificacaoRaw[] {
 
 export function getNotificacoes(): NotificacaoRaw[] {
   try {
+    const versaoSalva = localStorage.getItem(SEED_VERSION_KEY);
+    if (versaoSalva !== SEED_VERSION) {
+      const fresh = seed();
+      localStorage.setItem(NOTIFICACOES_KEY, JSON.stringify(fresh));
+      localStorage.setItem(HISTORICO_KEY, "{}");
+      localStorage.setItem(SEED_VERSION_KEY, SEED_VERSION);
+      return clone(fresh);
+    }
     const saved = localStorage.getItem(NOTIFICACOES_KEY);
     if (!saved) return seed();
-    const notifications = clone(JSON.parse(saved)) as NotificacaoRaw[];
-    const analyzedFixture = seed().find((item) => item.id === "notificacao-4");
-    return analyzedFixture && !notifications.some((item) => item.id === analyzedFixture.id)
-      ? [analyzedFixture, ...notifications]
-      : notifications;
+    return clone(JSON.parse(saved)) as NotificacaoRaw[];
   } catch {
     return seed();
   }
@@ -597,10 +591,6 @@ export function encaminharLocal(id: string, setorDestinoId?: string) {
   return clone(items[index]);
 }
 
-// --------------------------------------------------------------------------
-// Análise de incidente (ACR / Protocolo de Londres) — rascunho e conclusão
-// --------------------------------------------------------------------------
-
 export function salvarAnaliseRascunhoLocal(
   id: string,
   flowAtivo: AnaliseFlowId,
@@ -611,8 +601,6 @@ export function salvarAnaliseRascunhoLocal(
   if (!metodologia)
     throw new Error("Escolha a metodologia de investigação antes de iniciar a análise.");
 
-  // Primeira gravação: registra a origem (veio de um encaminhamento ao setor, ou o núcleo está
-  // analisando direto) e move o status para "em análise".
   const viaEncaminhamento = item.status === "ENCAMINHADA_SETOR";
   const analiseViaEncaminhamento = item.analise
     ? item.analise_via_encaminhamento
@@ -645,14 +633,6 @@ export function salvarAnaliseRascunhoLocal(
   return clone(analise);
 }
 
-/**
- * A última seção de cada fluxo de análise ("Plano de Ação") já pede ação/responsável/prazo de
- * cada recomendação — se a pessoa preencheu isso ali, não faz sentido pedir de novo na aba
- * "Plano de ação" da notificação. Aqui a gente converte essas linhas (campo "acoes_resumo" do
- * schema) em planos de ação de verdade, com o que já foi preenchido; os campos SMART que essa
- * etapa não coleta (onde, comprovação, resultado esperado...) ficam em branco pra completar depois
- * pelo "Editar" normal do plano de ação.
- */
 function extrairPlanosDeAcaoPreenchidos(valores: AnaliseValues): ActionPlan[] {
   const linhas =
     (valores["acoes_resumo"] as
@@ -692,9 +672,7 @@ export function concluirAnaliseLocal(
     data_conclusao: now(),
     responsavel_nome: "Administrador",
   };
-  // Se a análise veio de um encaminhamento (o setor já sabia do caso), concluir já finaliza como
-  // "analisado". Se o núcleo analisou direto, falta decidir se encaminha ou justifica antes disso —
-  // o status continua "em análise" até essa decisão (ver decidirEncaminhamentoPosAnaliseLocal).
+
   const status = item.analise_via_encaminhamento ? "ANALISADA" : "EM_ANALISE";
   const planosPreCriados = extrairPlanosDeAcaoPreenchidos(valores);
   const planosAcao = [...(item.planos_acao ?? []), ...planosPreCriados];
@@ -710,11 +688,6 @@ export function concluirAnaliseLocal(
   return { notificacao: clone(items[index]), analise: clone(analise) };
 }
 
-/**
- * Decisão do núcleo após concluir a análise sozinho (sem encaminhamento prévio): encaminhar o
- * resultado para o setor (apenas ciência/registro, não muda quem analisa) ou justificar por que
- * não vai encaminhar. Nos dois casos o status vira "analisado".
- */
 export function decidirEncaminhamentoPosAnaliseLocal(
   id: string,
   decisao:
@@ -738,10 +711,6 @@ export function decidirEncaminhamentoPosAnaliseLocal(
   return clone(items[index]);
 }
 
-// --------------------------------------------------------------------------
-// Plano de ação — registro e atualização (persistidos por notificação)
-// --------------------------------------------------------------------------
-
 export function registrarPlanoAcaoLocal(id: string, plan: ActionPlan): NotificacaoRaw {
   const { items, index, item } = requireNotificacao(id);
   if (item.status !== "ANALISADA" && item.status !== "EM_ACAO")
@@ -762,10 +731,30 @@ export function atualizarPlanoAcaoLocal(id: string, plano: ActionPlan): Notifica
   return clone(items[index]);
 }
 
+export function excluirPlanoAcaoLocal(id: string, planoId: string): NotificacaoRaw {
+  const { items, index, item } = requireNotificacao(id);
+  const alvo = (item.planos_acao ?? []).find((p) => p.id === planoId);
+  const planos = (item.planos_acao ?? []).filter((p) => p.id !== planoId);
+  items[index] = { ...item, planos_acao: planos, updated_at: now() };
+  saveNotificacoes(items);
+  addHistorico(id, `plano de ação excluído${alvo ? `: ${alvo.what}` : ""}`);
+  return clone(items[index]);
+}
+
 export function arquivarLocal(id: string) {
   const { items, index, item } = requireNotificacao(id);
   items[index] = { ...item, status: "ARQUIVADA", updated_at: now() };
   saveNotificacoes(items);
   addHistorico(id, "notificação arquivada");
+  return clone(items[index]);
+}
+
+export function concluirIncidenteLocal(id: string) {
+  const { items, index, item } = requireNotificacao(id);
+  if (item.status !== "ANALISADA" && item.status !== "EM_ACAO")
+    throw new Error("Só é possível concluir o incidente depois que a análise foi registrada.");
+  items[index] = { ...item, status: "CONCLUIDA", updated_at: now() };
+  saveNotificacoes(items);
+  addHistorico(id, "concluiu o incidente");
   return clone(items[index]);
 }

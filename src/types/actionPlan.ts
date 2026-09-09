@@ -12,7 +12,7 @@ export type ActionStatus =
 
 export type ActionEffect = "" | "Sim" | "Parcialmente" | "Não";
 
-export type ActionAttachment = { name: string; type: string; size: number };
+export type ActionAttachment = { name: string; type: string; size: number; dataUrl: string };
 
 /** Uma linha de "pedido + preço" do recurso necessário — mesmo formato genérico usado pelas
     tabelas repetíveis da Análise (ver TableField), pra reaproveitar aquele componente aqui. */

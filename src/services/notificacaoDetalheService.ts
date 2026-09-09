@@ -1,8 +1,10 @@
 import {
   addHistorico,
   arquivarLocal,
+  concluirIncidenteLocal,
   atualizarLocal,
   atualizarPlanoAcaoLocal,
+  excluirPlanoAcaoLocal,
   classificarLocal,
   concluirAnaliseLocal,
   decidirEncaminhamentoPosAnaliseLocal,
@@ -44,6 +46,7 @@ export const STATUS_LABEL: Record<string, string> = {
   EM_ANALISE: "Em análise",
   ANALISADA: "Analisado",
   EM_ACAO: "Em ação",
+  CONCLUIDA: "Concluído",
   ARQUIVADA: "Arquivado",
 };
 
@@ -393,6 +396,11 @@ export async function arquivarNotificacao(
   return { id: notificacao.id, status: notificacao.status };
 }
 
+export async function concluirNotificacao(id: string): Promise<{ id: string; status: string }> {
+  const notificacao = concluirIncidenteLocal(id);
+  return { id: notificacao.id, status: notificacao.status };
+}
+
 // --------------------------------------------------------------------------
 // Atualizar rascunho — PUT /api/notificacoes/:id/classificacao
 // --------------------------------------------------------------------------
@@ -455,4 +463,8 @@ export async function registrarPlanoAcao(id: string, plan: ActionPlan): Promise<
 
 export async function atualizarPlanoAcao(id: string, plan: ActionPlan): Promise<NotificacaoRaw> {
   return atualizarPlanoAcaoLocal(id, plan);
+}
+
+export async function excluirPlanoAcao(id: string, planoId: string): Promise<NotificacaoRaw> {
+  return excluirPlanoAcaoLocal(id, planoId);
 }
