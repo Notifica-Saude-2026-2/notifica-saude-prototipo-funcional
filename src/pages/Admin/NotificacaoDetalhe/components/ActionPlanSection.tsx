@@ -1,4 +1,5 @@
-import { FiEdit3, FiEye, FiEyeOff } from "react-icons/fi";
+import { useState } from "react";
+import { FiEdit3, FiEye, FiEyeOff, FiTrash2 } from "react-icons/fi";
 import type { ActionPlan } from "./ActionPlanModal";
 import styles from "../NotificacaoDetalhe.module.css";
 
@@ -7,10 +8,13 @@ type Props = {
   onToggle: () => void;
   onRegister: () => void;
   canRegister: boolean;
+  // Incidente concluído: apenas leitura — sem editar andamento, sem excluir ações.
+  readOnly?: boolean;
   actions: ActionPlan[];
   visibleActionId: string | null;
   onToggleDetails: (id: string) => void;
   onUpdate: (action: ActionPlan) => void;
+  onDelete: (actionId: string) => Promise<void> | void;
 };
 
 export function ActionPlanSection({
@@ -18,11 +22,26 @@ export function ActionPlanSection({
   onToggle,
   onRegister,
   canRegister,
+  readOnly = false,
   actions,
   visibleActionId,
   onToggleDetails,
   onUpdate,
+  onDelete,
 }: Props) {
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
+  async function handleConfirmDelete() {
+    if (!pendingDeleteId) return;
+    setDeleting(true);
+    try {
+      await onDelete(pendingDeleteId);
+      setPendingDeleteId(null);
+    } finally {
+      setDeleting(false);
+    }
+  }
   return (
     <section className={styles.section}>
       <div
@@ -53,14 +72,16 @@ export function ActionPlanSection({
                         <span className={`${styles.actionStatus} ${statusClass(action.status)}`}>
                           {action.status}
                         </span>
-                        <button
-                          className={styles.actionIconButton}
-                          aria-label="Atualizar andamento da ação"
-                          title="Atualizar andamento da ação"
-                          onClick={() => onUpdate(action)}
-                        >
-                          <FiEdit3 />
-                        </button>
+                        {!readOnly && (
+                          <button
+                            className={styles.actionIconButton}
+                            aria-label="Atualizar andamento da ação"
+                            title="Atualizar andamento da ação"
+                            onClick={() => onUpdate(action)}
+                          >
+                            <FiEdit3 />
+                          </button>
+                        )}
                         <button
                           className={styles.actionIconButton}
                           aria-label={detailsVisible ? "Ocultar detalhes" : "Visualizar detalhes"}
@@ -69,6 +90,16 @@ export function ActionPlanSection({
                         >
                           {detailsVisible ? <FiEyeOff /> : <FiEye />}
                         </button>
+                        {!readOnly && (
+                          <button
+                            className={`${styles.actionIconButton} ${styles.actionIconButtonDanger}`}
+                            aria-label="Excluir ação"
+                            title="Excluir ação"
+                            onClick={() => setPendingDeleteId(action.id)}
+                          >
+                            <FiTrash2 />
+                          </button>
+                        )}
                       </div>
                     </div>
                     <p className={styles.actionCardLabel}>O que será feito</p>
@@ -93,6 +124,23 @@ export function ActionPlanSection({
                           label="Resultado observado"
                           value={action.observedResult || "Não informado"}
                         />
+                        {action.attachments.length > 0 && (
+                          <div className={styles.actionDetailsFull}>
+                            <span>Anexos</span>
+                            <div className={styles.actionAttachmentList}>
+                              {action.attachments.map((attachment) => (
+                                <a
+                                  key={`${attachment.name}-${attachment.size}`}
+                                  href={attachment.dataUrl}
+                                  download={attachment.name}
+                                  className={styles.actionAttachmentLink}
+                                >
+                                  {attachment.name}
+                                </a>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     )}
                   </article>
@@ -100,7 +148,7 @@ export function ActionPlanSection({
               })}
             </div>
           )}
-          {canRegister && (
+          {canRegister && !readOnly && (
             <button
               className={styles.primaryButton}
               onClick={onRegister}
@@ -110,6 +158,39 @@ export function ActionPlanSection({
               {actions.length ? "Adicionar outra ação" : "Registrar plano de ação"}
             </button>
           )}
+        </div>
+      )}
+
+      {pendingDeleteId && (
+        <div className={styles.overlay} onClick={() => !deleting && setPendingDeleteId(null)}>
+          <div
+            className={styles.confirmModal}
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+          >
+            <p className={styles.confirmText}>
+              Tem certeza que deseja excluir esse plano de ação? Essa ação não poderá ser desfeita.
+            </p>
+            <div className={styles.confirmActions}>
+              <button
+                className={styles.cancelBtn}
+                onClick={() => setPendingDeleteId(null)}
+                disabled={deleting}
+                data-testid="btn-excluir-acao-cancelar"
+              >
+                Não
+              </button>
+              <button
+                className={styles.saveBtnDanger}
+                onClick={handleConfirmDelete}
+                disabled={deleting}
+                data-testid="btn-excluir-acao-confirmar"
+              >
+                {deleting ? "Excluindo..." : "Sim"}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </section>

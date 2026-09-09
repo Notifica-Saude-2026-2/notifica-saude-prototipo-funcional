@@ -7,6 +7,7 @@ import { BackButton } from "../../../components/common/ui/BackButton";
 import {
   registrarPlanoAcao,
   atualizarPlanoAcao,
+  excluirPlanoAcao,
   type UpdateNotificacaoPayload,
 } from "../../../services/notificacaoDetalheService";
 import styles from "./NotificacaoDetalhe.module.css";
@@ -39,11 +40,13 @@ export default function NotificacaoDetalhe() {
     salvar,
     onClassificacaoSuccess,
     onArquivarSuccess,
+    onConcluirSuccess,
     onEncaminharSuccess,
     onDecisaoPosAnaliseSuccess,
     onMetodologiaEscolhida,
     onPlanoAcaoRegistrado,
     onPlanoAcaoAtualizado,
+    onPlanoAcaoExcluido,
   } = useNotificacaoDetalhe();
 
   type SectionKey = "info" | "classification" | "analysis" | "actionPlan" | "history";
@@ -69,6 +72,8 @@ export default function NotificacaoDetalhe() {
   const actionPlans = detalhe?.planosAcao ?? [];
   // O plano de ação só pode ser registrado depois que a análise (núcleo ou setor) foi concluída.
   const analysisCompleted = detalhe?.statusRaw === "ANALISADA" || detalhe?.statusRaw === "EM_ACAO";
+  // Incidente concluído é somente leitura: nada pode mais ser editado, adicionado ou excluído.
+  const incidenteConcluido = detalhe?.statusRaw === "CONCLUIDA";
 
   // Próxima recomendação da Análise (ACR/Londres) ainda sem um plano de ação vinculado —
   // usada para pré-preencher o modal de novo plano de ação.
@@ -124,7 +129,11 @@ export default function NotificacaoDetalhe() {
         </BackButton>
 
         <div className={styles.detailsCard}>
-          <NotificacaoHeader detalhe={detalhe} onArquivarSuccess={onArquivarSuccess} />
+          <NotificacaoHeader
+            detalhe={detalhe}
+            onArquivarSuccess={onArquivarSuccess}
+            onConcluirSuccess={onConcluirSuccess}
+          />
 
           <InformacoesGeraisSection
             detalhe={detalhe}
@@ -156,10 +165,20 @@ export default function NotificacaoDetalhe() {
             onToggle={() => toggleSection("actionPlan")}
             onRegister={() => setActionPlanOpen(true)}
             canRegister={analysisCompleted}
+            readOnly={incidenteConcluido}
             actions={actionPlans}
             visibleActionId={visibleActionId}
             onToggleDetails={(id) => setVisibleActionId((current) => (current === id ? null : id))}
             onUpdate={setActionToUpdate}
+            onDelete={async (actionId) => {
+              try {
+                const raw = await excluirPlanoAcao(detalhe.id, actionId);
+                onPlanoAcaoExcluido(raw);
+                setVisibleActionId((current) => (current === actionId ? null : current));
+              } catch {
+                window.alert("Erro ao excluir o plano de ação. Tente novamente.");
+              }
+            }}
           />
 
           <HistoricoSection

@@ -509,6 +509,14 @@
   font-weight: 700;
 }
 
+/* Asterisco de campo obrigatório — mesmo padrão (cor/espaçamento) usado em Input, Textarea,
+   Select, FileInput, CheckboxGroup e RadioGroup. Sem espaço literal antes do "*": o respiro vem
+   só da margem, evitando o espaçamento excessivo que havia nos textos com " *" embutido. */
+.required {
+  color: #d32f2f;
+  margin-left: 2px;
+}
+
 .modalInput {
   width: 100%;
   box-sizing: border-box;
@@ -829,6 +837,7 @@
 .actionStatusCancelled { color: #5b6475; background: #edf0f5; }
 .actionIconButton { width: 28px; height: 25px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid #656565; border-radius: 5px; background: #fff; cursor: pointer; color: #333; }
 .actionIconButton:hover { color: #2f4fff; border-color: #2f4fff; }
+.actionIconButtonDanger:hover { color: #c62828; border-color: #c62828; }
 .actionCardLabel { color: #68708a; font-weight: 600; margin-top: 11px !important; }
 .actionCardValue { margin-top: 2px !important; }
 .actionCardDates { font-size: 12px; }
@@ -838,6 +847,21 @@
 .actionDetails p { margin-top: 3px; font-size: 12px; }
 .actionAttachmentInput { margin-top: 2px; font-size: 13px; }
 .actionAttachmentList { display: flex; flex-direction: column; gap: 3px; margin-top: 8px; font-size: 12px; color: #68708a; }
+
+/* Bloco "Anexos" na visualização detalhada da ação — ocupa as 2 colunas do grid de detalhes. */
+.actionDetailsFull { grid-column: 1 / -1; }
+
+/* Nome do anexo funciona como link de download (sem pré-visualização, só baixar pelo clique). */
+.actionAttachmentLink {
+  color: #3454d1;
+  text-decoration: none;
+  width: fit-content;
+  cursor: pointer;
+}
+
+.actionAttachmentLink:hover {
+  text-decoration: underline;
+}
 
 
 /* ─── Menu de contexto de status ─── */
@@ -873,26 +897,38 @@
   border-radius: 8px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
   z-index: 100;
-  min-width: 180px;
+  min-width: max-content;
   overflow: hidden;
 }
 
 .contextDropdownItem {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   width: 100%;
   padding: 10px 16px;
   background: none;
   border: none;
   text-align: left;
+  white-space: nowrap;
   font-size: 13px;
   font-family: 'Inter', sans-serif;
-  color: #c62828;
+  color: #33395c;
   font-weight: 500;
   cursor: pointer;
   transition: background 0.15s;
 }
 
 .contextDropdownItem:hover {
+  background: #f5f5f8;
+}
+
+/* Só a ação destrutiva (arquivar) usa vermelho — "concluir" é uma ação neutra/positiva. */
+.contextDropdownItemDanger {
+  color: #c62828;
+}
+
+.contextDropdownItemDanger:hover {
   background: #fff3f3;
 }
 

@@ -13,6 +13,8 @@ export const STATUS_COLORS: Record<string, StatusColorSet> = {
   ANALISADA: { bg: "#e0f2f1", text: "#00695c", bar: "#00897b" },
   // Verde — plano(s) de ação em andamento
   EM_ACAO: { bg: "#e8f5e9", text: "#2e7d32", bar: "#43a047" },
+  // Verde forte — incidente concluído (todas as ações finalizadas)
+  CONCLUIDA: { bg: "#dcfce7", text: "#15803d", bar: "#16a34a" },
   // Cinza — estado final, sem novas alterações permitidas
   ARQUIVADA: { bg: "#f5f5f5", text: "#616161", bar: "#9e9e9e" },
 };

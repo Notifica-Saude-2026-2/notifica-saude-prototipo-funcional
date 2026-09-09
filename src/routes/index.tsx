@@ -9,7 +9,11 @@ import ResetPassword from "../pages/ResetPassword";
 import AdminDashboard from "../pages/Admin/AdminDashboard";
 import AdminArquivados from "../pages/Admin/AdminArquivados";
 import AdminNovos from "../pages/Admin/AdminNovos";
+import AdminClassificados from "../pages/Admin/AdminClassificados";
 import AdminEncaminhados from "../pages/Admin/AdminEncaminhados";
+import AdminEmAnalise from "../pages/Admin/AdminEmAnalise";
+import AdminEmAcao from "../pages/Admin/AdminEmAcao";
+import AdminConcluidos from "../pages/Admin/AdminConcluidos";
 import NotificacaoDetalhe from "../pages/Admin/NotificacaoDetalhe/NotificacaoDetalhe";
 import AnaliseFlowPage from "../pages/Admin/Analise/AnaliseFlowPage";
 
@@ -26,7 +30,11 @@ export function AppRoutes() {
       <Route element={<PrivateRoute />}>
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/admin/novos" element={<AdminNovos />} />
+        <Route path="/admin/classificados" element={<AdminClassificados />} />
         <Route path="/admin/encaminhados" element={<AdminEncaminhados />} />
+        <Route path="/admin/em-analise" element={<AdminEmAnalise />} />
+        <Route path="/admin/em-acao" element={<AdminEmAcao />} />
+        <Route path="/admin/concluidos" element={<AdminConcluidos />} />
         <Route path="/admin/resolvidos" element={<AdminArquivados />} />
         <Route path="/incident/:id" element={<NotificacaoDetalhe />} />
         <Route path="/incident/:id/analise" element={<AnaliseFlowPage />} />

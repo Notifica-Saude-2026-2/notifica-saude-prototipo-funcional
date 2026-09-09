@@ -50,7 +50,9 @@ export function JustificarNaoEncaminharModal({ notificacaoId, onClose, onSuccess
             manter o histórico do caso.
           </p>
           <div style={{ marginTop: 12 }}>
-            <p className={styles.formQuestion}>Motivo de não encaminhar *</p>
+            <p className={styles.formQuestion}>
+              Motivo de não encaminhar<span className={styles.required}>*</span>
+            </p>
             <textarea
               className={styles.modalInput}
               rows={4}

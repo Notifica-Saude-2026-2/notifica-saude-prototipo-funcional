@@ -48,6 +48,7 @@ export function AnaliseSection({
   const analiseConcluida =
     detalhe.statusRaw === "ANALISADA" ||
     detalhe.statusRaw === "EM_ACAO" ||
+    detalhe.statusRaw === "CONCLUIDA" ||
     detalhe.statusRaw === "ARQUIVADA";
 
   return (

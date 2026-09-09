@@ -134,7 +134,10 @@ export function ActionPlanModal({ onClose, onSave, initialWhat, origemRecomendac
         />
         {plan.resource === "Sim" && (
           <div>
-            <p className={styles.formQuestion}>Se sim, qual e quanto irá custar? *</p>
+            <p className={styles.formQuestion}>
+              Se sim, qual e quanto irá custar?
+              <span className={styles.required}>*</span>
+            </p>
             <TableField
               field={{
                 id: "resource_items",
@@ -239,7 +242,7 @@ function TextField({
     <div>
       <p className={styles.formQuestion}>
         {label}
-        {required && " *"}
+        {required && <span className={styles.required}>*</span>}
       </p>
       {multiline ? (
         <textarea

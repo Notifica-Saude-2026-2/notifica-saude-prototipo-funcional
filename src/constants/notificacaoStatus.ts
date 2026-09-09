@@ -18,6 +18,8 @@ export function motivoEdicaoBloqueada(statusRaw: string): string {
     case "ANALISADA":
     case "EM_ACAO":
       return "Análise já concluída";
+    case "CONCLUIDA":
+      return "Incidente concluído";
     case "ARQUIVADA":
       return "Notificação arquivada";
     default:

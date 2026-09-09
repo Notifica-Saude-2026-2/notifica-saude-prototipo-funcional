@@ -14,12 +14,13 @@ import type {
   MetodologiaAbordagem,
   RecomendacaoExtraida,
 } from "../types/analise";
-// METODOLOGIA_LABEL: texto amigável pro histórico (ex.: "Protocolo de Londres — Investigação
-// completa").
 import { METODOLOGIA_LABEL } from "../types/analise";
 
 const NOTIFICACOES_KEY = "notifica_saude_prototipo_notificacoes";
 const HISTORICO_KEY = "notifica_saude_prototipo_historico";
+const SEED_VERSION_KEY = "notifica_saude_prototipo_seed_versao";
+
+const SEED_VERSION = "2";
 
 export const unidades = [
   { id: "unidade-hospital-regional", nome: "Hospital Regional de Mato Grosso do Sul" },
@@ -244,17 +245,6 @@ function seed(): NotificacaoRaw[] {
     ),
     {
       ...base(
-        "notificacao-3",
-        1003,
-        "ENCAMINHADA_SETOR",
-        "Equipamento apresentou falha durante atendimento.",
-        setores[2],
-        classificada,
-      ),
-      metodologia_analise: "LONDRES_RAPIDO" as MetodologiaAbordagem,
-    },
-    {
-      ...base(
         "notificacao-4",
         1004,
         "EM_ACAO",
@@ -363,13 +353,17 @@ function seed(): NotificacaoRaw[] {
 
 export function getNotificacoes(): NotificacaoRaw[] {
   try {
+    const versaoSalva = localStorage.getItem(SEED_VERSION_KEY);
+    if (versaoSalva !== SEED_VERSION) {
+      const fresh = seed();
+      localStorage.setItem(NOTIFICACOES_KEY, JSON.stringify(fresh));
+      localStorage.setItem(HISTORICO_KEY, "{}");
+      localStorage.setItem(SEED_VERSION_KEY, SEED_VERSION);
+      return clone(fresh);
+    }
     const saved = localStorage.getItem(NOTIFICACOES_KEY);
     if (!saved) return seed();
-    const notifications = clone(JSON.parse(saved)) as NotificacaoRaw[];
-    const analyzedFixture = seed().find((item) => item.id === "notificacao-4");
-    return analyzedFixture && !notifications.some((item) => item.id === analyzedFixture.id)
-      ? [analyzedFixture, ...notifications]
-      : notifications;
+    return clone(JSON.parse(saved)) as NotificacaoRaw[];
   } catch {
     return seed();
   }
@@ -762,10 +756,32 @@ export function atualizarPlanoAcaoLocal(id: string, plano: ActionPlan): Notifica
   return clone(items[index]);
 }
 
+export function excluirPlanoAcaoLocal(id: string, planoId: string): NotificacaoRaw {
+  const { items, index, item } = requireNotificacao(id);
+  const alvo = (item.planos_acao ?? []).find((p) => p.id === planoId);
+  const planos = (item.planos_acao ?? []).filter((p) => p.id !== planoId);
+  items[index] = { ...item, planos_acao: planos, updated_at: now() };
+  saveNotificacoes(items);
+  addHistorico(id, `plano de ação excluído${alvo ? `: ${alvo.what}` : ""}`);
+  return clone(items[index]);
+}
+
 export function arquivarLocal(id: string) {
   const { items, index, item } = requireNotificacao(id);
   items[index] = { ...item, status: "ARQUIVADA", updated_at: now() };
   saveNotificacoes(items);
   addHistorico(id, "notificação arquivada");
+  return clone(items[index]);
+}
+
+/** Fecha o incidente como concluído — só faz sentido depois que a análise foi feita (com ou sem
+    plano de ação registrado); ver AnaliseSection/NotificacaoHeader pra quando o botão aparece. */
+export function concluirIncidenteLocal(id: string) {
+  const { items, index, item } = requireNotificacao(id);
+  if (item.status !== "ANALISADA" && item.status !== "EM_ACAO")
+    throw new Error("Só é possível concluir o incidente depois que a análise foi registrada.");
+  items[index] = { ...item, status: "CONCLUIDA", updated_at: now() };
+  saveNotificacoes(items);
+  addHistorico(id, "concluiu o incidente");
   return clone(items[index]);
 }

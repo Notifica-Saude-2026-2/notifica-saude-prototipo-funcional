@@ -31,6 +31,7 @@ const STATUS_MAP: Record<string, IncidentStatus> = {
   EM_ANALISE: "Em análise",
   ANALISADA: "Analisado",
   EM_ACAO: "Em ação",
+  CONCLUIDA: "Concluído",
   ARQUIVADA: "Arquivado",
 };
 
@@ -70,6 +71,7 @@ export type BackendStatus =
   | "EM_ANALISE"
   | "ANALISADA"
   | "EM_ACAO"
+  | "CONCLUIDA"
   | "ARQUIVADA";
 
 export type FetchIncidentsParams = {
