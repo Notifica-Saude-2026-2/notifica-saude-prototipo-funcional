@@ -1,99 +1,111 @@
 .card {
   display: grid;
-  grid-template-columns: 5px 4fr 2fr;
+  grid-template-columns: 4px 4fr 2fr;
   background: #fff;
-  border-radius: 0;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
-  margin-bottom: 12px;
+  border-radius: 10px;
+  box-shadow: 0 1px 3px rgba(20, 30, 70, 0.06);
+  margin-bottom: 10px;
   cursor: pointer;
-  transition: box-shadow 0.15s ease;
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
   outline: none;
   border: 1px solid #e5e4e7;
   overflow: hidden;
-  font-family: "Inter", sans-serif;
 }
 
 .card:hover {
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 4px 14px rgba(20, 30, 70, 0.1);
+  border-color: #d7d6db;
 }
 
 .card:focus-visible {
-  box-shadow: 0 0 0 2px #183eff;
+  box-shadow: 0 0 0 2px var(--color-primary);
 }
 
 /* ─── Barra lateral colorida (baseada no Status) ─── */
 .colorBar {
-  /* largura definida pela coluna do grid (5px) */
+  /* largura definida pela coluna do grid (4px) */
 }
 
 /* ─── Conteúdo ─── */
 .left {
   flex: 1;
-  padding: 14px 18px;
+  padding: 12px 16px;
   min-width: 0;
 }
 
 .topRow {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 10px;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 8px;
 }
 
 .id {
+  font-family: "Poppins", sans-serif;
   font-weight: 700;
-  font-size: 0.875rem;
+  font-size: 0.8rem;
   color: #f58220;
   background: #fff3e0;
-  padding: 2px 8px;
-  border-radius: 4px;
+  padding: 2px 9px;
+  border-radius: 100px;
+  white-space: nowrap;
+}
+
+.tipoTag {
+  font-family: "Poppins", sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #555;
+  background: #f0f0f2;
+  border-radius: 100px;
+  padding: 2px 9px;
   white-space: nowrap;
 }
 
 .date {
   display: flex;
   align-items: center;
-  gap: 5px;
-  font-size: 0.78rem;
-  color: #6b6375;
-  background: #f0f0f2;
-  border: 1px solid #e5e4e7;
-  border-radius: 4px;
-  padding: 2px 8px;
+  gap: 4px;
+  font-size: 0.75rem;
+  color: #9b96a1;
+  margin-left: auto;
   white-space: nowrap;
 }
 
 .calendarIcon {
   display: block;
-  opacity: 0.6;
+  opacity: 0.55;
 }
 
 .statusRow {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 8px;
-  flex-wrap: nowrap;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
 }
 
 .statusBadge {
   display: inline-block;
   padding: 2px 10px;
-  border-radius: 12px;
-  font-size: 0.78rem;
+  border-radius: 100px;
+  font-size: 0.75rem;
   font-weight: 600;
+  font-family: "Poppins", sans-serif;
 }
 
 .description {
-  font-size: 0.875rem;
-  color: #08060d;
+  font-size: 0.85rem;
+  color: #333;
   margin: 0;
-  line-height: 1.45;
+  line-height: 1.4;
 }
 
 .label {
-  font-size: 0.875rem;
-  color: #08060d;
+  font-size: 0.85rem;
+  color: #6b6375;
+  font-family: "Poppins", sans-serif;
   font-weight: 600;
 }
 
@@ -101,21 +113,21 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  margin-left: 12px;
+  margin-left: 4px;
 }
 
 .sectorValue {
-  font-size: 0.875rem;
-  color: #08060d;
+  font-size: 0.85rem;
+  color: #222;
 }
 
 .right {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  justify-content: flex-start;
-  gap: 8px;
-  padding: 14px 18px;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px 16px;
   border-left: 1px solid #f0f0f2;
 }
 
@@ -132,8 +144,8 @@
 }
 
 .rightValue {
-  font-size: 0.875rem;
-  color: #08060d;
+  font-size: 0.85rem;
+  color: #222;
   white-space: normal;
   word-break: break-word;
   overflow: visible;
@@ -142,9 +154,10 @@
 .damageBadge {
   display: inline-block;
   padding: 2px 10px;
-  border-radius: 12px;
-  font-size: 0.78rem;
+  border-radius: 100px;
+  font-size: 0.75rem;
   font-weight: 600;
+  font-family: "Poppins", sans-serif;
   white-space: nowrap;
   flex-shrink: 0;
 }
@@ -152,7 +165,7 @@
 /* ─── Responsivo ─── */
 @media (max-width: 640px) {
   .card {
-    grid-template-columns: 5px 1fr;
+    grid-template-columns: 4px 1fr;
     grid-template-rows: auto auto;
   }
 
@@ -180,5 +193,9 @@
     margin-left: 0;
     width: 100%;
     margin-top: 4px;
+  }
+
+  .date {
+    margin-left: 0;
   }
 }

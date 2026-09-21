@@ -54,3 +54,48 @@ export function getGrauDanoColorByLabel(label: string | null | undefined): GrauD
   if (!label) return null;
   return GRAU_DANO_COLORS_BY_LABEL[label] ?? null;
 }
+
+// --------------------------------------------------------------------------
+// Prazo da análise (cartão de listagem) — só faz sentido enquanto a análise
+// ainda não foi concluída (classificado, encaminhado ou em análise).
+// --------------------------------------------------------------------------
+
+export type PrazoInfo = { label: string; bg: string; text: string };
+
+const PRAZO_PENDENTE_STATUSES = new Set(["CLASSIFICADA", "ENCAMINHADA_SETOR", "EM_ANALISE"]);
+
+export function getPrazoInfo(
+  dataValidadeIso: string | null | undefined,
+  statusRaw: string,
+): PrazoInfo | null {
+  if (!dataValidadeIso || !PRAZO_PENDENTE_STATUSES.has(statusRaw)) return null;
+
+  const validade = new Date(dataValidadeIso).getTime();
+  if (Number.isNaN(validade)) return null;
+
+  const diffDias = Math.ceil((validade - Date.now()) / 86_400_000);
+
+  if (diffDias < 0) {
+    const dias = Math.abs(diffDias);
+    return {
+      label: `Vencido há ${dias} dia${dias === 1 ? "" : "s"}`,
+      bg: "#fee4e2",
+      text: "#b42318",
+    };
+  }
+  if (diffDias === 0) {
+    return { label: "Vence hoje", bg: "#fff2cc", text: "#946200" };
+  }
+  if (diffDias <= 3) {
+    return {
+      label: `Vence em ${diffDias} dia${diffDias === 1 ? "" : "s"}`,
+      bg: "#fff2cc",
+      text: "#946200",
+    };
+  }
+  return {
+    label: `Até ${new Date(dataValidadeIso).toLocaleDateString("pt-BR")}`,
+    bg: "#e8f5e9",
+    text: "#2e7d32",
+  };
+}

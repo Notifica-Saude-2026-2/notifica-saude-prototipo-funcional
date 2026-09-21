@@ -1,9 +1,71 @@
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import { PaperAirplaneIcon } from "../../../../assets/icons/PaperAirplaneIcon";
+import { InfoTooltip } from "../../../../components/common/ui/InfoTooltip";
 import { useAuth } from "../../../../hooks/useAuth";
 import type { NotificacaoDetalheDTO } from "../../../../types/notificacaoDetalhe";
-import { METODOLOGIA_LABEL } from "../../../../types/analise";
+import type { AnaliseRaw } from "../../../../types/analise";
+import { ANALISE_FLOWS } from "../../../../constants/analiseSchema";
+import { AnaliseSectionForm } from "../../../../components/analise/AnaliseSectionForm";
 import styles from "../NotificacaoDetalhe.module.css";
+import analiseStyles from "../../../../components/analise/Analise.module.css";
+
+/** onFieldChange é obrigatório em AnaliseSectionForm, mas não é usado em modo readOnly. */
+function noop() {}
+
+/**
+ * Resumo somente-leitura da análise já registrada, direto dentro da seção "Análise" (sem modal):
+ * cada seção do formulário original vira um submenu colapsável, mesmo motor de renderização usado
+ * no preenchimento (AnaliseSectionForm), então o layout dos campos é idêntico.
+ */
+function AnaliseResumoInline({ analise }: { analise: AnaliseRaw }) {
+  const flow = ANALISE_FLOWS[analise.flowAtivo];
+  const [openSectionId, setOpenSectionId] = useState<string | null>(flow?.sections[0]?.id ?? null);
+
+  if (!flow) return null;
+
+  return (
+    <div style={{ marginTop: 8 }}>
+      {flow.sections.map((section) => {
+        const isOpen = openSectionId === section.id;
+        return (
+          <div className={styles.section} key={section.id}>
+            <div
+              className={styles.sectionHeader}
+              onClick={() => setOpenSectionId(isOpen ? null : section.id)}
+              data-testid={`analise-resumo-secao-${section.id}-toggle`}
+            >
+              {section.title}
+              <div className={`${styles.collapseIcon} ${isOpen ? styles.open : styles.closed}`} />
+            </div>
+            {isOpen && (
+              <div className={styles.sectionContent}>
+                <AnaliseSectionForm
+                  section={section}
+                  values={analise.valores}
+                  onFieldChange={noop}
+                  readOnly
+                  allSections={flow.sections}
+                />
+              </div>
+            )}
+          </div>
+        );
+      })}
+
+      {analise.recomendacoes.length > 0 && (
+        <div className={analiseStyles.infoBox}>
+          <strong>Recomendações geradas</strong>
+          <ul style={{ margin: "6px 0 0", paddingLeft: 18 }}>
+            {analise.recomendacoes.map((r, i) => (
+              <li key={i}>{r.texto}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
 
 type Props = {
   detalhe: NotificacaoDetalheDTO;
@@ -15,10 +77,6 @@ type Props = {
   onEncaminharPosAnalise: () => void;
   /** Núcleo já concluiu a própria análise e decide não encaminhar — precisa justificar. */
   onJustificarNaoEncaminhar: () => void;
-  /** Notificação classificada mas sem metodologia de investigação definida ainda. */
-  onEscolherMetodologia: () => void;
-  /** Abre a visualização completa (somente leitura) da análise já registrada. */
-  onVerAnalise: () => void;
 };
 
 export function AnaliseSection({
@@ -28,8 +86,6 @@ export function AnaliseSection({
   onEncaminhar,
   onEncaminharPosAnalise,
   onJustificarNaoEncaminhar,
-  onEscolherMetodologia,
-  onVerAnalise,
 }: Props) {
   const { usuario } = useAuth();
   const navigate = useNavigate();
@@ -60,14 +116,6 @@ export function AnaliseSection({
 
       {isOpen && (
         <div className={styles.sectionContent}>
-          {detalhe.metodologiaAnalise && (
-            <div className={styles.metaRow}>
-              <span className={styles.metaText}>
-                Metodologia de investigação: {METODOLOGIA_LABEL[detalhe.metodologiaAnalise]}
-              </span>
-            </div>
-          )}
-
           {/* ── Sem classificação: nada a fazer ainda ── */}
           {detalhe.statusRaw === "NOVA" && (
             <span className={styles.sectionValue}>
@@ -76,46 +124,34 @@ export function AnaliseSection({
           )}
 
           {/* ── Classificado: bifurcação — analisar direto ou encaminhar pro setor ── */}
-          {detalhe.statusRaw === "CLASSIFICADA" && (
+          {detalhe.statusRaw === "CLASSIFICADA" && podeEscolherCaminho && (
             <>
-              {detalhe.metodologiaAnalise ? (
-                <>
-                  {podeEscolherCaminho && (
-                    <div className={styles.metaRow} style={{ gap: 10 }}>
-                      <button
-                        className={styles.primaryButton}
-                        onClick={() => navigate(`/incident/${detalhe.id}/analise`)}
-                        data-testid="btn-registrar-analise"
-                      >
-                        <PaperAirplaneIcon width={15} stroke="ffffff" /> Registrar análise
-                      </button>
-                      <button
-                        className={styles.editButton}
-                        onClick={onEncaminhar}
-                        data-testid="btn-encaminhar-notificacao"
-                      >
-                        Encaminhar para o setor analisar
-                      </button>
-                    </div>
-                  )}
-                </>
-              ) : (
-                <>
-                  <span className={styles.sectionValue}>
-                    Classificação concluída. Escolha a metodologia de investigação para liberar a
-                    análise.
-                  </span>
-                  {podeEscolherCaminho && (
-                    <button
-                      className={styles.primaryButton}
-                      onClick={onEscolherMetodologia}
-                      data-testid="btn-escolher-metodologia"
-                    >
-                      Escolher metodologia de investigação
-                    </button>
-                  )}
-                </>
-              )}
+              <div
+                className={styles.metaRow}
+                style={{ justifyContent: "flex-start", gap: 6, marginTop: 0, marginBottom: 2 }}
+              >
+                <span className={styles.metaText}>Analisar agora ou encaminhar ao setor?</span>
+                <InfoTooltip
+                  text="O profissional do setor só poderá registrar a análise deste incidente se ele for encaminhado. Sem o encaminhamento, a análise deve ser feita pelo próprio núcleo (NSP)."
+                  size={14}
+                />
+              </div>
+              <div className={styles.metaRow} style={{ gap: 10 }}>
+                <button
+                  className={styles.primaryButton}
+                  onClick={() => navigate(`/incident/${detalhe.id}/analise`)}
+                  data-testid="btn-registrar-analise"
+                >
+                  <PaperAirplaneIcon width={15} stroke="ffffff" /> Registrar análise
+                </button>
+                <button
+                  className={styles.editButton}
+                  onClick={onEncaminhar}
+                  data-testid="btn-encaminhar-notificacao"
+                >
+                  Encaminhar para o setor analisar
+                </button>
+              </div>
             </>
           )}
 
@@ -197,16 +233,7 @@ export function AnaliseSection({
                   ação abaixo.
                 </span>
               )}
-              {detalhe.analise && (
-                <button
-                  className={styles.editButton}
-                  style={{ marginTop: 4, alignSelf: "flex-start" }}
-                  onClick={onVerAnalise}
-                  data-testid="btn-ver-analise-completa"
-                >
-                  Ver análise completa
-                </button>
-              )}
+              {detalhe.analise && <AnaliseResumoInline analise={detalhe.analise} />}
             </>
           )}
         </div>

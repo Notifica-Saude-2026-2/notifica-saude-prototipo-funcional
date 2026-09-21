@@ -4,6 +4,7 @@ import { evalCondition } from "./condition";
 import { TableField, type TableRow } from "./TableField";
 import { ChecklistWithDetailField, type ChecklistState } from "./ChecklistWithDetailField";
 import { RepeatableChoiceGroupField, type GroupItem } from "./RepeatableChoiceGroupField";
+import { ItemSelectorField, type ItemSelectorState } from "./ItemSelectorField";
 import { IshikawaDiagram } from "./IshikawaDiagram";
 import styles from "./Analise.module.css";
 
@@ -29,7 +30,10 @@ export function AnaliseFieldRenderer({
   value,
   onChange,
   values,
-  siblingFields,
+  // Não usado mais desde que o diagrama de Ishikawa (único consumidor) passou a montar os dados
+  // por item a partir de `values`, em vez de procurar um campo irmão na mesma seção — mantido no
+  // tipo porque quem chama este componente ainda passa a prop (ver AnaliseSectionForm).
+  siblingFields: _siblingFields,
   resumoNotificacao,
   readOnly,
   "data-testid": dataTestId,
@@ -44,12 +48,17 @@ export function AnaliseFieldRenderer({
         </div>
       );
 
-    case "readonly":
+    case "readonly": {
+      // Prioridade: bloco de resumo pronto (ex.: "resumo_notificacao") > valor já armazenado em
+      // outro campo do fluxo (ex.: "incidente_investigado", copiado da Seção 1) > texto estático
+      // de field.source > traço.
+      const hasValue = typeof value === "string" && value.trim().length > 0;
       return (
         <div className={styles.readonlyBox} data-testid={testId}>
-          {resumoNotificacao ?? field.source ?? "—"}
+          {resumoNotificacao ?? (hasValue ? value : (field.source ?? "—"))}
         </div>
       );
+    }
 
     case "text":
       return (
@@ -225,13 +234,8 @@ export function AnaliseFieldRenderer({
         />
       );
 
-    case "computed": {
-      const sourceField = siblingFields?.find((f) => f.id === field.generatedFrom);
-      const sourceValue = sourceField
-        ? (values[sourceField.id] as ChecklistState | undefined)
-        : undefined;
-      return <IshikawaDiagram field={field} sourceField={sourceField} sourceValue={sourceValue} />;
-    }
+    case "computed":
+      return <IshikawaDiagram field={field} values={values} />;
 
     case "repeatable_choice_group":
       return (
@@ -239,6 +243,18 @@ export function AnaliseFieldRenderer({
           field={field}
           value={value as GroupItem[] | undefined}
           onChange={(items) => onChange(items)}
+          values={values}
+          readOnly={readOnly}
+        />
+      );
+
+    case "item_selector":
+      return (
+        <ItemSelectorField
+          field={field}
+          value={value as ItemSelectorState | undefined}
+          onChange={(v) => onChange(v)}
+          values={values}
           readOnly={readOnly}
         />
       );

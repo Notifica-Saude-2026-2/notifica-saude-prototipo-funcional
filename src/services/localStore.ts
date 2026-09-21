@@ -14,13 +14,13 @@ import type {
   MetodologiaAbordagem,
   RecomendacaoExtraida,
 } from "../types/analise";
-import { METODOLOGIA_LABEL } from "../types/analise";
+import { FLOW_TO_METODOLOGIA, METODOLOGIA_LABEL } from "../types/analise";
 
 const NOTIFICACOES_KEY = "notifica_saude_prototipo_notificacoes";
 const HISTORICO_KEY = "notifica_saude_prototipo_historico";
 const SEED_VERSION_KEY = "notifica_saude_prototipo_seed_versao";
 
-const SEED_VERSION = "2";
+const SEED_VERSION = "3";
 
 export const unidades = [
   { id: "unidade-hospital-regional", nome: "Hospital Regional de Mato Grosso do Sul" },
@@ -87,6 +87,14 @@ export const camposFormulario: CampoDinamico[] = [
       option("turno-noite", "Noite"),
     ],
   },
+  // ⚠️ PROVISÓRIO — ver CAMPO_IDS.HORARIO em types/notificacaoDetalhe.ts.
+  {
+    id: "55555555-5555-4555-b555-000000000012",
+    label: "Horário do incidente",
+    tipo: "HORA",
+    obrigatorio: true,
+    secao: "Tela 3 - Momento e Local do Incidente",
+  },
   {
     id: "55555555-5555-4555-b555-000000000010",
     label: "Instituição",
@@ -112,6 +120,15 @@ export const camposFormulario: CampoDinamico[] = [
     obrigatorio: true,
     secao: "Tela 4 - Descrição do Incidente e Papel do Notificador",
     placeholder: "Descreva o que aconteceu",
+  },
+  // ⚠️ PROVISÓRIO — ver CAMPO_IDS.CONDUTA_IMEDIATA em types/notificacaoDetalhe.ts.
+  {
+    id: "55555555-5555-4555-b555-000000000011",
+    label: "Conduta imediata adotada",
+    tipo: "AREA",
+    obrigatorio: false,
+    secao: "Tela 4 - Descrição do Incidente e Papel do Notificador",
+    placeholder: "Ex.: avaliação médica, analgesia, exame de imagem, comunicação à família",
   },
   {
     id: "55555555-5555-4555-b555-000000000005",
@@ -190,6 +207,7 @@ function seed(): NotificacaoRaw[] {
     data_registro: "2026-08-21T12:00:00.000Z",
     updated_at: "2026-08-22T14:30:00.000Z",
     descricao,
+    condutaImediata: "Avaliação médica, analgesia, exame de imagem e comunicação à família.",
     anonima: false,
     tenant_id: "prototipo",
     unidade_id: unidades[0].id,
@@ -203,6 +221,7 @@ function seed(): NotificacaoRaw[] {
       resposta("55555555-5555-4555-b555-000000000001", null, "60 anos ou mais"),
       resposta("55555555-5555-4555-b555-000000000002", null, "Feminino"),
       resposta("55555555-5555-4555-b555-000000000009", null, "Manhã"),
+      resposta("55555555-5555-4555-b555-000000000012", "22:25"),
       resposta("55555555-5555-4555-b555-000000000005", null, "Profissional de saúde"),
       resposta("55555555-5555-4555-b555-000000000006", "Maria da Silva"),
       resposta("55555555-5555-4555-b555-000000000007", "maria@exemplo.com"),
@@ -219,7 +238,6 @@ function seed(): NotificacaoRaw[] {
     envolvidos: ["PACIENTE"],
     grau_dano: "LEVE",
     observacoes: "Paciente avaliado pela equipe.",
-    protocolo_investigacao: "INVESTIGACAO_DIRETA",
     rascunho: false,
     data_classificacao: "2026-08-22T14:30:00.000Z",
     data_validade: "2026-09-21T14:30:00.000Z",
@@ -254,7 +272,7 @@ function seed(): NotificacaoRaw[] {
           ...classificada,
           id: "classificacao-4",
           notificacao_id: "notificacao-4",
-          tipos_incidentes: ["IDENTIFICACAO"],
+          tipos_incidentes: ["FALHA_IDENTIFICACAO"],
           observacoes: "Análise concluída e ações corretivas necessárias foram definidas.",
         },
       ),
@@ -422,6 +440,9 @@ export function criarLocal(payload: NotificacaoPayload): NotificacaoRaw {
   const descricao =
     valueFor(payload.respostas.find((r) => r.campo_id.endsWith("000004")) ?? { campo_id: "" }) ??
     "Sem descrição";
+  const condutaImediata = valueFor(
+    payload.respostas.find((r) => r.campo_id.endsWith("000011")) ?? { campo_id: "" },
+  );
   const item: NotificacaoRaw = {
     id,
     codigo: 1000 + items.length + 1,
@@ -431,6 +452,7 @@ export function criarLocal(payload: NotificacaoPayload): NotificacaoRaw {
     data_registro: now(),
     updated_at: now(),
     descricao,
+    condutaImediata,
     anonima: payload.anonima,
     tenant_id: "prototipo",
     unidade_id: payload.unidade_id,
@@ -549,7 +571,6 @@ export function classificarLocal(id: string, payload: ClassificarPayload): Class
     envolvidos: payload.envolvidos ?? [],
     grau_dano: payload.grau_dano ?? null,
     observacoes: payload.observacoes ?? null,
-    protocolo_investigacao: payload.protocolo_investigacao ?? null,
     rascunho: false,
     data_classificacao: data,
     data_validade: null,
@@ -562,26 +583,11 @@ export function classificarLocal(id: string, payload: ClassificarPayload): Class
   return clone(classificacao);
 }
 
-export function escolherMetodologiaLocal(
-  id: string,
-  metodologia: MetodologiaAbordagem,
-): NotificacaoRaw {
-  const { items, index, item } = requireNotificacao(id);
-  if (!item.classificacao || item.classificacao.rascunho)
-    throw new Error("Classifique a notificação antes de escolher a metodologia de investigação.");
-  items[index] = { ...item, metodologia_analise: metodologia, updated_at: now() };
-  saveNotificacoes(items);
-  addHistorico(id, `metodologia de investigação escolhida: ${METODOLOGIA_LABEL[metodologia]}`);
-  return clone(items[index]);
-}
-
 /** Encaminha a notificação para o setor ANTES da análise (setor é quem vai analisar). */
 export function encaminharLocal(id: string, setorDestinoId?: string) {
   const { items, index, item } = requireNotificacao(id);
   if (!item.classificacao || item.classificacao.rascunho)
     throw new Error("Classifique a notificação antes de encaminhá-la.");
-  if (!item.metodologia_analise)
-    throw new Error("Escolha a metodologia de investigação antes de encaminhar.");
   items[index] = { ...item, status: "ENCAMINHADA_SETOR", updated_at: now() };
   saveNotificacoes(items);
   addHistorico(
@@ -597,9 +603,9 @@ export function salvarAnaliseRascunhoLocal(
   valores: AnaliseValues,
 ): AnaliseRaw {
   const { items, index, item } = requireNotificacao(id);
-  const metodologia = item.metodologia_analise;
-  if (!metodologia)
-    throw new Error("Escolha a metodologia de investigação antes de iniciar a análise.");
+  // Não existe mais uma etapa dedicada de "escolher metodologia" antes de iniciar a análise — ela
+  // fica implícita no fluxo que o usuário está de fato seguindo (ver FLOW_TO_METODOLOGIA).
+  const metodologia = item.metodologia_analise ?? FLOW_TO_METODOLOGIA[flowAtivo];
 
   const viaEncaminhamento = item.status === "ENCAMINHADA_SETOR";
   const analiseViaEncaminhamento = item.analise
@@ -627,25 +633,24 @@ export function salvarAnaliseRascunhoLocal(
     analise,
     status: novoStatus,
     analise_via_encaminhamento: analiseViaEncaminhamento,
+    metodologia_analise: metodologia,
     updated_at: now(),
   };
   saveNotificacoes(items);
   return clone(analise);
 }
 
-function extrairPlanosDeAcaoPreenchidos(valores: AnaliseValues): ActionPlan[] {
-  const linhas =
-    (valores["acoes_resumo"] as
-      | { acao?: string; responsavel?: string; prazo?: string }[]
-      | undefined) ?? [];
-  return linhas
-    .filter((linha) => (linha.acao ?? "").trim().length > 0)
-    .map((linha) => ({
+/** Plano de ação já vem pré-carregado com as recomendações registradas na última seção da
+    Análise (RN-13/CA10) — não existe mais uma seção própria de "Plano de Ação" no assistente,
+    já que o plano é preenchido e gerenciado direto na tela de detalhe da notificação. */
+function extrairPlanosDeAcaoPreenchidos(recomendacoes: RecomendacaoExtraida[]): ActionPlan[] {
+  return recomendacoes
+    .filter((r) => r.texto.trim().length > 0)
+    .map((r) => ({
       ...createEmptyActionPlan(),
       id: newLocalId(),
-      what: linha.acao?.trim() ?? "",
-      responsible: linha.responsavel?.trim() ?? "",
-      conclusionDate: linha.prazo ?? "",
+      what: r.texto.trim(),
+      origemRecomendacao: r.texto.trim(),
       updatedAt: now(),
     }));
 }
@@ -657,9 +662,10 @@ export function concluirAnaliseLocal(
   recomendacoes: RecomendacaoExtraida[],
 ): { notificacao: NotificacaoRaw; analise: AnaliseRaw } {
   const { items, index, item } = requireNotificacao(id);
-  const metodologia = item.metodologia_analise;
-  if (!metodologia)
-    throw new Error("Escolha a metodologia de investigação antes de concluir a análise.");
+  // Idem salvarAnaliseRascunhoLocal: sem etapa dedicada de escolha, a metodologia é implícita no
+  // fluxo seguido (normalmente já persistida desde o primeiro rascunho, mas o default cobre o
+  // caso de concluir num único passo, sem rascunho intermediário).
+  const metodologia = item.metodologia_analise ?? FLOW_TO_METODOLOGIA[flowAtivo];
   const analise: AnaliseRaw = {
     id: item.analise?.id ?? newLocalId(),
     notificacao_id: id,
@@ -674,9 +680,16 @@ export function concluirAnaliseLocal(
   };
 
   const status = item.analise_via_encaminhamento ? "ANALISADA" : "EM_ANALISE";
-  const planosPreCriados = extrairPlanosDeAcaoPreenchidos(valores);
+  const planosPreCriados = extrairPlanosDeAcaoPreenchidos(recomendacoes);
   const planosAcao = [...(item.planos_acao ?? []), ...planosPreCriados];
-  items[index] = { ...item, analise, status, planos_acao: planosAcao, updated_at: now() };
+  items[index] = {
+    ...item,
+    analise,
+    status,
+    planos_acao: planosAcao,
+    metodologia_analise: metodologia,
+    updated_at: now(),
+  };
   saveNotificacoes(items);
   addHistorico(id, `análise concluída (${METODOLOGIA_LABEL[metodologia]})`);
   if (planosPreCriados.length > 0) {

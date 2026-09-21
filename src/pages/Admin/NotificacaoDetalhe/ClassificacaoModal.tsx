@@ -8,9 +8,6 @@ import type { ClassificacaoRaw } from "../../../types/notificacaoDetalhe";
 import { ApiError } from "../../../services/api";
 import { ModalBase } from "./components/ModalBase";
 import { Toast } from "../../../components/common/ui/Toast";
-import { EscolhaMetodologiaStep } from "../../../components/analise/EscolhaMetodologiaStep";
-import { escolherMetodologiaAnalise } from "../../../services/notificacaoDetalheService";
-import type { MetodologiaAbordagem } from "../../../types/analise";
 import styles from "./NotificacaoDetalhe.module.css";
 
 // --------------------------------------------------------------------------
@@ -298,10 +295,8 @@ function SelectCardGroup({
 type ClassificacaoModalProps = {
   notificacaoId: string;
   classificacaoExistente?: ClassificacaoRaw | null;
-  /** Metodologia de investigação já escolhida anteriormente (se houver) — pula o passo de escolha. */
-  metodologiaAtual?: MetodologiaAbordagem | null;
   onClose: () => void;
-  onSuccess: (classificacao: ClassificacaoRaw, metodologia?: MetodologiaAbordagem) => void;
+  onSuccess: (classificacao: ClassificacaoRaw) => void;
 };
 
 // --------------------------------------------------------------------------
@@ -311,12 +306,9 @@ type ClassificacaoModalProps = {
 export function ClassificacaoModal({
   notificacaoId,
   classificacaoExistente,
-  metodologiaAtual,
   onClose,
   onSuccess,
 }: ClassificacaoModalProps) {
-  const [stage, setStage] = useState<"form" | "metodologia">("form");
-  const [classificacaoSalva, setClassificacaoSalva] = useState<ClassificacaoRaw | null>(null);
   const rascunhoLocal = (() => {
     try {
       const raw = localStorage.getItem(`classificacao_rascunho_${notificacaoId}`);
@@ -446,16 +438,8 @@ export function ClassificacaoModal({
         ? await atualizarClassificacao(notificacaoId, payload)
         : await classificarNotificacao(notificacaoId, payload);
       localStorage.removeItem(`classificacao_rascunho_${notificacaoId}`);
-      if (metodologiaAtual) {
-        // Metodologia já escolhida anteriormente (edição de uma classificação existente) — não repete o passo.
-        onSuccess(result);
-        onClose();
-      } else {
-        // Fim da Classificação: a última etapa agora é escolher a metodologia de investigação.
-        setClassificacaoSalva(result);
-        setSaving(false);
-        setStage("metodologia");
-      }
+      onSuccess(result);
+      onClose();
     } catch (e) {
       let msg = "Erro ao salvar classificação.";
       if (e instanceof ApiError) {
@@ -466,32 +450,6 @@ export function ClassificacaoModal({
       setError(msg);
       setSaving(false);
     }
-  }
-
-  if (stage === "metodologia") {
-    return (
-      <ModalBase onClose={onClose} ariaLabel="Escolha da metodologia de investigação">
-        <>
-          <div className={styles.modalHeader}>
-            <h2 className={styles.modalTitle}>Escolha da metodologia de investigação</h2>
-          </div>
-          <div className={styles.modalBody}>
-            <EscolhaMetodologiaStep
-              onComplete={async ({ abordagem }) => {
-                try {
-                  await escolherMetodologiaAnalise(notificacaoId, abordagem);
-                } catch (e) {
-                  // A classificação já foi salva com sucesso; um eventual erro aqui não deve travar o fluxo.
-                  console.error(e);
-                }
-                if (classificacaoSalva) onSuccess(classificacaoSalva, abordagem);
-                onClose();
-              }}
-            />
-          </div>
-        </>
-      </ModalBase>
-    );
   }
 
   return (

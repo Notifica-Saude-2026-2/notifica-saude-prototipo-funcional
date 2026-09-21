@@ -65,6 +65,11 @@ export function EditModal({
 
   const [dataIncidente, setDataIncidente] = useState(toDateInput(detalhe.dataIncidente));
   const [turnoId, setTurnoId] = useState(findOpcaoId(CAMPO_IDS.TURNO));
+  // ⚠️ PROVISÓRIO — ver CAMPO_IDS.HORARIO. Sem opções fixas (é hora livre), por isso lido/salvo
+  // como texto (valor_texto), igual nome/contato do notificante, em vez de valor_opcao_id.
+  const [horario, setHorario] = useState<string>(
+    rawData.respostas.find((r) => r.campo_id === CAMPO_IDS.HORARIO)?.valor_texto ?? "",
+  );
   const [unidadeId] = useState(rawData.unidade_id);
   const [setorId, setSetorId] = useState(rawData.setor_id);
   const [setorOutroText, setSetorOutroText] = useState<string>(
@@ -171,6 +176,10 @@ export function EditModal({
       respostas.push({ campo_id: CAMPO_IDS.CONTATO_OPC, valor: contatoNotificante.trim() });
     }
 
+    if (horario.trim()) {
+      respostas.push({ campo_id: CAMPO_IDS.HORARIO, valor: horario.trim() });
+    }
+
     onSave({
       data_incidente: dataIncidente ? new Date(dataIncidente).toISOString() : undefined,
       unidade_id: unidadeId,
@@ -222,6 +231,17 @@ export function EditModal({
                   </option>
                 ))}
               </select>
+            </div>
+            <div>
+              <p className={styles.formQuestion}>Horário do incidente</p>
+              <input
+                type="time"
+                className={styles.modalInput}
+                data-testid="field-horario"
+                value={horario}
+                onChange={(e) => setHorario(e.target.value)}
+                disabled={saving}
+              />
             </div>
           </div>
 
@@ -373,10 +393,20 @@ export function EditModal({
 
         {/* Rodapé */}
         <div className={styles.modalFooter}>
-          <button className={styles.cancelBtn} data-testid="btn-edit-cancelar" onClick={onClose} disabled={saving}>
+          <button
+            className={styles.cancelBtn}
+            data-testid="btn-edit-cancelar"
+            onClick={onClose}
+            disabled={saving}
+          >
             Cancelar
           </button>
-          <button className={styles.saveBtn} data-testid="btn-edit-salvar" onClick={handleSave} disabled={saving}>
+          <button
+            className={styles.saveBtn}
+            data-testid="btn-edit-salvar"
+            onClick={handleSave}
+            disabled={saving}
+          >
             {saving ? "Salvando..." : "Salvar alterações"}
           </button>
         </div>

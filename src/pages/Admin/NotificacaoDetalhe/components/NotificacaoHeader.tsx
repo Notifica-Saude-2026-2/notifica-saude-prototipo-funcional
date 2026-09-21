@@ -102,6 +102,13 @@ export function NotificacaoHeader({ detalhe, onArquivarSuccess, onConcluirSucces
           </div>
 
           <div className={styles.headerBadgeGroup}>
+            <span className={styles.headerLabel}>Responsável:</span>
+            <span className={styles.headerBadge}>
+              {detalhe.classificacao?.responsavelNome ?? "—"}
+            </span>
+          </div>
+
+          <div className={styles.headerBadgeGroup}>
             <span className={styles.headerLabel}>Status:</span>
             <span
               className={styles.headerBadge}

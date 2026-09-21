@@ -2,6 +2,7 @@ export type TipoCampo =
   | "TEXTO"
   | "NUMERO"
   | "DATA"
+  | "HORA"
   | "AREA"
   | "EMAIL"
   | "TELEFONE"
