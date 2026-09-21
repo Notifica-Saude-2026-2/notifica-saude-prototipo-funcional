@@ -4,6 +4,8 @@
 // motor genérico de renderização em src/components/analise.
 // --------------------------------------------------------------------------
 
+import type { TooltipLegendItem } from "../components/common/ui/InfoTooltip";
+
 export type AnaliseValues = Record<string, unknown>;
 
 export type AnaliseCondition =
@@ -25,7 +27,16 @@ export function normalizeOption(opt: ChoiceOption): ChoiceOptionObj {
   return typeof opt === "string" ? { value: opt, label: opt } : opt;
 }
 
-export type TableColumnType = "text" | "textarea" | "date" | "time" | "choice" | "currency";
+export type TableColumnType =
+  | "text"
+  | "textarea"
+  | "date"
+  | "time"
+  | "choice"
+  | "currency"
+  /** Número da linha preenchido automaticamente pela posição (1, 2, 3...) — não editável.
+      Ex.: coluna "Nível" dos 5 Porquês, que deve acompanhar sozinha a ordem das linhas. */
+  | "auto-index";
 
 export type TableColumn = {
   id: string;
@@ -33,6 +44,22 @@ export type TableColumn = {
   type: TableColumnType;
   options?: ChoiceOption[];
   helpText?: string;
+  /** Legenda estruturada (uma linha por item, com bolinha colorida opcional) para o tooltip do
+      cabeçalho da coluna — usar no lugar de `helpText` quando a explicação for uma lista de
+      opções (ex.: o que cada valor de "Status" significa). Ver InfoTooltip. */
+  helpTextItems?: TooltipLegendItem[];
+  /** Coluna "choice" com uma opção "Outro" que revela um campo de texto livre ao ser selecionada. */
+  allowOther?: boolean;
+  /** Ao clicar em "Adicionar linha", pré-preenche este campo com o valor de outra coluna da linha
+      anterior (opcionalmente envolvido num prefixo/sufixo) — ex.: nos "5 Porquês", a pergunta do
+      próximo nível já vem sugerida a partir da resposta do nível anterior ("Por que <resposta>?").
+      Só um ponto de partida: o campo continua editável normalmente depois. Não faz nada na
+      primeira linha (não há linha anterior pra copiar). */
+  deriveFromPreviousRow?: {
+    sourceColumnId: string;
+    prefix?: string;
+    suffix?: string;
+  };
 };
 
 export type ChecklistItemDef = { id: string; label: string; example?: string };
@@ -58,6 +85,10 @@ export type ItemSchemaFieldDef = {
   repeatable?: boolean;
   fixedRows?: string[];
   helpText?: string;
+  layout?: "table" | "cards";
+  /** Rótulo de cada item repetido (ex.: "Porquê" -> "Porquê #1"). Pré-existente — apenas
+      faltava no tipo; já era usado em runtime (ver "niveis" do 5 Porquês). */
+  itemLabel?: string;
 };
 
 export type ItemSchemaDef = { fields: ItemSchemaFieldDef[] };
@@ -73,16 +104,21 @@ export type AnaliseFieldType =
   | "checklist_with_detail"
   | "computed"
   | "info"
-  | "repeatable_choice_group";
+  | "repeatable_choice_group"
+  | "item_selector";
 
 export type AnaliseField = {
   id: string;
   label: string;
   type: AnaliseFieldType;
   helpText?: string;
+  /** Ver TableColumn.helpTextItems — mesma ideia, pro tooltip do rótulo do campo (não de coluna). */
+  helpTextItems?: TooltipLegendItem[];
   designNote?: string;
   description?: string;
   source?: string;
+  /** Marca o campo como obrigatório para avançar de seção — ver formCanAdvance em AnaliseFlowPage. */
+  required?: boolean;
   options?: ChoiceOption[];
   multiple?: boolean;
   allowOther?: boolean;
@@ -92,10 +128,18 @@ export type AnaliseField = {
   minRows?: number;
   fixedRows?: string[];
   columns?: TableColumn[];
+  /** Força a tabela repetível a renderizar como grid (linhas/colunas) mesmo tendo coluna de texto
+      longo — por padrão esses casos viram uma lista de cards (ver TableField.tsx). Usado quando
+      o valor de ter tudo alinhado em colunas (ex.: cronologia, 5 Porquês) supera o aperto do
+      texto longo, que quebra dentro da célula normalmente. */
+  layout?: "table" | "cards";
   /** Nome no singular de cada linha de uma tabela repetível (ex.: "PPC", "Recomendação",
       "Entrevista") — usado no título do card de cada linha ("PPC #1"). Sem isso, cai no genérico
       "Linha N". */
   itemLabel?: string;
+  /** Texto do botão de adicionar linha de uma tabela repetível (ex.: "+ Adicionar membro"). Sem
+      isso, cai no genérico "+ Adicionar linha". */
+  addButtonLabel?: string;
   pullsInto?: string;
   prefilledFrom?: string;
   taxonomy?: string;
@@ -106,6 +150,25 @@ export type AnaliseField = {
   itemCommonFields?: ItemCommonFieldDef[];
   itemChoiceField?: ItemChoiceFieldDef;
   itemSchemas?: Record<string, ItemSchemaDef>;
+  /** Fontes de itens para um campo "item_selector" (Seção 4 — seleção de fatores a investigar):
+      cada entrada aponta para uma tabela já preenchida em seção anterior (ex.: cronologia, ppc)
+      e diz qual coluna usar como prévia de texto no card de seleção. */
+  selectorSources?: { fieldId: string; itemLabel: string; textColumnId: string }[];
+  /** No checklist de fatores contribuintes: habilita, em cada categoria marcada, o gatilho
+      "Por que isso aconteceu?" que abre um 5 Porquês embutido vinculado àquele achado — em vez de
+      uma seção de aprofundamento solta e desconectada. */
+  enablePorques?: boolean;
+  /** Para um campo "computed" que é o diagrama de Ishikawa por item (Seção de Resultado): de onde
+      juntar os dados, já que os fatores contribuintes agora são por item selecionado, não mais um
+      único checklist global (ver `generatedFrom`, que cobria só esse caso antigo). As
+      `selectorSources` são as mesmas do campo "item_selector" referenciado — duplicadas aqui de
+      propósito para o diagrama não precisar de acesso ao schema de outras seções, só aos valores. */
+  ishikawaSource?: {
+    selectorFieldId: string;
+    selectorSources: { fieldId: string; itemLabel: string; textColumnId: string }[];
+    perItemSectionId: string;
+    checklistFieldId: string;
+  };
 };
 
 export type DecisionThen = {
@@ -133,6 +196,10 @@ export type AnaliseSectionSchema = {
   decisionLogic?: DecisionRule[];
   /** Quando presente, a seção se repete uma vez por linha da tabela referenciada (ex.: "secao6.ppc"). */
   repeatablePerItemOf?: string;
+  /** Quando presente, a seção se repete uma vez por item MARCADO no campo "item_selector"
+      referenciado (id do campo, ex.: "itens_selecionados") — diferente de repeatablePerItemOf, que
+      repete para TODAS as linhas de uma tabela, sem etapa de seleção prévia. */
+  repeatablePerSelectedItemOf?: string;
 };
 
 export type AnaliseFlowId = "acr" | "londres_rapido" | "londres_completo";
@@ -147,13 +214,13 @@ export type AnaliseFlowSchema = {
 export type MetodologiaAbordagem = "ACR" | "LONDRES_RAPIDO" | "LONDRES_COMPLETO";
 
 export const METODOLOGIA_LABEL: Record<MetodologiaAbordagem, string> = {
-  ACR: "ACR — Análise de Causa Raiz",
+  ACR: "Registro de ACR — Análise de Causa Raiz",
   LONDRES_RAPIDO: "Protocolo de Londres — Investigação rápida",
   LONDRES_COMPLETO: "Protocolo de Londres — Investigação completa",
 };
 
 export const ANALISE_FLOW_LABEL: Record<AnaliseFlowId, string> = {
-  acr: "ACR — Análise de Causa Raiz",
+  acr: "Registro de ACR — Análise de Causa Raiz",
   londres_rapido: "Protocolo de Londres — Investigação rápida",
   londres_completo: "Protocolo de Londres — Investigação completa",
 };
@@ -162,6 +229,15 @@ export const METODOLOGIA_TO_FLOW: Record<MetodologiaAbordagem, AnaliseFlowId> = 
   ACR: "acr",
   LONDRES_RAPIDO: "londres_rapido",
   LONDRES_COMPLETO: "londres_completo",
+};
+
+/** Sentido inverso de METODOLOGIA_TO_FLOW — usado para preencher a metodologia automaticamente a
+    partir do fluxo ativo, já que não existe mais uma etapa dedicada de "escolher metodologia"
+    antes de iniciar a análise (ela fica implícita no fluxo que o usuário está de fato seguindo). */
+export const FLOW_TO_METODOLOGIA: Record<AnaliseFlowId, MetodologiaAbordagem> = {
+  acr: "ACR",
+  londres_rapido: "LONDRES_RAPIDO",
+  londres_completo: "LONDRES_COMPLETO",
 };
 
 // --------------------------------------------------------------------------

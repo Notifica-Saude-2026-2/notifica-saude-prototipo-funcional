@@ -1,11 +1,15 @@
 import React, { useRef, useEffect } from "react";
 import styles from "./StepForm.module.css";
 import { Button } from "../../common/ui/Button";
+import { InfoTooltip } from "../../common/ui/InfoTooltip";
 
 type StepFormProps = {
   currentStep: number;
   totalSteps: number;
   stepTitle: string;
+  /** Explicação da etapa, mostrada num ícone "i" ao lado do título (ver InfoTooltip) — não usado
+      no formulário público de notificação, só nas telas internas que passam essa prop. */
+  stepTitleTooltip?: string;
   stepIcon?: React.ReactNode;
   children: React.ReactNode;
   onNext: () => void;
@@ -26,6 +30,7 @@ export const StepForm: React.FC<StepFormProps> = ({
   currentStep,
   totalSteps,
   stepTitle,
+  stepTitleTooltip,
   stepIcon,
   children,
   onNext,
@@ -57,6 +62,11 @@ export const StepForm: React.FC<StepFormProps> = ({
       <div className={styles.stepHeader}>
         {stepIcon && <span className={styles.stepIcon}>{stepIcon}</span>}
         <span className={styles.stepTitle}>{stepTitle}</span>
+        {stepTitleTooltip && (
+          <span style={{ display: "inline-flex" }}>
+            <InfoTooltip text={stepTitleTooltip} size={15} />
+          </span>
+        )}
       </div>
 
       <div className={styles.content}>{children}</div>

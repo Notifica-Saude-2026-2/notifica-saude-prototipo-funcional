@@ -87,6 +87,21 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
       );
     }
 
+    case "HORA":
+      return (
+        <div style={{ maxWidth: "160px" }}>
+          <Input
+            label={label}
+            value={(value as string) ?? ""}
+            onChange={(e) => onChange(e.target.value)}
+            type="time"
+            required={obrigatorio}
+            error={error}
+            data-testid={`field-${id}`}
+          />
+        </div>
+      );
+
     case "AREA":
       return (
         <Textarea

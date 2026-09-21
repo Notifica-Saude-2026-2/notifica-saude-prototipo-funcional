@@ -22,8 +22,6 @@ import { HistoricoSection } from "./components/HistoricoSection";
 import { EditModal } from "./components/EditModal";
 import { EncaminhamentoModal } from "./components/EncaminhamentoModal";
 import { JustificarNaoEncaminharModal } from "./components/JustificarNaoEncaminharModal";
-import { EscolherMetodologiaModal } from "./components/EscolherMetodologiaModal";
-import { AnaliseResumoModal } from "./components/AnaliseResumoModal";
 import { ActionPlanSection } from "./components/ActionPlanSection";
 import { ActionPlanModal, type ActionPlan } from "./components/ActionPlanModal";
 import { ActionUpdateModal } from "./components/ActionUpdateModal";
@@ -43,7 +41,6 @@ export default function NotificacaoDetalhe() {
     onConcluirSuccess,
     onEncaminharSuccess,
     onDecisaoPosAnaliseSuccess,
-    onMetodologiaEscolhida,
     onPlanoAcaoRegistrado,
     onPlanoAcaoAtualizado,
     onPlanoAcaoExcluido,
@@ -63,8 +60,6 @@ export default function NotificacaoDetalhe() {
   const [encaminhamentoOpen, setEncaminhamentoOpen] = useState(false);
   const [encaminhamentoPosAnaliseOpen, setEncaminhamentoPosAnaliseOpen] = useState(false);
   const [justificarNaoEncaminharOpen, setJustificarNaoEncaminharOpen] = useState(false);
-  const [escolherMetodologiaOpen, setEscolherMetodologiaOpen] = useState(false);
-  const [analiseResumoOpen, setAnaliseResumoOpen] = useState(false);
   const [actionPlanOpen, setActionPlanOpen] = useState(false);
   const [visibleActionId, setVisibleActionId] = useState<string | null>(null);
   const [actionToUpdate, setActionToUpdate] = useState<ActionPlan | null>(null);
@@ -156,8 +151,6 @@ export default function NotificacaoDetalhe() {
             onEncaminhar={() => setEncaminhamentoOpen(true)}
             onEncaminharPosAnalise={() => setEncaminhamentoPosAnaliseOpen(true)}
             onJustificarNaoEncaminhar={() => setJustificarNaoEncaminharOpen(true)}
-            onEscolherMetodologia={() => setEscolherMetodologiaOpen(true)}
-            onVerAnalise={() => setAnaliseResumoOpen(true)}
           />
 
           <ActionPlanSection
@@ -205,10 +198,9 @@ export default function NotificacaoDetalhe() {
           <ClassificacaoModal
             notificacaoId={detalhe.id}
             classificacaoExistente={detalhe.classificacao ? rawData?.classificacao : null}
-            metodologiaAtual={rawData?.metodologia_analise ?? null}
             onClose={() => setClassificacaoOpen(false)}
-            onSuccess={(classificacao, metodologia) => {
-              onClassificacaoSuccess(classificacao, metodologia);
+            onSuccess={(classificacao) => {
+              onClassificacaoSuccess(classificacao);
               setClassificacaoOpen(false);
             }}
           />
@@ -240,22 +232,6 @@ export default function NotificacaoDetalhe() {
             notificacaoId={detalhe.id}
             onClose={() => setJustificarNaoEncaminharOpen(false)}
             onSuccess={onDecisaoPosAnaliseSuccess}
-          />
-        )}
-
-        {escolherMetodologiaOpen && (
-          <EscolherMetodologiaModal
-            notificacaoId={detalhe.id}
-            onClose={() => setEscolherMetodologiaOpen(false)}
-            onSuccess={onMetodologiaEscolhida}
-          />
-        )}
-
-        {analiseResumoOpen && detalhe.analise && (
-          <AnaliseResumoModal
-            analise={detalhe.analise}
-            detalhe={detalhe}
-            onClose={() => setAnaliseResumoOpen(false)}
           />
         )}
 

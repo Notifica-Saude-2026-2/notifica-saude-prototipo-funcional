@@ -97,9 +97,12 @@ function ResumoItem({
 function ResumoNotificacao({
   detalhe,
   compact,
+  incidenteInvestigado,
 }: {
   detalhe: NotificacaoDetalheDTO;
   compact?: boolean;
+  /** Texto livre informado pelo analista na Seção 1, identificando qual incidente está sendo investigado. */
+  incidenteInvestigado?: string;
 }) {
   const classificacao = detalhe.classificacao;
   return (
@@ -108,9 +111,17 @@ function ResumoNotificacao({
         <strong>Notificação #{detalhe.codigo}</strong> — {detalhe.unidade} · {detalhe.setor}
       </p>
 
+      {incidenteInvestigado && (
+        <p style={{ margin: "0 0 8px" }}>
+          <strong>Incidente em investigação:</strong> {incidenteInvestigado}
+        </p>
+      )}
+
       <div className={styles.resumoGrid}>
         <ResumoItem label="Descrição" value={detalhe.descricao} full />
+        <ResumoItem label="Conduta imediata" value={detalhe.condutaImediata} full />
         <ResumoItem label="Data do incidente" value={detalhe.dataIncidente} />
+        <ResumoItem label="Horário" value={detalhe.horario} />
         <ResumoItem label="Turno" value={detalhe.turno} />
         {detalhe.paciente.envolvido ? (
           <>
@@ -152,10 +163,6 @@ function ResumoNotificacao({
               />
             )}
             <ResumoItem label="Envolve" value={classificacao.envolvidos.join(", ")} />
-            <ResumoItem
-              label="Protocolo de investigação"
-              value={classificacao.protocoloInvestigacao}
-            />
             <ResumoItem label="Data da classificação" value={classificacao.dataClassificacao} />
             <ResumoItem label="Observações do NSP" value={classificacao.observacoes} full />
           </div>
@@ -182,9 +189,12 @@ export default function AnaliseFlowPage() {
     getNotificacaoById(id).then((raw) => {
       const dto = mapToNotificacaoDetalhe(raw);
       setDetalhe(dto);
-      const initialFlow =
+      // Não existe mais uma etapa dedicada de "escolher metodologia" antes de iniciar a análise —
+      // o usuário começa direto pelo fluxo ACR (o mais comum) e o sistema vai adaptando as seções
+      // conforme as respostas (ver decisionLogic dos fluxos em analiseSchema.ts).
+      const initialFlow: AnaliseFlowId =
         raw.analise?.flowAtivo ??
-        (dto.metodologiaAnalise ? METODOLOGIA_TO_FLOW[dto.metodologiaAnalise] : null);
+        (dto.metodologiaAnalise ? METODOLOGIA_TO_FLOW[dto.metodologiaAnalise] : "acr");
       setFlowId(initialFlow);
       setValues(raw.analise?.valores ?? {});
       setLoading(false);
@@ -194,9 +204,21 @@ export default function AnaliseFlowPage() {
   const flow = flowId ? ANALISE_FLOWS[flowId] : null;
   const section = flow?.sections[sectionIndex];
 
+  const incidenteInvestigado = values["incidente_investigado"] as string | undefined;
+
   const resumoNotificacaoCompleto = useMemo(
-    () => (detalhe ? <ResumoNotificacao detalhe={detalhe} /> : null),
-    [detalhe],
+    () =>
+      detalhe ? (
+        <ResumoNotificacao detalhe={detalhe} incidenteInvestigado={incidenteInvestigado} />
+      ) : null,
+    [detalhe, incidenteInvestigado],
+  );
+  const resumoNotificacaoCompacto = useMemo(
+    () =>
+      detalhe ? (
+        <ResumoNotificacao detalhe={detalhe} compact incidenteInvestigado={incidenteInvestigado} />
+      ) : null,
+    [detalhe, incidenteInvestigado],
   );
   const resumoNotificacaoCompacto = useMemo(
     () => (detalhe ? <ResumoNotificacao detalhe={detalhe} compact /> : null),
@@ -235,6 +257,16 @@ export default function AnaliseFlowPage() {
     });
   }
 
+  function formCanAdvance(): boolean {
+    if (!section || section.kind !== "form") return true;
+    return section.fields.every((f) => {
+      if (!f.required) return true;
+      if (f.visibleIf && !evalCondition(values, f.visibleIf)) return true;
+      const v = values[f.id];
+      return Array.isArray(v) ? v.length > 0 : !!v;
+    });
+  }
+
   async function handleNext() {
     if (!flow || !section) return;
 
@@ -253,6 +285,12 @@ export default function AnaliseFlowPage() {
         setFlowId(targetFlowId);
         setSectionIndex(targetIndex >= 0 ? targetIndex : 0);
         await saveDraft(escalatedValues);
+        return;
+      }
+      // "Checagem de suficiência" concluindo que a análise já está completa (Londres Rápido) —
+      // não há mais uma seção de Plano de Ação própria pra ir em seguida, então encerra aqui.
+      if (goto === "fim") {
+        await handleFinish(values);
         return;
       }
       if (goto) {
@@ -303,10 +341,7 @@ export default function AnaliseFlowPage() {
     return (
       <AdminLayout>
         <div className={styles.flowPage}>
-          <p>
-            Escolha a metodologia de investigação (no encaminhamento da notificação) antes de
-            iniciar a análise.
-          </p>
+          <p>Não foi possível carregar esta análise.</p>
           <BackButton onClick={() => id && navigate(`/incident/${id}`)}>
             Voltar para a notificação
           </BackButton>
@@ -337,11 +372,12 @@ export default function AnaliseFlowPage() {
         <StepForm
           currentStep={sectionIndex + 1}
           totalSteps={flow.sections.length}
-          stepTitle={`Seção ${sectionIndex + 1}`}
+          stepTitle={section.title}
+          stepTitleTooltip={section.description}
           onNext={handleNext}
           onPrev={handlePrev}
           isLastStep={!!section.onSubmit}
-          canAdvance={decisionCanAdvance() && !finishing}
+          canAdvance={decisionCanAdvance() && formCanAdvance() && !finishing}
           submitLabel="Concluir investigação"
           compact
         >
@@ -350,6 +386,7 @@ export default function AnaliseFlowPage() {
             values={values}
             onFieldChange={updateField}
             resumoNotificacao={resumoNotificacaoCompleto}
+            allSections={flow.sections}
           />
         </StepForm>
 

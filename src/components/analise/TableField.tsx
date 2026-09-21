@@ -1,7 +1,8 @@
-import { useEffect } from "react";
-import type { AnaliseField, ChoiceOption, TableColumnType } from "../../types/analise";
+import { useEffect, useState } from "react";
+import type { AnaliseField, ChoiceOption, TableColumn, TableColumnType } from "../../types/analise";
 import { formatCurrencyInput } from "../../utils/currency";
 import { normalizeOption } from "../../types/analise";
+import { InfoTooltip } from "../common/ui/InfoTooltip";
 import styles from "./Analise.module.css";
 
 export type TableRow = Record<string, string> & { __label?: string };
@@ -27,7 +28,28 @@ const COLUMN_WIDTH: Record<TableColumnType, string> = {
   text: "200px",
   textarea: "260px",
   currency: "140px",
+  "auto-index": "64px",
 };
+
+/** Rótulo de coluna/campo com um ícone de ajuda ao lado quando há uma legenda associada (ex.:
+    "Confirmado = fonte documental direta..." na coluna Status da cronologia). */
+function ColumnLabel({
+  label,
+  helpText,
+  helpTextItems,
+}: {
+  label: string;
+  helpText?: string;
+  helpTextItems?: TableColumn["helpTextItems"];
+}) {
+  if (!helpText && !helpTextItems) return <>{label}</>;
+  return (
+    <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+      {label}
+      <InfoTooltip text={helpText} items={helpTextItems} />
+    </span>
+  );
+}
 
 export function TableField({ field, value, onChange, readOnly, "data-testid": dataTestId }: Props) {
   const columns = field.columns ?? [];
@@ -43,7 +65,7 @@ export function TableField({ field, value, onChange, readOnly, "data-testid": da
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value]);
 
-  const rows = value ?? (fixedRows ? fixedRows.map((label) => ({ __label: label })) : []);
+  const rows = value ?? (fixedRows ? fixedRows.map((label): TableRow => ({ __label: label })) : []);
 
   function updateCell(rowIndex: number, columnId: string, cellValue: string) {
     const next = rows.map((row, i) => (i === rowIndex ? { ...row, [columnId]: cellValue } : row));
@@ -51,7 +73,21 @@ export function TableField({ field, value, onChange, readOnly, "data-testid": da
   }
 
   function addRow() {
-    onChange([...rows, emptyRow()]);
+    const previousRow = rows[rows.length - 1];
+    const newRow = emptyRow();
+    // Colunas marcadas com `deriveFromPreviousRow` já vêm sugeridas a partir da linha anterior
+    // (ex.: nos "5 Porquês", a pergunta do próximo nível puxa a resposta do nível de cima). Só um
+    // ponto de partida editável — e não faz nada na primeira linha, que não tem anterior.
+    if (previousRow) {
+      for (const col of columns) {
+        const derive = col.deriveFromPreviousRow;
+        const sourceValue = derive ? previousRow[derive.sourceColumnId] : undefined;
+        if (derive && sourceValue) {
+          newRow[col.id] = `${derive.prefix ?? ""}${sourceValue}${derive.suffix ?? ""}`;
+        }
+      }
+    }
+    onChange([...rows, newRow]);
   }
 
   function removeRow(rowIndex: number) {
@@ -63,7 +99,7 @@ export function TableField({ field, value, onChange, readOnly, "data-testid": da
   // Colunas de texto longo (textarea) ficam ruins espremidas numa célula de tabela — nesse caso a
   // linha inteira vira um card (campos curtos lado a lado, texto longo ocupando a largura toda)
   // em vez de uma linha de tabela. Tabelas só com campos curtos continuam como tabela mesmo.
-  const hasLongText = columns.some((col) => col.type === "textarea");
+  const hasLongText = field.layout !== "table" && columns.some((col) => col.type === "textarea");
 
   const addButton = field.repeatable && !fixedRows && !readOnly && (
     <button
@@ -72,7 +108,7 @@ export function TableField({ field, value, onChange, readOnly, "data-testid": da
       onClick={addRow}
       data-testid={dataTestId ? `${dataTestId}-add` : undefined}
     >
-      + Adicionar linha
+      {field.addButtonLabel ?? "+ Adicionar linha"}
     </button>
   );
 
@@ -108,27 +144,45 @@ export function TableField({ field, value, onChange, readOnly, "data-testid": da
                     <div className={styles.tableCardShortGrid}>
                       {shortColumns.map((col) => (
                         <div key={col.id} className={styles.tableCardField}>
-                          <label className={styles.tableCardFieldLabel}>{col.label}</label>
-                          <TableCell
-                            type={col.type}
-                            options={col.options}
-                            value={row[col.id] ?? ""}
-                            onChange={(v) => updateCell(rowIndex, col.id, v)}
-                            readOnly={readOnly}
-                            testId={
-                              dataTestId ? `${dataTestId}-row${rowIndex}-${col.id}` : undefined
-                            }
-                          />
+                          <label className={styles.tableCardFieldLabel}>
+                            <ColumnLabel
+                              label={col.label}
+                              helpText={col.helpText}
+                              helpTextItems={col.helpTextItems}
+                            />
+                          </label>
+                          {col.type === "auto-index" ? (
+                            <span className={styles.autoIndexCell}>{rowIndex + 1}</span>
+                          ) : (
+                            <TableCell
+                              type={col.type}
+                              options={col.options}
+                              allowOther={col.allowOther}
+                              value={row[col.id] ?? ""}
+                              onChange={(v) => updateCell(rowIndex, col.id, v)}
+                              readOnly={readOnly}
+                              testId={
+                                dataTestId ? `${dataTestId}-row${rowIndex}-${col.id}` : undefined
+                              }
+                            />
+                          )}
                         </div>
                       ))}
                     </div>
                   )}
                   {longColumns.map((col) => (
                     <div key={col.id} className={styles.tableCardField}>
-                      <label className={styles.tableCardFieldLabel}>{col.label}</label>
+                      <label className={styles.tableCardFieldLabel}>
+                        <ColumnLabel
+                          label={col.label}
+                          helpText={col.helpText}
+                          helpTextItems={col.helpTextItems}
+                        />
+                      </label>
                       <TableCell
                         type={col.type}
                         options={col.options}
+                        allowOther={col.allowOther}
                         value={row[col.id] ?? ""}
                         onChange={(v) => updateCell(rowIndex, col.id, v)}
                         readOnly={readOnly}
@@ -162,7 +216,13 @@ export function TableField({ field, value, onChange, readOnly, "data-testid": da
             <tr>
               {fixedRows && <th></th>}
               {columns.map((col) => (
-                <th key={col.id}>{col.label}</th>
+                <th key={col.id}>
+                  <ColumnLabel
+                    label={col.label}
+                    helpText={col.helpText}
+                    helpTextItems={col.helpTextItems}
+                  />
+                </th>
               ))}
               {showRemoveColumn && <th></th>}
             </tr>
@@ -180,14 +240,19 @@ export function TableField({ field, value, onChange, readOnly, "data-testid": da
                 {fixedRows && <td className={styles.rowLabelCell}>{row.__label}</td>}
                 {columns.map((col) => (
                   <td key={col.id}>
-                    <TableCell
-                      type={col.type}
-                      options={col.options}
-                      value={row[col.id] ?? ""}
-                      onChange={(v) => updateCell(rowIndex, col.id, v)}
-                      readOnly={readOnly}
-                      testId={dataTestId ? `${dataTestId}-row${rowIndex}-${col.id}` : undefined}
-                    />
+                    {col.type === "auto-index" ? (
+                      <span className={styles.autoIndexCell}>{rowIndex + 1}</span>
+                    ) : (
+                      <TableCell
+                        type={col.type}
+                        options={col.options}
+                        allowOther={col.allowOther}
+                        value={row[col.id] ?? ""}
+                        onChange={(v) => updateCell(rowIndex, col.id, v)}
+                        readOnly={readOnly}
+                        testId={dataTestId ? `${dataTestId}-row${rowIndex}-${col.id}` : undefined}
+                      />
+                    )}
                   </td>
                 ))}
                 {showRemoveColumn && (
@@ -215,6 +280,7 @@ export function TableField({ field, value, onChange, readOnly, "data-testid": da
 function TableCell({
   type,
   options,
+  allowOther,
   value,
   onChange,
   readOnly,
@@ -223,6 +289,7 @@ function TableCell({
 }: {
   type: string;
   options?: ChoiceOption[];
+  allowOther?: TableColumn["allowOther"];
   value: string;
   onChange: (v: string) => void;
   readOnly?: boolean;
@@ -281,10 +348,64 @@ function TableCell({
   }
   if (type === "choice" && options) {
     return (
+      <TableChoiceCell
+        options={options}
+        allowOther={allowOther}
+        value={value}
+        onChange={onChange}
+        readOnly={readOnly}
+        testId={testId}
+      />
+    );
+  }
+  return (
+    <input
+      className={styles.cellInput}
+      type="text"
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      disabled={readOnly}
+      data-testid={testId}
+    />
+  );
+}
+
+/** Select de coluna com opção "Outro" — ao escolhê-la, revela um campo de texto livre logo
+    abaixo (ex.: Fonte da cronologia: Prontuário / Inspeção no local / Entrevista / Outro). */
+function TableChoiceCell({
+  options,
+  allowOther,
+  value,
+  onChange,
+  readOnly,
+  testId,
+}: {
+  options: ChoiceOption[];
+  allowOther?: boolean;
+  value: string;
+  onChange: (v: string) => void;
+  readOnly?: boolean;
+  testId?: string;
+}) {
+  const optionValues = options.map((opt) => normalizeOption(opt).value);
+  const isCustomValue = allowOther && value !== "" && !optionValues.includes(value);
+  const [customMode, setCustomMode] = useState(false);
+  const showCustomInput = isCustomValue || customMode;
+
+  return (
+    <div>
       <select
         className={styles.cellSelect}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
+        value={showCustomInput ? "Outro" : value}
+        onChange={(e) => {
+          if (allowOther && e.target.value === "Outro") {
+            setCustomMode(true);
+            onChange("");
+          } else {
+            setCustomMode(false);
+            onChange(e.target.value);
+          }
+        }}
         disabled={readOnly}
         data-testid={testId}
       >
@@ -298,16 +419,18 @@ function TableCell({
           );
         })}
       </select>
-    );
-  }
-  return (
-    <input
-      className={styles.cellInput}
-      type="text"
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      disabled={readOnly}
-      data-testid={testId}
-    />
+      {showCustomInput && (
+        <input
+          className={styles.cellInput}
+          style={{ marginTop: 6 }}
+          type="text"
+          placeholder="Especifique"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          disabled={readOnly}
+          data-testid={testId ? `${testId}-outro` : undefined}
+        />
+      )}
+    </div>
   );
 }

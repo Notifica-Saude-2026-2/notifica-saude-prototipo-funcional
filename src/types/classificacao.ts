@@ -24,7 +24,6 @@ export type ClassificacaoResponse = {
   observacoes: string | null;
   outro_tipo_incidente: string | null;
   outro_envolvido: string | null;
-  protocolo_investigacao: string | null;
   /** true enquanto a classificação estiver incompleta (rascunho) */
   rascunho: boolean;
   /** @db.Timestamptz — ISO 8601 com timezone */
