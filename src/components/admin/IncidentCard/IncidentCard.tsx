@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import calendarIcon from "../../../assets/calendar.svg";
 import type { Incident } from "../../../types/incident";
-import { getStatusColors, GRAU_DANO_COLORS } from "../../../utils/statusColors";
+import { getStatusColors, GRAU_DANO_COLORS, getPrazoInfo } from "../../../utils/statusColors";
 import { GRAU_DANO_LABEL } from "../../../services/notificacaoDetalheService";
 import styles from "./IncidentCard.module.css";
 
@@ -16,6 +16,7 @@ export function IncidentCard({ incident }: Props) {
   const grauDanoLabel = incident.grauDano
     ? (GRAU_DANO_LABEL[incident.grauDano] ?? incident.grauDano)
     : null;
+  const prazoInfo = getPrazoInfo(incident.dataValidade, incident.statusRaw);
 
   function handleClick() {
     navigate(`/incident/${incident.id}`);
@@ -40,8 +41,11 @@ export function IncidentCard({ incident }: Props) {
       <div className={styles.left}>
         <div className={styles.topRow}>
           <span className={styles.id}>#{incident.codigo}</span>
+          {incident.tipoIncidente && (
+            <span className={styles.tipoTag}>{incident.tipoIncidente}</span>
+          )}
           <span className={styles.date}>
-            <img src={calendarIcon} alt="" width={13} height={13} className={styles.calendarIcon} />
+            <img src={calendarIcon} alt="" width={12} height={12} className={styles.calendarIcon} />
             {incident.date}
           </span>
         </div>
@@ -82,6 +86,17 @@ export function IncidentCard({ incident }: Props) {
               style={{ background: grauDanoStyle.bg, color: grauDanoStyle.text }}
             >
               {grauDanoLabel}
+            </span>
+          </span>
+        )}
+        {prazoInfo && (
+          <span className={styles.rightItem}>
+            <strong className={styles.label}>Análise:</strong>{" "}
+            <span
+              className={styles.damageBadge}
+              style={{ background: prazoInfo.bg, color: prazoInfo.text }}
+            >
+              {prazoInfo.label}
             </span>
           </span>
         )}

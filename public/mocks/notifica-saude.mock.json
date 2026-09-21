@@ -1,13 +1,31 @@
 {
   "unidades": [
-    { "id": "unidade-hospital-regional", "nome": "Hospital Regional de Mato Grosso do Sul" },
-    { "id": "unidade-hospital-universitario", "nome": "Hospital Universitário" }
+    {
+      "id": "unidade-hospital-regional",
+      "nome": "Hospital Regional de Mato Grosso do Sul"
+    },
+    {
+      "id": "unidade-hospital-universitario",
+      "nome": "Hospital Universitário"
+    }
   ],
   "setores": [
-    { "id": "setor-emergencia", "nome": "Emergência" },
-    { "id": "setor-enfermaria", "nome": "Enfermaria" },
-    { "id": "setor-uti", "nome": "UTI" },
-    { "id": "setor-centro-cirurgico", "nome": "Centro cirúrgico" }
+    {
+      "id": "setor-emergencia",
+      "nome": "Emergência"
+    },
+    {
+      "id": "setor-enfermaria",
+      "nome": "Enfermaria"
+    },
+    {
+      "id": "setor-uti",
+      "nome": "UTI"
+    },
+    {
+      "id": "setor-centro-cirurgico",
+      "nome": "Centro cirúrgico"
+    }
   ],
   "notificacoes": [
     {
@@ -51,42 +69,12 @@
           "acao": "registrou a classificação"
         }
       ],
-      "planosAcao": [
-        {
-          "id": "acao-1002-1",
-          "what": "Reforçar a conferência do risco de queda antes do deslocamento.",
-          "where": "Corredor da enfermaria",
-          "responsible": "Enfermeira responsável pelo turno",
-          "startDate": "2026-08-25",
-          "conclusionDate": "2026-09-05",
-          "status": "Em andamento",
-          "resource": "Não",
-          "approval": "Não",
-          "proof": "Checklist de deslocamento preenchido.",
-          "expectedResult": "Reduzir o risco de quedas durante o transporte.",
-          "verification": "Auditoria semanal dos checklists.",
-          "verificationDate": "2026-09-12",
-          "indicator": "Sim",
-          "indicatorDetail": "Percentual de checklists preenchidos",
-          "realStartDate": "2026-08-25",
-          "realConclusionDate": "",
-          "completionDescription": "",
-          "observedResult": "",
-          "effectiveness": "",
-          "effectivenessReason": "",
-          "delayReason": "",
-          "newConclusionDate": "",
-          "cancellationReason": "",
-          "evidenceLocation": "Pasta compartilhada / Segurança do Paciente",
-          "attachments": [],
-          "updatedAt": "2026-08-31T16:37:00.000Z"
-        }
-      ]
+      "planosAcao": []
     },
     {
       "id": "notificacao-1003",
       "codigo": "1003",
-      "status": "ENCAMINHADA_SETOR",
+      "status": "EM_ACAO",
       "dataIncidente": "2026-08-23",
       "dataRegistro": "2026-08-23T09:15:00.000Z",
       "unidadeId": "unidade-hospital-regional",
@@ -98,11 +86,45 @@
         "tiposIncidentes": ["Falha de equipamento"],
         "envolvidos": ["Profissional"]
       },
+      "metodologiaAnalise": "LONDRES_RAPIDO",
+      "analiseViaEncaminhamento": true,
+      "analise": {
+        "concluida": true,
+        "flowAtivo": "londres_rapido",
+        "recomendacoes": [
+          {
+            "texto": "Solicitar manutenção preventiva do equipamento e revisar o cronograma de reposição de peças críticas da UTI."
+          }
+        ],
+        "dataInicio": "2026-08-24T08:00:00.000Z",
+        "dataConclusao": "2026-08-29T17:00:00.000Z",
+        "responsavelNome": "Administrador"
+      },
       "historico": [
         {
           "data": "2026-08-23T09:15:00.000Z",
           "autor": "Administrador",
-          "acao": "encaminhou a notificação para o setor"
+          "acao": "registrou a classificação"
+        },
+        {
+          "data": "2026-08-23T09:40:00.000Z",
+          "autor": "Administrador",
+          "acao": "metodologia de investigação escolhida: Protocolo de Londres — Investigação rápida"
+        },
+        {
+          "data": "2026-08-23T10:00:00.000Z",
+          "autor": "Administrador",
+          "acao": "notificação encaminhada para UTI analisar"
+        },
+        {
+          "data": "2026-08-29T17:00:00.000Z",
+          "autor": "Coordenação da UTI",
+          "acao": "análise concluída (Protocolo de Londres — Investigação rápida)"
+        },
+        {
+          "data": "2026-08-31T14:10:00.000Z",
+          "autor": "Coordenação da UTI",
+          "acao": "plano de ação registrado: Solicitar manutenção preventiva do equipamento."
         }
       ],
       "planosAcao": [
@@ -113,15 +135,26 @@
           "responsible": "Coordenação de manutenção",
           "startDate": "2026-08-24",
           "conclusionDate": "2026-08-29",
-          "status": "Atrasada",
           "resource": "Sim",
-          "resourceDetail": "Peças de reposição e visita técnica.",
+          "resourceItems": [
+            {
+              "pedido": "Peças de reposição",
+              "preco": "R$ 2.800,00"
+            },
+            {
+              "pedido": "Visita técnica especializada",
+              "preco": "R$ 700,00"
+            }
+          ],
           "approval": "Não",
+          "approvalDetail": "",
           "proof": "Ordem de serviço assinada.",
           "expectedResult": "Equipamento disponível e seguro para uso.",
           "verification": "Teste funcional após a manutenção.",
           "verificationDate": "2026-09-02",
           "indicator": "Não",
+          "indicatorDetail": "",
+          "status": "Atrasada",
           "realStartDate": "2026-08-24",
           "realConclusionDate": "",
           "completionDescription": "",
@@ -133,9 +166,14 @@
           "cancellationReason": "",
           "evidenceLocation": "Sistema de manutenção, OS 2026-448",
           "attachments": [
-            { "name": "ordem-servico-2026-448.pdf", "type": "application/pdf", "size": 245760 }
+            {
+              "name": "ordem-servico-2026-448.pdf",
+              "type": "application/pdf",
+              "size": 245760
+            }
           ],
-          "updatedAt": "2026-08-31T14:10:00.000Z"
+          "updatedAt": "2026-08-31T14:10:00.000Z",
+          "origemRecomendacao": "Solicitar manutenção preventiva do equipamento e revisar o cronograma de reposição de peças críticas da UTI."
         }
       ]
     }

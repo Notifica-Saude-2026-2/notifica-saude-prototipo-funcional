@@ -1,4 +1,7 @@
+import { useState } from "react";
 import type { AnaliseField } from "../../types/analise";
+import { FIVE_WHYS_NIVEIS_COLUMNS } from "../../constants/analiseSchema";
+import { TableField, type TableRow } from "./TableField";
 import styles from "./Analise.module.css";
 
 export type ChecklistState = {
@@ -7,9 +10,74 @@ export type ChecklistState = {
   otherChecked?: boolean;
   otherText?: string;
   otherDetail?: Record<string, string>;
+  /** 5 Porquês embutidos por categoria (chave = id da categoria, ou "outro" pra categoria livre) —
+      só existe quando `field.enablePorques` está ativo (ver Seção 4A). */
+  porques?: Record<string, TableRow[]>;
 };
 
 const EMPTY_STATE: ChecklistState = { checked: {}, details: {} };
+
+/**
+ * Bloco do 5 Porquês embutido numa categoria marcada — componente de nível de módulo (fora de
+ * ChecklistWithDetailField) de propósito: definir isso como função aninhada dentro do render do
+ * componente pai criava um novo "tipo" de componente a cada re-render, e o React desmontava e
+ * remontava a árvore inteira (inclusive a TableField com o input em foco) a cada tecla digitada —
+ * só a 1ª letra de cada campo chegava a salvar. Com o componente estável aqui fora, o foco persiste.
+ */
+function PorquesBlock({
+  isOpen,
+  rows,
+  onOpen,
+  onHide,
+  onChangeRows,
+  readOnly,
+}: {
+  isOpen: boolean;
+  rows: TableRow[] | undefined;
+  onOpen: () => void;
+  onHide: () => void;
+  onChangeRows: (rows: TableRow[]) => void;
+  readOnly?: boolean;
+}) {
+  if (!isOpen) {
+    return (
+      <button
+        type="button"
+        className={styles.addItemBtn}
+        style={{ marginTop: 8 }}
+        onClick={onOpen}
+        disabled={readOnly}
+      >
+        Por que isso aconteceu? (5 Porquês)
+      </button>
+    );
+  }
+  return (
+    <div className={styles.groupItemCard} style={{ marginTop: 8 }}>
+      <div className={styles.groupItemHeader}>
+        <span className={styles.groupItemTitle}>5 Porquês</span>
+        {!readOnly && (
+          <button type="button" className={styles.removeItemBtn} onClick={onHide}>
+            Ocultar
+          </button>
+        )}
+      </div>
+      <TableField
+        field={{
+          id: "porques",
+          label: "Níveis de 'Por quê?'",
+          type: "table",
+          repeatable: true,
+          itemLabel: "Porquê",
+          columns: FIVE_WHYS_NIVEIS_COLUMNS,
+        }}
+        value={rows}
+        onChange={onChangeRows}
+        readOnly={readOnly}
+      />
+    </div>
+  );
+}
 
 type Props = {
   field: AnaliseField;
@@ -29,6 +97,7 @@ export function ChecklistWithDetailField({
   const state = value ?? EMPTY_STATE;
   const items = field.items ?? [];
   const detailFields = field.detailFields ?? [];
+  const [expandedPorques, setExpandedPorques] = useState<Record<string, boolean>>({});
 
   function toggle(itemId: string) {
     onChange({ ...state, checked: { ...state.checked, [itemId]: !state.checked[itemId] } });
@@ -47,6 +116,29 @@ export function ChecklistWithDetailField({
 
   function updateOtherDetail(detailId: string, v: string) {
     onChange({ ...state, otherDetail: { ...state.otherDetail, [detailId]: v } });
+  }
+
+  /** Abre o 5 Porquês embutido de uma categoria — na primeira vez, semeia a primeira pergunta a
+      partir do achado já registrado ali ("Por que <achado>?"), continuando editável depois. */
+  function openPorques(itemId: string, achado: string | undefined) {
+    setExpandedPorques((e) => ({ ...e, [itemId]: true }));
+    const existing = state.porques?.[itemId];
+    if (existing && existing.length > 0) return;
+    const seedRow: TableRow = achado?.trim() ? { pergunta: `Por que ${achado.trim()}?` } : {};
+    onChange({ ...state, porques: { ...state.porques, [itemId]: [seedRow] } });
+  }
+
+  function hidePorques(itemId: string) {
+    setExpandedPorques((e) => ({ ...e, [itemId]: false }));
+  }
+
+  function updatePorques(itemId: string, rows: TableRow[]) {
+    onChange({ ...state, porques: { ...state.porques, [itemId]: rows } });
+  }
+
+  function isPorquesOpen(itemId: string): boolean {
+    const rows = state.porques?.[itemId];
+    return !!expandedPorques[itemId] || (!!rows && rows.length > 0);
   }
 
   return (
@@ -107,6 +199,16 @@ export function ChecklistWithDetailField({
                 ))}
               </div>
             )}
+            {checked && field.enablePorques && (
+              <PorquesBlock
+                isOpen={isPorquesOpen(item.id)}
+                rows={state.porques?.[item.id]}
+                onOpen={() => openPorques(item.id, state.details[item.id]?.["achado"])}
+                onHide={() => hidePorques(item.id)}
+                onChangeRows={(rows) => updatePorques(item.id, rows)}
+                readOnly={readOnly}
+              />
+            )}
           </div>
         );
       })}
@@ -162,6 +264,16 @@ export function ChecklistWithDetailField({
                   )}
                 </div>
               ))}
+              {field.enablePorques && (
+                <PorquesBlock
+                  isOpen={isPorquesOpen("outro")}
+                  rows={state.porques?.["outro"]}
+                  onOpen={() => openPorques("outro", state.otherDetail?.["achado"])}
+                  onHide={() => hidePorques("outro")}
+                  onChangeRows={(rows) => updatePorques("outro", rows)}
+                  readOnly={readOnly}
+                />
+              )}
             </div>
           )}
         </div>

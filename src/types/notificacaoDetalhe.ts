@@ -32,7 +32,6 @@ export type ClassificacaoRaw = {
   envolvidos: string[];
   grau_dano: string | null;
   observacoes: string | null;
-  protocolo_investigacao: string | null;
   rascunho: boolean;
   data_classificacao: string;
   data_validade: string | null;
@@ -49,6 +48,8 @@ export type NotificacaoRaw = {
   data_registro: string;
   updated_at: string;
   descricao: string | null;
+  /** Promovido a coluna própria na criação, igual a `descricao` — ver CAMPO_IDS.CONDUTA_IMEDIATA. */
+  condutaImediata?: string | null;
   anonima: boolean;
   tenant_id: string;
   unidade_id: string;
@@ -82,13 +83,15 @@ export type ClassificacaoDTO = {
   envolvidos: string[];
   grauDano: string | null;
   observacoes: string | null;
-  protocoloInvestigacao: string | null;
   rascunho: boolean;
   dataClassificacao: string;
   dataValidade: string | null;
   diasValidade: number | null;
   outroEnvolvido: string | null;
   outroTipoIncidente: string | null;
+  /** Responsável pelo incidente — regra de negócio: é sempre quem registrou a classificação
+      (profissional do NSP). Não há atribuição manual de responsável em nenhum outro momento. */
+  responsavelNome: string | null;
 };
 
 export type NotificacaoDetalheDTO = {
@@ -101,10 +104,12 @@ export type NotificacaoDetalheDTO = {
   dataCadastroCompleto: string;
   dataAtualizacao: string; // Nova propriedade para incluir hora
   descricao: string | null;
+  condutaImediata: string | null;
   anonima: boolean;
   unidade: string;
   setor: string;
   turno: string | null;
+  horario: string | null;
   papel: string | null;
   paciente: PacienteDTO;
   notificante: {
@@ -132,4 +137,9 @@ export const CAMPO_IDS = {
   PAPEL: "55555555-5555-4555-b555-000000000005",
   NOME_OPC: "55555555-5555-4555-b555-000000000006",
   CONTATO_OPC: "55555555-5555-4555-b555-000000000007",
+  // ⚠️ PROVISÓRIOS — não existem no seed.ts do backend ainda. Campos novos pedidos pela proponente
+  // (fluxo de Investigação ajustado). Confirmar com o backend os IDs definitivos antes de integrar
+  // de verdade; por ora servem só para o protótipo front-end funcionar de ponta a ponta.
+  CONDUTA_IMEDIATA: "55555555-5555-4555-b555-000000000011",
+  HORARIO: "55555555-5555-4555-b555-000000000012",
 } as const;

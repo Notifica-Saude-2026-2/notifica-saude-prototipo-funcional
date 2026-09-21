@@ -1,6 +1,31 @@
-import type { AnaliseField, ItemSchemaFieldDef } from "../../types/analise";
+import type { AnaliseField, AnaliseValues, ItemSchemaFieldDef } from "../../types/analise";
 import { TableField, type TableRow } from "./TableField";
+import { OrientacaoBox } from "./OrientacaoBox";
+import type { ChecklistState } from "./ChecklistWithDetailField";
+import { FATORES_CONTRIBUINTES_ITEMS } from "../../constants/analiseSchema";
 import styles from "./Analise.module.css";
+
+/**
+ * Opções do "Fator em investigação" (Seção 5): em vez de digitar de novo o fator já registrado
+ * na Seção 4, o profissional escolhe entre os fatores contribuintes marcados lá — cada opção já
+ * traz o que foi identificado/achado, não só o nome genérico da categoria.
+ */
+function fatorInvestigacaoOptions(values: AnaliseValues): string[] {
+  const state = values["fatores_contribuintes"] as ChecklistState | undefined;
+  if (!state) return [];
+  const options: string[] = [];
+  for (const item of FATORES_CONTRIBUINTES_ITEMS) {
+    if (!state.checked[item.id]) continue;
+    const achado = state.details[item.id]?.["achado"]?.trim();
+    options.push(achado ? `${item.label} — ${achado}` : item.label);
+  }
+  if (state.otherChecked) {
+    const achado = state.otherDetail?.["achado"]?.trim();
+    const base = state.otherText?.trim() || "Outro fator";
+    options.push(achado ? `${base} — ${achado}` : base);
+  }
+  return options;
+}
 
 export type GroupItem = {
   id: string;
@@ -13,6 +38,9 @@ type Props = {
   field: AnaliseField;
   value: GroupItem[] | undefined;
   onChange: (items: GroupItem[]) => void;
+  /** Todos os valores do fluxo — usado para popular "Fator em investigação" com os fatores já
+      marcados na Seção 4 (ver fatorInvestigacaoOptions). */
+  values: AnaliseValues;
   readOnly?: boolean;
 };
 
@@ -22,10 +50,11 @@ function newItemId() {
   return `item-${Date.now()}-${counter}`;
 }
 
-export function RepeatableChoiceGroupField({ field, value, onChange, readOnly }: Props) {
+export function RepeatableChoiceGroupField({ field, value, onChange, values, readOnly }: Props) {
   const items = value ?? [];
   const choiceField = field.itemChoiceField;
   const commonFields = field.itemCommonFields ?? [];
+  const fatorOptions = fatorInvestigacaoOptions(values);
 
   function addItem() {
     onChange([...items, { id: newItemId(), common: {}, ferramenta: "", schemaValues: {} }]);
@@ -63,15 +92,36 @@ export function RepeatableChoiceGroupField({ field, value, onChange, readOnly }:
                 <label className={styles.fieldLabel} style={{ fontSize: 12.5 }}>
                   {cf.label}
                 </label>
-                <input
-                  className={styles.cellInput}
-                  type="text"
-                  value={item.common[cf.id] ?? ""}
-                  onChange={(e) =>
-                    updateItem(item.id, { common: { ...item.common, [cf.id]: e.target.value } })
-                  }
-                  disabled={readOnly}
-                />
+                {cf.id === "fator_investigacao" ? (
+                  <select
+                    className={styles.cellSelect}
+                    value={item.common[cf.id] ?? ""}
+                    onChange={(e) =>
+                      updateItem(item.id, { common: { ...item.common, [cf.id]: e.target.value } })
+                    }
+                    disabled={readOnly}
+                  >
+                    <option value="">Selecione...</option>
+                    {fatorOptions.map((opt) => (
+                      <option key={opt} value={opt}>
+                        {opt}
+                      </option>
+                    ))}
+                    {item.common[cf.id] && !fatorOptions.includes(item.common[cf.id]) && (
+                      <option value={item.common[cf.id]}>{item.common[cf.id]}</option>
+                    )}
+                  </select>
+                ) : (
+                  <input
+                    className={styles.cellInput}
+                    type="text"
+                    value={item.common[cf.id] ?? ""}
+                    onChange={(e) =>
+                      updateItem(item.id, { common: { ...item.common, [cf.id]: e.target.value } })
+                    }
+                    disabled={readOnly}
+                  />
+                )}
               </div>
             ))}
 
@@ -151,7 +201,7 @@ function ItemSchemaFieldInput({
         <label className={styles.fieldLabel} style={{ fontSize: 12.5 }}>
           {def.label}
         </label>
-        {def.helpText && <p className={styles.helpText}>{def.helpText}</p>}
+        {def.helpText && <OrientacaoBox>{def.helpText}</OrientacaoBox>}
         <TableField
           field={{
             id: def.id,
@@ -160,6 +210,7 @@ function ItemSchemaFieldInput({
             repeatable: def.repeatable,
             fixedRows: def.fixedRows,
             columns: def.columns,
+            layout: def.layout,
           }}
           value={value as TableRow[] | undefined}
           onChange={(rows) => onChange(rows)}

@@ -1,13 +1,14 @@
 import {
   addHistorico,
   arquivarLocal,
+  concluirIncidenteLocal,
   atualizarLocal,
   atualizarPlanoAcaoLocal,
+  excluirPlanoAcaoLocal,
   classificarLocal,
   concluirAnaliseLocal,
   decidirEncaminhamentoPosAnaliseLocal,
   encaminharLocal,
-  escolherMetodologiaLocal,
   getHistorico,
   getNotificacoes,
   newLocalId,
@@ -19,7 +20,6 @@ import type {
   AnaliseFlowId,
   AnaliseRaw,
   AnaliseValues,
-  MetodologiaAbordagem,
   RecomendacaoExtraida,
 } from "../types/analise";
 import type { ActionPlan } from "../types/actionPlan";
@@ -44,6 +44,7 @@ export const STATUS_LABEL: Record<string, string> = {
   EM_ANALISE: "Em análise",
   ANALISADA: "Analisado",
   EM_ACAO: "Em ação",
+  CONCLUIDA: "Concluído",
   ARQUIVADA: "Arquivado",
 };
 
@@ -126,11 +127,6 @@ export const CATEGORIA_INCIDENTE_LABEL: Record<string, string> = {
   OUTRO: "Outro",
 };
 
-export const PROTOCOLO_INVESTIGACAO_LABEL: Record<string, string> = {
-  INVESTIGACAO_DIRETA: "Investigação Direta (ACR + Ishikawa + 5 Porquês + SMART)",
-  INVESTIGACAO_SISTEMICA_PROFUNDA: "Investigação Sistêmica Profunda (Protocolo de Londres + SMART)",
-};
-
 export const ENVOLVIDO_LABEL: Record<string, string> = {
   PROFISSIONAL_SAUDE: "Profissional de saúde",
   PACIENTE: "Paciente",
@@ -200,10 +196,6 @@ export function mapToNotificacaoDetalhe(raw: NotificacaoRaw): NotificacaoDetalhe
           ? (GRAU_DANO_LABEL[rawClassificacao.grau_dano] ?? rawClassificacao.grau_dano)
           : null,
         observacoes: rawClassificacao.observacoes,
-        protocoloInvestigacao: rawClassificacao.protocolo_investigacao
-          ? (PROTOCOLO_INVESTIGACAO_LABEL[rawClassificacao.protocolo_investigacao] ??
-            rawClassificacao.protocolo_investigacao)
-          : null,
         rascunho: rawClassificacao.rascunho,
         // @db.Timestamptz — ISO 8601 com timezone
         dataClassificacao: formatDateTime(rawClassificacao.data_classificacao),
@@ -214,6 +206,8 @@ export function mapToNotificacaoDetalhe(raw: NotificacaoRaw): NotificacaoDetalhe
         diasValidade: null,
         outroEnvolvido: rawClassificacao.outro_envolvido,
         outroTipoIncidente: rawClassificacao.outro_tipo_incidente,
+        // Regra de negócio: o responsável pelo incidente é sempre quem registrou a classificação.
+        responsavelNome: rawClassificacao.profissional_nsp_nome ?? null,
       }
     : null;
 
@@ -231,6 +225,7 @@ export function mapToNotificacaoDetalhe(raw: NotificacaoRaw): NotificacaoDetalhe
     // @db.Timestamptz — ISO 8601 com timezone
     dataAtualizacao: formatDateTime(raw.updated_at ?? raw.data_registro),
     descricao: raw.descricao,
+    condutaImediata: raw.condutaImediata ?? null,
     anonima: raw.anonima,
     unidade: raw.unidade?.nome ?? "(Não informado)",
     setor: (() => {
@@ -241,6 +236,7 @@ export function mapToNotificacaoDetalhe(raw: NotificacaoRaw): NotificacaoDetalhe
         : nome;
     })(),
     turno: getRespostaValor(respostas, CAMPO_IDS.TURNO),
+    horario: getRespostaValor(respostas, CAMPO_IDS.HORARIO),
     papel: getRespostaValor(respostas, CAMPO_IDS.PAPEL),
     paciente: {
       envolvido,
@@ -330,7 +326,6 @@ export type ClassificarPayload = {
   envolvidos?: string[];
   grau_dano?: string | null;
   observacoes?: string | null;
-  protocolo_investigacao?: string | null;
   outro_envolvido?: string | null;
   outro_tipo_incidente?: string | null;
 };
@@ -393,6 +388,11 @@ export async function arquivarNotificacao(
   return { id: notificacao.id, status: notificacao.status };
 }
 
+export async function concluirNotificacao(id: string): Promise<{ id: string; status: string }> {
+  const notificacao = concluirIncidenteLocal(id);
+  return { id: notificacao.id, status: notificacao.status };
+}
+
 // --------------------------------------------------------------------------
 // Atualizar rascunho — PUT /api/notificacoes/:id/classificacao
 // --------------------------------------------------------------------------
@@ -429,13 +429,6 @@ export async function concluirAnalise(
   return concluirAnaliseLocal(id, flowAtivo, valores, recomendacoes);
 }
 
-export async function escolherMetodologiaAnalise(
-  id: string,
-  metodologia: MetodologiaAbordagem,
-): Promise<NotificacaoRaw> {
-  return escolherMetodologiaLocal(id, metodologia);
-}
-
 export async function decidirEncaminhamentoPosAnalise(
   id: string,
   decisao:
@@ -455,4 +448,8 @@ export async function registrarPlanoAcao(id: string, plan: ActionPlan): Promise<
 
 export async function atualizarPlanoAcao(id: string, plan: ActionPlan): Promise<NotificacaoRaw> {
   return atualizarPlanoAcaoLocal(id, plan);
+}
+
+export async function excluirPlanoAcao(id: string, planoId: string): Promise<NotificacaoRaw> {
+  return excluirPlanoAcaoLocal(id, planoId);
 }

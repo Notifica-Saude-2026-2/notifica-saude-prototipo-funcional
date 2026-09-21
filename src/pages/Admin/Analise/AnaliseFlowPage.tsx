@@ -53,37 +53,120 @@ function extrairRecomendacoes(values: AnaliseValues): RecomendacaoExtraida[] {
     .map((texto) => ({ texto }));
 }
 
-function ResumoNotificacao({ detalhe }: { detalhe: NotificacaoDetalheDTO }) {
-  const grauDanoColor = getGrauDanoColorByLabel(detalhe.classificacao?.grauDano);
+function GrauDanoTag({ label }: { label: string }) {
+  const cor = getGrauDanoColorByLabel(label);
   return (
-    <div>
-      <p style={{ margin: "0 0 6px" }}>
+    <span
+      style={{
+        fontWeight: 700,
+        color: cor?.text,
+        background: cor?.bg,
+        padding: cor ? "1px 8px" : undefined,
+        borderRadius: cor ? 4 : undefined,
+      }}
+    >
+      {label}
+    </span>
+  );
+}
+
+function ResumoItem({
+  label,
+  value,
+  full,
+}: {
+  label: string;
+  value: React.ReactNode;
+  full?: boolean;
+}) {
+  if (!value) return null;
+  return (
+    <div className={full ? `${styles.resumoItemFull}` : undefined}>
+      <div className={styles.resumoLabel}>{label}</div>
+      <div className={styles.resumoValue}>{value}</div>
+    </div>
+  );
+}
+
+/**
+ * Resumo da notificação + classificação — mesmo conteúdo nos dois lugares em que aparece (Seção 1
+ * e o resumo fixo que gruda acima do formulário a partir da Seção 2), só que o fixo é mais enxuto:
+ * fonte/espaçamento menores (classe .resumoCompact) e sem os dados do notificante (não é essencial
+ * pra quem já está no meio da análise, e ajuda a ocupar menos altura fixa na tela).
+ */
+function ResumoNotificacao({
+  detalhe,
+  compact,
+  incidenteInvestigado,
+}: {
+  detalhe: NotificacaoDetalheDTO;
+  compact?: boolean;
+  /** Texto livre informado pelo analista na Seção 1, identificando qual incidente está sendo investigado. */
+  incidenteInvestigado?: string;
+}) {
+  const classificacao = detalhe.classificacao;
+  return (
+    <div className={compact ? styles.resumoCompact : undefined}>
+      <p style={{ margin: "0 0 4px" }}>
         <strong>Notificação #{detalhe.codigo}</strong> — {detalhe.unidade} · {detalhe.setor}
       </p>
-      <p style={{ margin: "0 0 6px" }}>{detalhe.descricao}</p>
-      {detalhe.classificacao && (
-        <p style={{ margin: 0 }}>
-          Classificação: {detalhe.classificacao.tipoIncidente ?? "—"}
-          {detalhe.classificacao.grauDano && (
-            <>
-              {" · Grau do dano: "}
-              <span
-                style={{
-                  fontWeight: 700,
-                  color: grauDanoColor?.text,
-                  background: grauDanoColor?.bg,
-                  padding: grauDanoColor ? "1px 8px" : undefined,
-                  borderRadius: grauDanoColor ? 4 : undefined,
-                }}
-              >
-                {detalhe.classificacao.grauDano}
-              </span>
-            </>
-          )}
-          {detalhe.classificacao.tiposIncidentes.length > 0
-            ? ` · Tipo: ${detalhe.classificacao.tiposIncidentes.join(", ")}`
-            : ""}
+
+      {incidenteInvestigado && (
+        <p style={{ margin: "0 0 8px" }}>
+          <strong>Incidente em investigação:</strong> {incidenteInvestigado}
         </p>
+      )}
+
+      <div className={styles.resumoGrid}>
+        <ResumoItem label="Descrição" value={detalhe.descricao} full />
+        <ResumoItem label="Conduta imediata" value={detalhe.condutaImediata} full />
+        <ResumoItem label="Data do incidente" value={detalhe.dataIncidente} />
+        <ResumoItem label="Horário" value={detalhe.horario} />
+        <ResumoItem label="Turno" value={detalhe.turno} />
+        {detalhe.paciente.envolvido ? (
+          <>
+            <ResumoItem label="Faixa etária do paciente" value={detalhe.paciente.idade} />
+            <ResumoItem label="Sexo do paciente" value={detalhe.paciente.sexo} />
+          </>
+        ) : (
+          <ResumoItem label="Paciente" value="Não envolve o paciente" full />
+        )}
+        {!compact &&
+          (detalhe.anonima ? (
+            <ResumoItem label="Notificante" value="Notificação anônima" full />
+          ) : (
+            <>
+              <ResumoItem label="Nome do notificante" value={detalhe.notificante.nome} />
+              <ResumoItem label="Celular/E-mail" value={detalhe.notificante.contato} />
+            </>
+          ))}
+      </div>
+
+      {classificacao && (
+        <>
+          <hr className={styles.resumoDivider} />
+          <div className={styles.resumoGrid}>
+            <ResumoItem label="Classificação" value={classificacao.tipoIncidente} />
+            <ResumoItem
+              label="Grau do dano"
+              value={classificacao.grauDano && <GrauDanoTag label={classificacao.grauDano} />}
+            />
+            {classificacao.tipoEspecifico ? (
+              <ResumoItem
+                label="Tipo específico (Never Event)"
+                value={classificacao.tipoEspecifico}
+              />
+            ) : (
+              <ResumoItem
+                label="Tipo de incidente"
+                value={classificacao.tiposIncidentes.join(", ")}
+              />
+            )}
+            <ResumoItem label="Envolve" value={classificacao.envolvidos.join(", ")} />
+            <ResumoItem label="Data da classificação" value={classificacao.dataClassificacao} />
+            <ResumoItem label="Observações do NSP" value={classificacao.observacoes} full />
+          </div>
+        </>
       )}
     </div>
   );
@@ -106,9 +189,12 @@ export default function AnaliseFlowPage() {
     getNotificacaoById(id).then((raw) => {
       const dto = mapToNotificacaoDetalhe(raw);
       setDetalhe(dto);
-      const initialFlow =
+      // Não existe mais uma etapa dedicada de "escolher metodologia" antes de iniciar a análise —
+      // o usuário começa direto pelo fluxo ACR (o mais comum) e o sistema vai adaptando as seções
+      // conforme as respostas (ver decisionLogic dos fluxos em analiseSchema.ts).
+      const initialFlow: AnaliseFlowId =
         raw.analise?.flowAtivo ??
-        (dto.metodologiaAnalise ? METODOLOGIA_TO_FLOW[dto.metodologiaAnalise] : null);
+        (dto.metodologiaAnalise ? METODOLOGIA_TO_FLOW[dto.metodologiaAnalise] : "acr");
       setFlowId(initialFlow);
       setValues(raw.analise?.valores ?? {});
       setLoading(false);
@@ -118,9 +204,21 @@ export default function AnaliseFlowPage() {
   const flow = flowId ? ANALISE_FLOWS[flowId] : null;
   const section = flow?.sections[sectionIndex];
 
-  const resumoNotificacao = useMemo(
-    () => (detalhe ? <ResumoNotificacao detalhe={detalhe} /> : null),
-    [detalhe],
+  const incidenteInvestigado = values["incidente_investigado"] as string | undefined;
+
+  const resumoNotificacaoCompleto = useMemo(
+    () =>
+      detalhe ? (
+        <ResumoNotificacao detalhe={detalhe} incidenteInvestigado={incidenteInvestigado} />
+      ) : null,
+    [detalhe, incidenteInvestigado],
+  );
+  const resumoNotificacaoCompacto = useMemo(
+    () =>
+      detalhe ? (
+        <ResumoNotificacao detalhe={detalhe} compact incidenteInvestigado={incidenteInvestigado} />
+      ) : null,
+    [detalhe, incidenteInvestigado],
   );
 
   function updateField(fieldId: string, value: unknown) {
@@ -155,6 +253,16 @@ export default function AnaliseFlowPage() {
     });
   }
 
+  function formCanAdvance(): boolean {
+    if (!section || section.kind !== "form") return true;
+    return section.fields.every((f) => {
+      if (!f.required) return true;
+      if (f.visibleIf && !evalCondition(values, f.visibleIf)) return true;
+      const v = values[f.id];
+      return Array.isArray(v) ? v.length > 0 : !!v;
+    });
+  }
+
   async function handleNext() {
     if (!flow || !section) return;
 
@@ -173,6 +281,12 @@ export default function AnaliseFlowPage() {
         setFlowId(targetFlowId);
         setSectionIndex(targetIndex >= 0 ? targetIndex : 0);
         await saveDraft(escalatedValues);
+        return;
+      }
+      // "Checagem de suficiência" concluindo que a análise já está completa (Londres Rápido) —
+      // não há mais uma seção de Plano de Ação própria pra ir em seguida, então encerra aqui.
+      if (goto === "fim") {
+        await handleFinish(values);
         return;
       }
       if (goto) {
@@ -223,10 +337,7 @@ export default function AnaliseFlowPage() {
     return (
       <AdminLayout>
         <div className={styles.flowPage}>
-          <p>
-            Escolha a metodologia de investigação (no encaminhamento da notificação) antes de
-            iniciar a análise.
-          </p>
+          <p>Não foi possível carregar esta análise.</p>
           <BackButton onClick={() => id && navigate(`/incident/${id}`)}>
             Voltar para a notificação
           </BackButton>
@@ -250,18 +361,19 @@ export default function AnaliseFlowPage() {
         {/* Resumo da notificação e classificação: na Seção 1 ele já é o próprio conteúdo da seção
             (ver schema); a partir da Seção 2 esse campo não existe mais, então fixamos o mesmo
             resumo acima do formulário pra ele não sumir da tela quando o usuário avança. */}
-        {resumoNotificacao && sectionIndex > 0 && (
-          <div className={styles.flowResumoFixed}>{resumoNotificacao}</div>
+        {resumoNotificacaoCompacto && sectionIndex > 0 && (
+          <div className={styles.flowResumoFixed}>{resumoNotificacaoCompacto}</div>
         )}
 
         <StepForm
           currentStep={sectionIndex + 1}
           totalSteps={flow.sections.length}
-          stepTitle={`Seção ${sectionIndex + 1}`}
+          stepTitle={section.title}
+          stepTitleTooltip={section.description}
           onNext={handleNext}
           onPrev={handlePrev}
           isLastStep={!!section.onSubmit}
-          canAdvance={decisionCanAdvance() && !finishing}
+          canAdvance={decisionCanAdvance() && formCanAdvance() && !finishing}
           submitLabel="Concluir investigação"
           compact
         >
@@ -269,7 +381,8 @@ export default function AnaliseFlowPage() {
             section={section}
             values={values}
             onFieldChange={updateField}
-            resumoNotificacao={resumoNotificacao}
+            resumoNotificacao={resumoNotificacaoCompleto}
+            allSections={flow.sections}
           />
         </StepForm>
 

@@ -12,13 +12,23 @@ export function ActionUpdateModal({ action, onClose, onSave }: Props) {
     setDraft((current) => ({ ...current, [field]: value }));
     setError("");
   };
-  const attachFiles = (files: FileList | null) => {
+  const readAsDataUrl = (file: File): Promise<string> =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = () => reject(reader.error);
+      reader.readAsDataURL(file);
+    });
+  const attachFiles = async (files: FileList | null) => {
     if (!files) return;
-    const attachments: ActionAttachment[] = Array.from(files).map((file) => ({
-      name: file.name,
-      type: file.type,
-      size: file.size,
-    }));
+    const attachments: ActionAttachment[] = await Promise.all(
+      Array.from(files).map(async (file) => ({
+        name: file.name,
+        type: file.type,
+        size: file.size,
+        dataUrl: await readAsDataUrl(file),
+      })),
+    );
     setDraft((current) => ({ ...current, attachments: [...current.attachments, ...attachments] }));
   };
   const save = () => {
@@ -74,7 +84,8 @@ export function ActionUpdateModal({ action, onClose, onSave }: Props) {
           onChange={(value) => update("observedResult", value)}
         />
         <SelectField
-          label="A ação produziu o efeito esperado? *"
+          label="A ação produziu o efeito esperado?"
+          required
           value={draft.effectiveness}
           options={["", "Sim", "Parcialmente", "Não"]}
           onChange={(value) => update("effectiveness", value as ActionEffect)}
@@ -83,9 +94,10 @@ export function ActionUpdateModal({ action, onClose, onSave }: Props) {
           <UpdateField
             label={
               draft.effectiveness === "Parcialmente"
-                ? "Por que o efeito foi parcial? *"
-                : "Por que a ação não foi efetiva? *"
+                ? "Por que o efeito foi parcial?"
+                : "Por que a ação não foi efetiva?"
             }
+            required
             value={draft.effectivenessReason}
             multiline
             onChange={(value) => update("effectivenessReason", value)}
@@ -94,13 +106,15 @@ export function ActionUpdateModal({ action, onClose, onSave }: Props) {
         {draft.status === "Concluído" && (
           <>
             <UpdateField
-              label="Data real de conclusão *"
+              label="Data real de conclusão"
+              required
               value={draft.realConclusionDate}
               type="date"
               onChange={(value) => update("realConclusionDate", value)}
             />
             <UpdateField
-              label="O que foi realizado? *"
+              label="O que foi realizado?"
+              required
               value={draft.completionDescription}
               multiline
               onChange={(value) => update("completionDescription", value)}
@@ -110,13 +124,15 @@ export function ActionUpdateModal({ action, onClose, onSave }: Props) {
         {draft.status === "Atrasada" && (
           <>
             <UpdateField
-              label="Motivo do atraso *"
+              label="Motivo do atraso"
+              required
               value={draft.delayReason}
               multiline
               onChange={(value) => update("delayReason", value)}
             />
             <UpdateField
-              label="Nova previsão de finalização *"
+              label="Nova previsão de finalização"
+              required
               value={draft.newConclusionDate}
               type="date"
               onChange={(value) => update("newConclusionDate", value)}
@@ -125,7 +141,8 @@ export function ActionUpdateModal({ action, onClose, onSave }: Props) {
         )}
         {draft.status === "Cancelada" && (
           <UpdateField
-            label="Motivo do cancelamento *"
+            label="Motivo do cancelamento"
+            required
             value={draft.cancellationReason}
             multiline
             onChange={(value) => update("cancellationReason", value)}
@@ -144,7 +161,7 @@ export function ActionUpdateModal({ action, onClose, onSave }: Props) {
             className={styles.actionAttachmentInput}
             type="file"
             multiple
-            onChange={(event) => attachFiles(event.target.files)}
+            onChange={(event) => void attachFiles(event.target.files)}
           />
           {draft.attachments.length > 0 && (
             <div className={styles.actionAttachmentList}>
@@ -176,6 +193,7 @@ function UpdateField({
   multiline = false,
   readOnly = false,
   placeholder,
+  required = false,
 }: {
   label: string;
   value: string;
@@ -184,10 +202,14 @@ function UpdateField({
   multiline?: boolean;
   readOnly?: boolean;
   placeholder?: string;
+  required?: boolean;
 }) {
   return (
     <div>
-      <p className={styles.formQuestion}>{label}</p>
+      <p className={styles.formQuestion}>
+        {label}
+        {required && <span className={styles.required}>*</span>}
+      </p>
       {multiline ? (
         <textarea
           className={styles.modalInput}
@@ -215,15 +237,20 @@ function SelectField({
   value,
   options,
   onChange,
+  required = false,
 }: {
   label: string;
   value: string;
   options: string[];
   onChange: (value: string) => void;
+  required?: boolean;
 }) {
   return (
     <div>
-      <p className={styles.formQuestion}>{label}</p>
+      <p className={styles.formQuestion}>
+        {label}
+        {required && <span className={styles.required}>*</span>}
+      </p>
       <select
         className={styles.modalSelect}
         value={value}

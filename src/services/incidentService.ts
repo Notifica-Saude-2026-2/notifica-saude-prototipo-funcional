@@ -2,6 +2,7 @@ import { getNotificacoes } from "./localStore";
 import type { Incident, IncidentStatus } from "../types/incident";
 import type { NotificacaoRaw } from "../types/notificacaoDetalhe";
 import { CAMPO_IDS } from "../types/notificacaoDetalhe";
+import { CATEGORIA_INCIDENTE_LABEL } from "./notificacaoDetalheService";
 
 // --------------------------------------------------------------------------
 // Tipos de resposta do backend
@@ -11,7 +12,11 @@ type BackendNotificacao = NotificacaoRaw & {
   classificacao: {
     rascunho: boolean;
     grau_dano?: string | null;
-    profissional_nsp?: { nome: string } | null;
+    tipos_incidentes?: string[];
+    outro_tipo_incidente?: string | null;
+    data_validade?: string | null;
+    // Regra de negócio: o responsável é sempre quem registrou a classificação.
+    profissional_nsp_nome?: string | null;
   } | null;
 };
 
@@ -31,6 +36,7 @@ const STATUS_MAP: Record<string, IncidentStatus> = {
   EM_ANALISE: "Em análise",
   ANALISADA: "Analisado",
   EM_ACAO: "Em ação",
+  CONCLUIDA: "Concluído",
   ARQUIVADA: "Arquivado",
 };
 
@@ -54,8 +60,20 @@ function mapToIncident(n: BackendNotificacao): Incident {
       }
       return nome;
     })(),
-    responsavel: n.classificacao?.profissional_nsp?.nome ?? null,
+    responsavel: n.classificacao?.profissional_nsp_nome ?? null,
     grauDano: n.classificacao?.grau_dano ?? null,
+    tipoIncidente: (() => {
+      const tipos = n.classificacao?.tipos_incidentes ?? [];
+      if (tipos.length === 0) return null;
+      const labels = tipos.map((t) => {
+        if (t === "OUTRO" && n.classificacao?.outro_tipo_incidente) {
+          return `Outro - ${n.classificacao.outro_tipo_incidente}`;
+        }
+        return CATEGORIA_INCIDENTE_LABEL[t] ?? t;
+      });
+      return labels.join(", ");
+    })(),
+    dataValidade: n.classificacao?.data_validade ?? null,
   };
 }
 
@@ -70,6 +88,7 @@ export type BackendStatus =
   | "EM_ANALISE"
   | "ANALISADA"
   | "EM_ACAO"
+  | "CONCLUIDA"
   | "ARQUIVADA";
 
 export type FetchIncidentsParams = {
