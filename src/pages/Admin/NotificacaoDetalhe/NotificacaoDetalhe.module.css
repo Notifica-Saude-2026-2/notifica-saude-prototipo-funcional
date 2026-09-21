@@ -516,6 +516,14 @@
   margin-left: 2px;
 }
 
+/* Asterisco de campo obrigatório — mesmo padrão (cor/espaçamento) usado em Input, Textarea,
+   Select, FileInput, CheckboxGroup e RadioGroup. Sem espaço literal antes do "*": o respiro vem
+   só da margem, evitando o espaçamento excessivo que havia nos textos com " *" embutido. */
+.required {
+  color: #d32f2f;
+  margin-left: 2px;
+}
+
 .modalInput {
   width: 100%;
   box-sizing: border-box;
@@ -857,8 +865,8 @@
 .actionStatusPartial { color: #946200; background: #fff2cc; }
 .actionStatusLate { color: #b42318; background: #fee4e2; }
 .actionStatusCancelled { color: #5b6475; background: #edf0f5; }
-.actionIconButton { width: 28px; height: 25px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid #656565; border-radius: 7px; background: #fff; cursor: pointer; color: #333; }
-.actionIconButton:hover { color: var(--color-primary); border-color: var(--color-primary); }
+.actionIconButton { width: 28px; height: 25px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid #656565; border-radius: 5px; background: #fff; cursor: pointer; color: #333; }
+.actionIconButton:hover { color: #2f4fff; border-color: #2f4fff; }
 .actionIconButtonDanger:hover { color: #c62828; border-color: #c62828; }
 .actionCardLabel { color: #68708a; font-weight: 600; margin-top: 11px !important; }
 .actionCardValue { margin-top: 2px !important; }
@@ -934,7 +942,7 @@
   text-align: left;
   white-space: nowrap;
   font-size: 13px;
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Inter', sans-serif;
   color: #33395c;
   font-weight: 500;
   cursor: pointer;

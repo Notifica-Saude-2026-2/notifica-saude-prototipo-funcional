@@ -220,6 +220,10 @@ export default function AnaliseFlowPage() {
       ) : null,
     [detalhe, incidenteInvestigado],
   );
+  const resumoNotificacaoCompacto = useMemo(
+    () => (detalhe ? <ResumoNotificacao detalhe={detalhe} compact /> : null),
+    [detalhe],
+  );
 
   function updateField(fieldId: string, value: unknown) {
     setValues((current) => ({ ...current, [fieldId]: value }));

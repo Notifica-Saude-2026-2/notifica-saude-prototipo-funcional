@@ -14,13 +14,13 @@ import type {
   MetodologiaAbordagem,
   RecomendacaoExtraida,
 } from "../types/analise";
-import { FLOW_TO_METODOLOGIA, METODOLOGIA_LABEL } from "../types/analise";
+import { METODOLOGIA_LABEL } from "../types/analise";
 
 const NOTIFICACOES_KEY = "notifica_saude_prototipo_notificacoes";
 const HISTORICO_KEY = "notifica_saude_prototipo_historico";
 const SEED_VERSION_KEY = "notifica_saude_prototipo_seed_versao";
 
-const SEED_VERSION = "3";
+const SEED_VERSION = "2";
 
 export const unidades = [
   { id: "unidade-hospital-regional", nome: "Hospital Regional de Mato Grosso do Sul" },
