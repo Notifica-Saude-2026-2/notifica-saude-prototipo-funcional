@@ -15,6 +15,8 @@ type InputProps = {
   errorTestId?: string;
   fullWidth?: boolean;
   max?: string;
+  /** Limite de caracteres (nativo) — exibe um contador "N/limite" abaixo do campo. */
+  maxLength?: number;
   required?: boolean;
   showPasswordToggle?: boolean;
   "data-testid"?: string;
@@ -33,6 +35,7 @@ export const Input: React.FC<InputProps> = ({
   errorTestId,
   fullWidth = false,
   max,
+  maxLength,
   required = false,
   showPasswordToggle = false,
   "data-testid": dataTestId,
@@ -69,6 +72,7 @@ export const Input: React.FC<InputProps> = ({
           placeholder={placeholder}
           disabled={disabled}
           max={max}
+          maxLength={maxLength}
           className={inputClass}
           data-testid={dataTestId}
         />
@@ -86,7 +90,17 @@ export const Input: React.FC<InputProps> = ({
         )}
       </div>
 
-      {hasError && <span className={styles.errorMessage} data-testid={errorTestId}>{error}</span>}
+      {maxLength !== undefined && (
+        <span className={styles.counter}>
+          {value.length}/{maxLength}
+        </span>
+      )}
+
+      {hasError && (
+        <span className={styles.errorMessage} data-testid={errorTestId}>
+          {error}
+        </span>
+      )}
     </div>
   );
 };

@@ -1,8 +1,11 @@
 import { useState } from "react";
+import { MdWarningAmber } from "react-icons/md";
 import type { AnaliseField } from "../../types/analise";
 import { FIVE_WHYS_NIVEIS_COLUMNS } from "../../constants/analiseSchema";
 import { TableField, type TableRow } from "./TableField";
 import styles from "./Analise.module.css";
+import { OUTRO_MAX_LENGTH, PORQUES_MAX_NIVEIS, PORQUES_MIN_NIVEIS } from "../../constants/limites";
+import { SectionInfoBox } from "./SectionInfoBox";
 
 export type ChecklistState = {
   checked: Record<string, boolean>;
@@ -28,17 +31,26 @@ function PorquesBlock({
   isOpen,
   rows,
   onOpen,
-  onHide,
+  onRemove,
   onChangeRows,
   readOnly,
+  invalidCells,
 }: {
+  invalidCells?: string[];
   isOpen: boolean;
   rows: TableRow[] | undefined;
   onOpen: () => void;
-  onHide: () => void;
+  onRemove: () => void;
   onChangeRows: (rows: TableRow[]) => void;
   readOnly?: boolean;
 }) {
+  // Confirmação inline antes de apagar o que já foi preenchido (ação irreversível).
+  const [confirmando, setConfirmando] = useState(false);
+  const temConteudo = (rows ?? []).some((r) => Object.values(r).some((v) => (v ?? "").trim()));
+  function pedirRemocao() {
+    if (temConteudo) setConfirmando(true);
+    else onRemove();
+  }
   if (!isOpen) {
     return (
       <button
@@ -57,11 +69,56 @@ function PorquesBlock({
       <div className={styles.groupItemHeader}>
         <span className={styles.groupItemTitle}>5 Porquês</span>
         {!readOnly && (
-          <button type="button" className={styles.removeItemBtn} onClick={onHide}>
-            Ocultar
+          <button
+            type="button"
+            className={styles.removeItemBtn}
+            onClick={pedirRemocao}
+            data-testid="porques-remover"
+          >
+            Remover 5 Porquês
           </button>
         )}
       </div>
+      {confirmando && (
+        <div className={styles.porquesConfirm} role="alertdialog" aria-live="polite">
+          <MdWarningAmber size={18} aria-hidden="true" className={styles.porquesConfirmIcon} />
+          <span className={styles.porquesConfirmText}>
+            Remover o 5 Porquês desta categoria? Tudo o que foi preenchido nele será apagado.
+          </span>
+          <div className={styles.porquesConfirmActions}>
+            <button
+              type="button"
+              className={styles.porquesConfirmCancel}
+              onClick={() => setConfirmando(false)}
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              className={styles.porquesConfirmRemove}
+              onClick={() => {
+                setConfirmando(false);
+                onRemove();
+              }}
+              data-testid="porques-remover-confirmar"
+            >
+              Remover
+            </button>
+          </div>
+        </div>
+      )}
+      {!readOnly && (
+        <SectionInfoBox className={styles.sectionInfoBoxField}>
+          <p className={styles.sectionInfoParagraph}>
+            O <strong>5 Porquês</strong> ajuda a chegar à causa raiz: pergunte &quot;por que isso
+            aconteceu?&quot; e, a cada resposta, pergunte &quot;por quê?&quot; de novo — em geral
+            até umas 5 vezes (no máximo {PORQUES_MAX_NIVEIS} níveis). Assim a análise vai além do
+            que aconteceu na superfície (ex.: &quot;o paciente caiu&quot;) e chega à falha no
+            processo ou no sistema que permitiu o incidente — que é onde as ações de melhoria
+            realmente evitam que ele se repita.
+          </p>
+        </SectionInfoBox>
+      )}
       <TableField
         field={{
           id: "porques",
@@ -69,11 +126,23 @@ function PorquesBlock({
           type: "table",
           repeatable: true,
           itemLabel: "Porquê",
+          addButtonLabel: "+ Adicionar porquê",
+          // Um nível por linha (Nível · Por que aconteceu? · Resposta · Evidência), como a
+          // cronologia — fica mais fácil acompanhar a cadeia de porquês de cima pra baixo.
+          layout: "table",
+          // Opcional, mas cada nível criado precisa ter todas as colunas preenchidas.
+          requireCompleteRows: true,
+          // De 1 a 15 níveis: o último nível não pode ser removido (para descartar, use
+          // "Remover 5 Porquês") e o botão de adicionar trava no 15º.
+          minRows: PORQUES_MIN_NIVEIS,
+          maxRows: PORQUES_MAX_NIVEIS,
+          lockMinRows: true,
           columns: FIVE_WHYS_NIVEIS_COLUMNS,
         }}
         value={rows}
         onChange={onChangeRows}
         readOnly={readOnly}
+        invalidCells={invalidCells}
       />
     </div>
   );
@@ -84,6 +153,9 @@ type Props = {
   value: ChecklistState | undefined;
   onChange: (value: ChecklistState) => void;
   readOnly?: boolean;
+  /** Campos com pendência (ver validacao.ts): "det:<categoria>:<campo>", "outro:texto",
+      "porq:<categoria>:<linha>:<coluna>". */
+  invalidCells?: string[];
   "data-testid"?: string;
 };
 
@@ -92,8 +164,19 @@ export function ChecklistWithDetailField({
   value,
   onChange,
   readOnly,
+  invalidCells,
   "data-testid": dataTestId,
 }: Props) {
+  const invalido = (cell: string) => !!invalidCells?.includes(cell);
+  const classeCampo = (cell: string) =>
+    invalido(cell) ? `${styles.cellInput} ${styles.cellInputError}` : styles.cellInput;
+  /** Células do 5 Porquês de uma categoria, no formato da TableField ("linha:coluna"). */
+  const celulasPorques = (cat: string) =>
+    (invalidCells ?? [])
+      .filter((c) => c.startsWith(`porq:${cat}:`))
+      .map((c) => c.slice(`porq:${cat}:`.length));
+  const obrigatorio = !!field.required && !readOnly;
+  const asterisco = obrigatorio ? <span className={styles.required}>*</span> : null;
   const state = value ?? EMPTY_STATE;
   const items = field.items ?? [];
   const detailFields = field.detailFields ?? [];
@@ -128,8 +211,12 @@ export function ChecklistWithDetailField({
     onChange({ ...state, porques: { ...state.porques, [itemId]: [seedRow] } });
   }
 
-  function hidePorques(itemId: string) {
+  /** Remove o 5 Porquês da categoria: apaga os níveis preenchidos e fecha o bloco (volta a
+      mostrar o botão "Por que isso aconteceu?"). */
+  function removePorques(itemId: string) {
     setExpandedPorques((e) => ({ ...e, [itemId]: false }));
+    const { [itemId]: _removido, ...resto } = state.porques ?? {};
+    onChange({ ...state, porques: resto });
   }
 
   function updatePorques(itemId: string, rows: TableRow[]) {
@@ -171,11 +258,15 @@ export function ChecklistWithDetailField({
                   <div key={detail.id}>
                     <label className={styles.fieldLabel} style={{ fontSize: 12, fontWeight: 500 }}>
                       {detail.label}
+                      {asterisco}
                     </label>
                     {detail.type === "textarea" ? (
                       <textarea
-                        className={styles.cellInput}
+                        className={classeCampo(`det:${item.id}:${detail.id}`)}
                         rows={2}
+                        placeholder={
+                          readOnly ? undefined : (detail.placeholder ?? "Digite aqui...")
+                        }
                         value={state.details[item.id]?.[detail.id] ?? ""}
                         onChange={(e) => updateDetail(item.id, detail.id, e.target.value)}
                         disabled={readOnly}
@@ -185,8 +276,11 @@ export function ChecklistWithDetailField({
                       />
                     ) : (
                       <input
-                        className={styles.cellInput}
+                        className={classeCampo(`det:${item.id}:${detail.id}`)}
                         type="text"
+                        placeholder={
+                          readOnly ? undefined : (detail.placeholder ?? "Digite aqui...")
+                        }
                         value={state.details[item.id]?.[detail.id] ?? ""}
                         onChange={(e) => updateDetail(item.id, detail.id, e.target.value)}
                         disabled={readOnly}
@@ -200,14 +294,17 @@ export function ChecklistWithDetailField({
               </div>
             )}
             {checked && field.enablePorques && (
-              <PorquesBlock
-                isOpen={isPorquesOpen(item.id)}
-                rows={state.porques?.[item.id]}
-                onOpen={() => openPorques(item.id, state.details[item.id]?.["achado"])}
-                onHide={() => hidePorques(item.id)}
-                onChangeRows={(rows) => updatePorques(item.id, rows)}
-                readOnly={readOnly}
-              />
+              <div className={styles.porquesIndent}>
+                <PorquesBlock
+                  isOpen={isPorquesOpen(item.id)}
+                  rows={state.porques?.[item.id]}
+                  onOpen={() => openPorques(item.id, state.details[item.id]?.["achado"])}
+                  onRemove={() => removePorques(item.id)}
+                  onChangeRows={(rows) => updatePorques(item.id, rows)}
+                  readOnly={readOnly}
+                  invalidCells={celulasPorques(item.id)}
+                />
+              </div>
             )}
           </div>
         );
@@ -231,32 +328,44 @@ export function ChecklistWithDetailField({
           </div>
           {state.otherChecked && (
             <div className={styles.checklistDetailGrid}>
-              <input
-                className={styles.cellInput}
-                type="text"
-                placeholder="Descreva a categoria não mapeada..."
-                value={state.otherText ?? ""}
-                onChange={(e) => onChange({ ...state, otherText: e.target.value })}
-                disabled={readOnly}
-                data-testid={dataTestId ? `${dataTestId}-outro-texto` : undefined}
-              />
+              <div>
+                <input
+                  className={classeCampo("outro:texto")}
+                  type="text"
+                  placeholder="Descreva a categoria não mapeada..."
+                  value={state.otherText ?? ""}
+                  onChange={(e) => onChange({ ...state, otherText: e.target.value })}
+                  disabled={readOnly}
+                  data-testid={dataTestId ? `${dataTestId}-outro-texto` : undefined}
+                />
+                {!readOnly && (
+                  <div
+                    className={`${styles.charCounter} ${(state.otherText ?? "").length > OUTRO_MAX_LENGTH ? styles.charCounterOver : ""}`}
+                  >
+                    {(state.otherText ?? "").length}/{OUTRO_MAX_LENGTH}
+                  </div>
+                )}
+              </div>
               {detailFields.map((detail) => (
                 <div key={detail.id}>
                   <label className={styles.fieldLabel} style={{ fontSize: 12, fontWeight: 500 }}>
                     {detail.label}
+                    {asterisco}
                   </label>
                   {detail.type === "textarea" ? (
                     <textarea
-                      className={styles.cellInput}
+                      className={classeCampo(`det:outro:${detail.id}`)}
                       rows={2}
+                      placeholder={readOnly ? undefined : (detail.placeholder ?? "Digite aqui...")}
                       value={state.otherDetail?.[detail.id] ?? ""}
                       onChange={(e) => updateOtherDetail(detail.id, e.target.value)}
                       disabled={readOnly}
                     />
                   ) : (
                     <input
-                      className={styles.cellInput}
+                      className={classeCampo(`det:outro:${detail.id}`)}
                       type="text"
+                      placeholder={readOnly ? undefined : (detail.placeholder ?? "Digite aqui...")}
                       value={state.otherDetail?.[detail.id] ?? ""}
                       onChange={(e) => updateOtherDetail(detail.id, e.target.value)}
                       disabled={readOnly}
@@ -269,9 +378,10 @@ export function ChecklistWithDetailField({
                   isOpen={isPorquesOpen("outro")}
                   rows={state.porques?.["outro"]}
                   onOpen={() => openPorques("outro", state.otherDetail?.["achado"])}
-                  onHide={() => hidePorques("outro")}
+                  onRemove={() => removePorques("outro")}
                   onChangeRows={(rows) => updatePorques("outro", rows)}
                   readOnly={readOnly}
+                  invalidCells={celulasPorques("outro")}
                 />
               )}
             </div>

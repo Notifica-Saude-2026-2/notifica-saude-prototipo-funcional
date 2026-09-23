@@ -53,8 +53,18 @@ export const FATORES_CONTRIBUINTES_ITEMS: ChecklistItemDef[] = [
 ];
 
 export const FATORES_CONTRIBUINTES_DETAIL_FIELDS: DetailFieldDef[] = [
-  { id: "achado", label: "O que foi identificado / achado", type: "textarea" },
-  { id: "fonte", label: "Fonte / evidência", type: "text" },
+  {
+    id: "achado",
+    label: "O que foi identificado / achado",
+    type: "textarea",
+    placeholder: "Descreva o que foi identificado nesta categoria",
+  },
+  {
+    id: "fonte",
+    label: "Fonte / evidência",
+    type: "text",
+    placeholder: "Ex.: prontuário, entrevista, protocolo",
+  },
 ];
 
 /** Colunas da tabela "Níveis de 'Por quê?'" dos 5 Porquês — extraído como constante compartilhada
@@ -66,17 +76,30 @@ export const FIVE_WHYS_NIVEIS_COLUMNS: TableColumn[] = [
     id: "pergunta",
     label: "Por que aconteceu?",
     type: "textarea",
+    placeholder: "Ex.: Por que o paciente caiu?",
+    maxLength: 100,
     deriveFromPreviousRow: { sourceColumnId: "resposta", prefix: "Por que ", suffix: "?" },
   },
-  { id: "resposta", label: "Resposta", type: "textarea" },
-  { id: "evidencia", label: "Evidência / fonte", type: "text" },
+  {
+    id: "resposta",
+    label: "Resposta",
+    type: "textarea",
+    placeholder: "Responda o porquê acima",
+    maxLength: 100,
+  },
 ];
 
 const EQUIPE_RESPONSAVEL_COLUMNS = [
-  { id: "nome", label: "Nome do profissional", type: "text" as const },
-  { id: "formacao", label: "Formação", type: "text" as const },
-  { id: "funcao", label: "Função", type: "text" as const },
-  { id: "setor", label: "Setor", type: "text" as const },
+  {
+    id: "nome",
+    label: "Nome do profissional",
+    type: "text" as const,
+    placeholder: "Nome completo do profissional",
+    maxLength: 50,
+  },
+  { id: "formacao", label: "Formação", type: "text" as const, placeholder: "Ex.: Enfermagem" },
+  { id: "funcao", label: "Função", type: "text" as const, placeholder: "Ex.: Enfermeiro(a)" },
+  { id: "setor", label: "Setor", type: "text" as const, placeholder: "Ex.: UTI" },
 ];
 
 // --------------------------------------------------------------------------
@@ -96,7 +119,7 @@ const FORMACAO_OPTIONS = [
   "Administração",
 ];
 
-const FUNCAO_PROFISSIONAL_OPTIONS = [
+export const FUNCAO_PROFISSIONAL_OPTIONS = [
   "Enfermeiro(a)",
   "Técnico(a) de Enfermagem",
   "Médico(a)",
@@ -108,7 +131,7 @@ const FUNCAO_PROFISSIONAL_OPTIONS = [
   "Analista de Qualidade",
 ];
 
-const SETOR_HOSPITALAR_OPTIONS = [
+export const SETOR_HOSPITALAR_OPTIONS = [
   "Qualidade e Segurança do Paciente",
   "Clínica Médica",
   "Farmácia Hospitalar",
@@ -120,7 +143,13 @@ const SETOR_HOSPITALAR_OPTIONS = [
 ];
 
 const EQUIPE_MEMBRO_COLUMNS = [
-  { id: "nome", label: "Nome", type: "text" as const },
+  {
+    id: "nome",
+    label: "Nome",
+    type: "text" as const,
+    placeholder: "Nome completo do profissional",
+    maxLength: 50,
+  },
   {
     id: "formacao",
     label: "Formação",
@@ -146,13 +175,9 @@ const EQUIPE_MEMBRO_COLUMNS = [
 
 const FONTES_CONSULTADAS_OPTIONS = [
   "Prontuário",
-  "Prescrição",
   "Protocolo/POP",
   "Relato da equipe",
   "Paciente/família",
-  "Log do sistema",
-  "Equipamento/material",
-  "Auditoria",
 ];
 
 const RECOMENDACOES_FIELD = {
@@ -162,8 +187,22 @@ const RECOMENDACOES_FIELD = {
   repeatable: true,
   minRows: 1,
   itemLabel: "Recomendação",
-  helpText: "Uma recomendação concreta por linha, ligada ao problema e aos fatores identificados.",
-  columns: [{ id: "recomendacao", label: "Recomendação", type: "textarea" as const }],
+  addButtonLabel: "+ Adicionar recomendação",
+  helpText:
+    'Registre o que precisa ser feito para tratar as causas identificadas e evitar que o incidente se repita — uma recomendação por vez, de forma concreta e ligada aos fatores levantados na análise. Ao concluir a análise, cada recomendação pode virar uma ação no Plano de ação desta notificação (já com o "O quê" preenchido), onde ganha responsável, prazo e acompanhamento até ser concluída.',
+  helpTextInline: true,
+  // Coluna única: o rótulo dela não é exibido (o card já se chama "Recomendação N") — ver TableField.
+  // Opcional, mas cada recomendação adicionada precisa ser preenchida (até 300 caracteres).
+  requireCompleteRows: true,
+  columns: [
+    {
+      id: "recomendacao",
+      label: "Recomendação",
+      type: "textarea" as const,
+      placeholder: "Descreva uma ação concreta para evitar que o problema se repita",
+      maxLength: 300,
+    },
+  ],
   pullsInto: "plano_de_acao.acoes",
 };
 
@@ -181,8 +220,7 @@ export const acrFlow: AnaliseFlowSchema = {
       id: "secao1",
       title: "Seção 1 — Informações da notificação",
       kind: "form",
-      description:
-        'Revise as informações da notificação abaixo e informe qual incidente será analisado nesta investigação. Em seguida, clique em "Próximo" para continuar.',
+      description: "Revise os dados da notificação e informe qual incidente será investigado.",
       fields: [
         {
           id: "resumo_notificacao",
@@ -195,9 +233,11 @@ export const acrFlow: AnaliseFlowSchema = {
           id: "incidente_investigado",
           label: "Informe o incidente em investigação",
           type: "text",
+          placeholder: "Ex.: Queda do paciente durante a transferência para o leito",
           required: true,
+          maxLength: 100,
           helpText:
-            "Campo preenchido manualmente por quem está analisando. O texto informado aqui é levado automaticamente para as telas seguintes deste fluxo.",
+            "Campo preenchido manualmente por quem está analisando. O texto informado aqui é exibido no topo das próximas seções.",
         },
       ],
     },
@@ -206,7 +246,7 @@ export const acrFlow: AnaliseFlowSchema = {
       title: "Seção 2 — Informações da análise",
       kind: "form",
       description:
-        "Registre a equipe responsável pela análise, as fontes consultadas e as entrevistas realizadas.",
+        "Registre quem conduz a análise, os demais participantes, as fontes consultadas e as entrevistas.",
       fields: [
         {
           id: "condutor_analise",
@@ -214,6 +254,8 @@ export const acrFlow: AnaliseFlowSchema = {
           type: "table",
           repeatable: false,
           minRows: 1,
+          required: true,
+          helpTextInline: true,
           helpText:
             "Informe o condutor da análise e, abaixo, os demais membros participantes. Documentar a autoria de forma rastreável evita investigações conduzidas por uma única pessoa.",
           columns: EQUIPE_MEMBRO_COLUMNS,
@@ -224,16 +266,10 @@ export const acrFlow: AnaliseFlowSchema = {
           type: "table",
           repeatable: true,
           minRows: 0,
+          requireCompleteRows: true,
           itemLabel: "Membro",
           addButtonLabel: "+ Adicionar membro",
           columns: EQUIPE_MEMBRO_COLUMNS,
-        },
-        {
-          id: "incidente_investigado",
-          label: "Incidente em investigação",
-          type: "readonly",
-          helpText:
-            "Este campo foi transferido automaticamente da Seção 1 — Informações da notificação — e não pode ser editado nesta etapa.",
         },
         {
           id: "fontes_consultadas",
@@ -241,7 +277,10 @@ export const acrFlow: AnaliseFlowSchema = {
           type: "choice",
           multiple: true,
           allowOther: true,
-          helpText: "Selecione as fontes de informação utilizadas na análise.",
+          required: true,
+          helpTextInline: true,
+          helpText:
+            "Selecione as fontes de informação utilizadas na análise. Você pode selecionar uma ou mais opções.",
           options: FONTES_CONSULTADAS_OPTIONS,
         },
         {
@@ -249,38 +288,55 @@ export const acrFlow: AnaliseFlowSchema = {
           label: "Alguém precisa ser ouvido?",
           type: "choice",
           options: ["Sim", "Não"],
-          helpText: 'Ao marcar "Sim", a tabela é exibida para registrar a(s) entrevista(s).',
+          required: true,
+          helpTextInline: true,
+          helpText:
+            'Escolha uma das opções. Ao marcar "Sim", registre ao menos uma entrevista na tabela exibida abaixo.',
         },
         {
           id: "registro_entrevistas",
           label: "Registro de cada entrevista",
           type: "table",
           repeatable: true,
-          minRows: 0,
+          // Obrigatória quando visível (resposta "Sim"): ao menos uma entrevista, com todos os
+          // campos preenchidos. Já abre com uma linha em branco pra pessoa começar.
+          required: true,
+          minRows: 1,
           itemLabel: "Entrevista",
           addButtonLabel: "+ Adicionar entrevista",
           visibleIf: { field: "alguem_precisa_ser_ouvido", equals: "Sim" },
           columns: [
-            { id: "data", label: "Data", type: "date" },
-            { id: "nome", label: "Nome", type: "text" },
+            // Proporção na linha do card: Data 2 · Nome 6 · Função 2.
+            { id: "data", label: "Data", type: "date", width: 2 },
+            {
+              id: "nome",
+              label: "Nome",
+              type: "text",
+              placeholder: "Nome da pessoa entrevistada",
+              maxLength: 50,
+              width: 6,
+            },
             {
               id: "funcao",
               label: "Função",
               type: "choice",
               options: FUNCAO_PROFISSIONAL_OPTIONS,
               allowOther: true,
+              width: 2,
             },
             {
               id: "relato",
               label: "Relato / fatos relevantes",
               type: "textarea",
-              helpText: "Permite textos longos e quantas linhas forem necessárias.",
+              placeholder: "Descreva o que a pessoa relatou e os fatos relevantes",
+              maxLength: 500,
             },
             {
               id: "problemas_percebidos",
               label: "Problemas ou condições percebidos",
               type: "textarea",
-              helpText: "Permite textos longos e quantas linhas forem necessárias.",
+              placeholder: "Descreva problemas ou condições que a pessoa percebeu",
+              maxLength: 500,
             },
           ],
         },
@@ -290,18 +346,42 @@ export const acrFlow: AnaliseFlowSchema = {
       id: "secao3",
       title: "Seção 3 — Cronologia do Incidente",
       kind: "form",
+      description:
+        "Liste os fatos em ordem cronológica, sempre com a fonte, e registre os problemas na prestação do cuidado (PPC).",
       fields: [
         {
           id: "cronologia",
           label: "Cronologia",
           type: "table",
           repeatable: true,
+          // Obrigatória: ao menos um evento, com todos os campos preenchidos. Já abre com uma linha.
+          required: true,
+          minRows: 1,
           itemLabel: "Evento",
+          addButtonLabel: "+ Adicionar evento",
+          // Linha do tempo em formato de tabela: um evento por linha, todos os campos lado a lado
+          // (com rolagem horizontal se não couber), na ordem Data · Hora · Fato · Fonte · Status.
+          layout: "table",
+          helpTextInline: true,
           helpText: "Nunca registrar fatos baseados em suposições — sempre indicar a fonte.",
           columns: [
             { id: "data", label: "Data", type: "date" },
             { id: "hora", label: "Hora", type: "time" },
-            { id: "fato", label: "Fato", type: "textarea" },
+            {
+              id: "fato",
+              label: "Fato",
+              type: "textarea",
+              placeholder: "Descreva o que aconteceu neste momento (sem suposições)",
+              tableWidth: "420px",
+              maxLength: 500,
+            },
+            {
+              id: "fonte",
+              label: "Fonte",
+              type: "choice",
+              options: ["Prontuário", "Inspeção no local", "Entrevista", "Outro"],
+              allowOther: true,
+            },
             {
               id: "status",
               label: "Status",
@@ -326,13 +406,6 @@ export const acrFlow: AnaliseFlowSchema = {
                 },
               ],
             },
-            {
-              id: "fonte",
-              label: "Fonte",
-              type: "choice",
-              options: ["Prontuário", "Inspeção no local", "Entrevista", "Outro"],
-              allowOther: true,
-            },
           ],
         },
         {
@@ -340,6 +413,8 @@ export const acrFlow: AnaliseFlowSchema = {
           label: "Foi identificado algum Problema na Prestação do Cuidado (PPC)?",
           type: "choice",
           options: ["Não", "Sim"],
+          required: true,
+          helpTextInline: true,
           helpText:
             "Considere se houve alguma ação ou omissão da equipe que tenha contribuído para o incidente. Exemplos de PPC:",
           helpTextItems: [
@@ -366,23 +441,52 @@ export const acrFlow: AnaliseFlowSchema = {
           label: "Problemas na prestação do cuidado",
           type: "table",
           repeatable: true,
+          // Com "Sim" em "Foi identificado algum PPC?": ao menos 1 PPC, com todos os campos
+          // preenchidos. Já abre com uma linha. Exibido como tabela, um PPC por linha.
+          required: true,
+          minRows: 1,
+          layout: "table",
           itemLabel: "PPC",
+          addButtonLabel: "+ Adicionar PPC",
           visibleIf: { field: "tem_ppc", equals: "Sim" },
           columns: [
-            { id: "numero", label: "PPC nº", type: "text" },
-            { id: "ocorrido", label: "O que ocorreu (desvio observável)", type: "textarea" },
-            { id: "esperado", label: "O esperado", type: "textarea" },
-            { id: "fonte", label: "Fonte / evidência", type: "text" },
+            // Numeração automática pela posição da linha (1, 2, 3...) — não editável.
+            { id: "numero", label: "PPC nº", type: "auto-index", tableWidth: "80px" },
+            {
+              id: "ocorrido",
+              label: "O que ocorreu (desvio observável)",
+              type: "textarea",
+              placeholder: "Descreva o desvio observado no cuidado",
+              tableWidth: "340px",
+              maxLength: 500,
+            },
+            {
+              id: "esperado",
+              label: "O esperado",
+              type: "textarea",
+              placeholder: "Descreva o que deveria ter acontecido",
+              tableWidth: "340px",
+              maxLength: 500,
+            },
+            {
+              id: "fonte",
+              label: "Fonte / evidência",
+              type: "choice",
+              // Mesmas opções da Fonte da cronologia; "Outro" abre campo de texto (máx. 30).
+              options: ["Prontuário", "Inspeção no local", "Entrevista"],
+              allowOther: true,
+              tableWidth: "240px",
+            },
           ],
         },
       ],
     },
     {
       id: "secao4",
-      title: "Seção 4 — Seleção de fatores a investigar",
+      title: "Seção 4 — Análise dos fatores contribuintes",
       kind: "form",
       description:
-        "Marque quais fatos da Cronologia e quais PPCs identificados na Seção 3 devem virar uma análise de fatores contribuintes própria. Só os itens marcados aqui avançam para a próxima seção — não é preciso marcar todos.",
+        "Marque os fatos e PPCs que terão os fatores contribuintes analisados na próxima etapa.",
       fields: [
         {
           id: "itens_selecionados",
@@ -399,20 +503,25 @@ export const acrFlow: AnaliseFlowSchema = {
       id: "secao4a",
       title: "Seção 4A — Fatores contribuintes por item selecionado",
       kind: "form",
+      // Texto que antes ficava no ícone de info do campo — agora direto na caixa da seção (uma vez só,
+      // em vez de repetir em cada item).
+      description:
+        'Para cada item selecionado, marque as categorias de fatores contribuintes que se aplicam a ele. Em qualquer categoria marcada, use "Por que isso aconteceu?" para aprofundar com os 5 Porquês quando fizer sentido — não é obrigatório em todas.',
       repeatablePerSelectedItemOf: "itens_selecionados",
       fields: [
         {
           id: "fatores_por_item",
           label: "Fatores contribuintes deste item",
           type: "checklist_with_detail",
+          // Ao menos 1 categoria marcada; cada categoria marcada exige seus campos (achado e fonte).
+          // O 5 Porquês é opcional, mas cada nível criado precisa estar completo (ver validacao.ts).
+          required: true,
           taxonomy: "Protocolo de Londres (revisão 2024) — 8 categorias fixas",
           items: FATORES_CONTRIBUINTES_ITEMS,
           detailFields: FATORES_CONTRIBUINTES_DETAIL_FIELDS,
           allowOther: true,
           otherLabel: "Outro / não mapeado nas categorias acima",
           enablePorques: true,
-          helpText:
-            'Marque as categorias que se aplicam a este item específico. Em qualquer categoria marcada, use "Por que isso aconteceu?" para aprofundar com os 5 Porquês quando fizer sentido — não é obrigatório em todas.',
         },
       ],
     },
@@ -421,12 +530,15 @@ export const acrFlow: AnaliseFlowSchema = {
       title: "Seção 5 — Resultado (Ishikawa + Recomendações)",
       kind: "form",
       description:
-        "Parta dos achados e das causas raízes já registradas nos 5 Porquês de cada item (Seção 4A) em vez de propor recomendação nova sem relação com o apurado.",
+        "Revise o diagrama e registre recomendações ligadas aos achados e causas já identificados.",
       fields: [
         {
           id: "diagrama_ishikawa",
           label: "Diagrama de Ishikawa (espinha de peixe)",
           type: "computed",
+          helpText:
+            'O Diagrama de Ishikawa (ou espinha de peixe) reúne numa só imagem os fatores contribuintes registrados na Seção 4A, agrupados por categoria, todos convergindo para o incidente — a "cabeça" do peixe. Ele é montado automaticamente e ajuda a enxergar o quadro completo de uma vez: quais áreas mais contribuíram, como as causas se relacionam e onde concentrar os esforços de melhoria. Também é útil para apresentar o resultado da investigação à equipe e à gestão, e serve de base para as recomendações abaixo.',
+          helpTextInline: true,
           ishikawaSource: {
             selectorFieldId: "itens_selecionados",
             selectorSources: [
@@ -458,8 +570,7 @@ export const londresRapidoFlow: AnaliseFlowSchema = {
       id: "secao1",
       title: "Seção 1 — Informações da notificação",
       kind: "form",
-      description:
-        'Revise as informações da notificação abaixo e informe qual incidente será analisado nesta investigação. Em seguida, clique em "Próximo" para continuar.',
+      description: "Revise os dados da notificação e informe qual incidente será investigado.",
       fields: [
         {
           id: "resumo_notificacao",
@@ -472,7 +583,9 @@ export const londresRapidoFlow: AnaliseFlowSchema = {
           id: "incidente_investigado",
           label: "Informe o incidente em investigação",
           type: "text",
+          placeholder: "Ex.: Queda do paciente durante a transferência para o leito",
           required: true,
+          maxLength: 100,
           helpText:
             "Campo preenchido manualmente por quem está analisando. O texto informado aqui é levado automaticamente para as telas seguintes deste fluxo.",
         },
@@ -482,6 +595,7 @@ export const londresRapidoFlow: AnaliseFlowSchema = {
       id: "secao2",
       title: "Seção 2 — Equipe responsável pela análise",
       kind: "form",
+      description: "Registre os profissionais que participam da análise.",
       fields: [
         {
           id: "equipe_responsavel",
@@ -499,6 +613,7 @@ export const londresRapidoFlow: AnaliseFlowSchema = {
       id: "secao3",
       title: "Seção 3 — Fontes consultadas",
       kind: "form",
+      description: "Indique as fontes de informação consultadas.",
       fields: [
         {
           id: "fontes_consultadas",
@@ -515,7 +630,7 @@ export const londresRapidoFlow: AnaliseFlowSchema = {
       id: "secao4",
       title: "Seção 4 — Linha do tempo",
       kind: "form",
-      description: "Registre fatos curtos, na ordem dos acontecimentos. Não explique causas ainda.",
+      description: "Registre fatos curtos, em ordem cronológica, sem explicar causas ainda.",
       fields: [
         {
           id: "linha_do_tempo",
@@ -526,7 +641,12 @@ export const londresRapidoFlow: AnaliseFlowSchema = {
           columns: [
             { id: "data", label: "Data", type: "date" },
             { id: "horario", label: "Horário", type: "time" },
-            { id: "fato", label: "Fato", type: "textarea" },
+            {
+              id: "fato",
+              label: "Fato",
+              type: "textarea",
+              placeholder: "Descreva o que aconteceu neste momento (sem suposições)",
+            },
             { id: "fonte", label: "Fonte", type: "text" },
           ],
         },
@@ -537,7 +657,7 @@ export const londresRapidoFlow: AnaliseFlowSchema = {
       title: "Seção 5 — Processo esperado x problema no cuidado",
       kind: "form",
       description:
-        "Descreva o desvio observável comparando com o esperado. Evite explicações como 'desatenção' ou 'erro humano'.",
+        "Compare o processo esperado com o que ocorreu, descrevendo o desvio sem atribuir culpa.",
       fields: [
         {
           id: "problemas_cuidado",
@@ -546,8 +666,18 @@ export const londresRapidoFlow: AnaliseFlowSchema = {
           repeatable: true,
           itemLabel: "PPC",
           columns: [
-            { id: "esperado", label: "O esperado", type: "textarea" },
-            { id: "ocorrido", label: "O que ocorreu (desvio observável)", type: "textarea" },
+            {
+              id: "esperado",
+              label: "O esperado",
+              type: "textarea",
+              placeholder: "Descreva o que deveria ter acontecido",
+            },
+            {
+              id: "ocorrido",
+              label: "O que ocorreu (desvio observável)",
+              type: "textarea",
+              placeholder: "Descreva o desvio observado no cuidado",
+            },
           ],
         },
       ],
@@ -556,6 +686,7 @@ export const londresRapidoFlow: AnaliseFlowSchema = {
       id: "secao6",
       title: "Seção 6 — Fatores contribuintes",
       kind: "form",
+      description: "Marque os fatores que contribuíram para o incidente.",
       fields: [
         {
           id: "fatores_contribuintes",
@@ -573,12 +704,14 @@ export const londresRapidoFlow: AnaliseFlowSchema = {
       id: "secao7",
       title: "Seção 7 — Recomendação",
       kind: "form",
+      description: "Registre recomendações ligadas aos problemas e fatores identificados.",
       fields: [RECOMENDACOES_FIELD],
     },
     {
       id: "secao8",
       title: "Seção 8 — Checagem de suficiência",
       kind: "decision",
+      description: "Indique se a análise foi suficiente ou se precisa ser aprofundada.",
       fields: [
         {
           id: "analise_suficiente",
@@ -626,8 +759,7 @@ export const londresCompletoFlow: AnaliseFlowSchema = {
       id: "secao1",
       title: "Seção 1 — Informações da notificação",
       kind: "form",
-      description:
-        'Revise as informações da notificação abaixo e informe qual incidente será analisado nesta investigação. Em seguida, clique em "Próximo" para continuar.',
+      description: "Revise os dados da notificação e informe qual incidente será investigado.",
       fields: [
         {
           id: "resumo_notificacao",
@@ -640,7 +772,9 @@ export const londresCompletoFlow: AnaliseFlowSchema = {
           id: "incidente_investigado",
           label: "Informe o incidente em investigação",
           type: "text",
+          placeholder: "Ex.: Queda do paciente durante a transferência para o leito",
           required: true,
+          maxLength: 100,
           helpText:
             "Campo preenchido manualmente por quem está analisando. O texto informado aqui é levado automaticamente para as telas seguintes deste fluxo.",
         },
@@ -650,6 +784,7 @@ export const londresCompletoFlow: AnaliseFlowSchema = {
       id: "secao2",
       title: "Seção 2 — Equipe responsável pela análise",
       kind: "form",
+      description: "Registre os profissionais que participam da análise.",
       fields: [
         {
           id: "equipe_responsavel",
@@ -667,6 +802,7 @@ export const londresCompletoFlow: AnaliseFlowSchema = {
       id: "secao3",
       title: "Seção 3 — Fontes consultadas",
       kind: "form",
+      description: "Indique as fontes de informação consultadas.",
       fields: [
         {
           id: "fontes_consultadas",
@@ -683,8 +819,7 @@ export const londresCompletoFlow: AnaliseFlowSchema = {
       id: "secao4",
       title: "Seção 4 — Entrevistas",
       kind: "form",
-      description:
-        "Selecione quem pode esclarecer fatos, decisões ou condições do cuidado. Preserve versões divergentes, não force consenso.",
+      description: "Registre quem pode esclarecer os fatos, preservando versões divergentes.",
       fields: [
         {
           id: "quem_ouvir",
@@ -708,13 +843,25 @@ export const londresCompletoFlow: AnaliseFlowSchema = {
           itemLabel: "Entrevista",
           columns: [
             { id: "data", label: "Data", type: "date" },
-            { id: "nome", label: "Nome", type: "text" },
-            { id: "funcao", label: "Função", type: "text" },
-            { id: "relato", label: "Relato / fatos relevantes", type: "textarea" },
+            {
+              id: "nome",
+              label: "Nome",
+              type: "text",
+              placeholder: "Nome da pessoa entrevistada",
+              maxLength: 50,
+            },
+            { id: "funcao", label: "Função", type: "text", placeholder: "Ex.: Enfermeiro(a)" },
+            {
+              id: "relato",
+              label: "Relato / fatos relevantes",
+              type: "textarea",
+              placeholder: "Descreva o que a pessoa relatou e os fatos relevantes",
+            },
             {
               id: "problemas_percebidos",
               label: "Problemas ou condições percebidos",
               type: "textarea",
+              placeholder: "Descreva problemas ou condições que a pessoa percebeu",
             },
           ],
         },
@@ -724,8 +871,7 @@ export const londresCompletoFlow: AnaliseFlowSchema = {
       id: "secao5",
       title: "Seção 5 — Cronologia ampliada",
       kind: "form",
-      description:
-        "Inclua fatos, fontes e divergências até a sequência ficar compreensível. Nunca registre fatos baseados em suposições.",
+      description: "Amplie a cronologia com fatos, fontes e divergências, sem suposições.",
       fields: [
         {
           id: "cronologia_ampliada",
@@ -736,7 +882,12 @@ export const londresCompletoFlow: AnaliseFlowSchema = {
           columns: [
             { id: "data", label: "Data", type: "date" },
             { id: "hora", label: "Hora", type: "time" },
-            { id: "fato", label: "Fato", type: "textarea" },
+            {
+              id: "fato",
+              label: "Fato",
+              type: "textarea",
+              placeholder: "Descreva o que aconteceu neste momento (sem suposições)",
+            },
             { id: "fonte", label: "Fonte", type: "text" },
             {
               id: "status",
@@ -754,8 +905,7 @@ export const londresCompletoFlow: AnaliseFlowSchema = {
       id: "secao6",
       title: "Seção 6 — Problemas na prestação do cuidado (PPC)",
       kind: "form",
-      description:
-        "PPC é o termo neutro do Protocolo de Londres para os desvios observáveis na assistência. Compare o esperado com o ocorrido; não presuma a causa nesta etapa.",
+      description: "Compare o esperado com o ocorrido em cada desvio, sem presumir a causa.",
       fields: [
         {
           id: "ppc",
@@ -764,10 +914,25 @@ export const londresCompletoFlow: AnaliseFlowSchema = {
           repeatable: true,
           itemLabel: "PPC",
           columns: [
-            { id: "numero", label: "PPC nº", type: "text" },
-            { id: "esperado", label: "O esperado", type: "textarea" },
-            { id: "ocorrido", label: "O que ocorreu (desvio observável)", type: "textarea" },
-            { id: "fonte", label: "Fonte / evidência", type: "text" },
+            { id: "numero", label: "PPC nº", type: "text", placeholder: "Ex.: 1" },
+            {
+              id: "esperado",
+              label: "O esperado",
+              type: "textarea",
+              placeholder: "Descreva o que deveria ter acontecido",
+            },
+            {
+              id: "ocorrido",
+              label: "O que ocorreu (desvio observável)",
+              type: "textarea",
+              placeholder: "Descreva o desvio observado no cuidado",
+            },
+            {
+              id: "fonte",
+              label: "Fonte / evidência",
+              type: "text",
+              placeholder: "Ex.: prontuário, entrevista, protocolo",
+            },
           ],
         },
       ],
@@ -776,8 +941,7 @@ export const londresCompletoFlow: AnaliseFlowSchema = {
       id: "secao7",
       title: "Seção 7 — Fatores contribuintes por problema",
       kind: "form",
-      description:
-        "Este bloco se repete para cada PPC identificado na Seção 6. Todo fator deve ficar vinculado a pelo menos um PPC — não é permitido registrar um fator solto.",
+      description: "Para cada PPC, marque os fatores contribuintes vinculados a ele.",
       repeatablePerItemOf: "secao6.ppc",
       fields: [
         { id: "ppc_referencia", label: "PPC nº a que este bloco se refere", type: "text" },
@@ -798,6 +962,7 @@ export const londresCompletoFlow: AnaliseFlowSchema = {
       id: "secao8",
       title: "Seção 8 — Recomendações",
       kind: "form",
+      description: "Registre recomendações ligadas aos PPCs e fatores identificados.",
       fields: [RECOMENDACOES_FIELD],
       onSubmit: { action: "concluirInvestigacao", next: "fim" },
     },

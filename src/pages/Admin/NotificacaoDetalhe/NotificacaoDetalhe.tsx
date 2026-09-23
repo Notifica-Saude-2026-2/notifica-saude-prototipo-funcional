@@ -63,6 +63,7 @@ export default function NotificacaoDetalhe() {
   const [actionPlanOpen, setActionPlanOpen] = useState(false);
   const [visibleActionId, setVisibleActionId] = useState<string | null>(null);
   const [actionToUpdate, setActionToUpdate] = useState<ActionPlan | null>(null);
+  const [actionToEdit, setActionToEdit] = useState<ActionPlan | null>(null);
 
   const actionPlans = detalhe?.planosAcao ?? [];
   // O plano de ação só pode ser registrado depois que a análise (núcleo ou setor) foi concluída.
@@ -158,11 +159,13 @@ export default function NotificacaoDetalhe() {
             onToggle={() => toggleSection("actionPlan")}
             onRegister={() => setActionPlanOpen(true)}
             canRegister={analysisCompleted}
+            canEdit={analysisCompleted || !!detalhe.analise?.concluida}
             readOnly={incidenteConcluido}
             actions={actionPlans}
             visibleActionId={visibleActionId}
             onToggleDetails={(id) => setVisibleActionId((current) => (current === id ? null : id))}
             onUpdate={setActionToUpdate}
+            onEdit={setActionToEdit}
             onDelete={async (actionId) => {
               try {
                 const raw = await excluirPlanoAcao(detalhe.id, actionId);
@@ -252,6 +255,25 @@ export default function NotificacaoDetalhe() {
                 setActionPlanOpen(false);
               } catch {
                 window.alert("Erro ao registrar o plano de ação. Tente novamente.");
+              }
+            }}
+          />
+        )}
+
+        {actionToEdit && (
+          <ActionPlanModal
+            initialPlan={actionToEdit}
+            onClose={() => setActionToEdit(null)}
+            onSave={async (plan) => {
+              try {
+                const raw = await atualizarPlanoAcao(detalhe.id, {
+                  ...plan,
+                  updatedAt: new Date().toISOString(),
+                });
+                onPlanoAcaoAtualizado(raw);
+                setActionToEdit(null);
+              } catch {
+                window.alert("Erro ao salvar o plano de ação. Tente novamente.");
               }
             }}
           />

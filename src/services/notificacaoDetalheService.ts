@@ -199,9 +199,9 @@ export function mapToNotificacaoDetalhe(raw: NotificacaoRaw): NotificacaoDetalhe
         rascunho: rawClassificacao.rascunho,
         // @db.Timestamptz — ISO 8601 com timezone
         dataClassificacao: formatDateTime(rawClassificacao.data_classificacao),
-        // @db.Timestamptz — exibe data e hora exatas do vencimento
+        // @db.Timestamptz — exibe só a data do vencimento (sem horário), no fuso do navegador
         dataValidade: rawClassificacao.data_validade
-          ? formatDateTime(rawClassificacao.data_validade)
+          ? new Date(rawClassificacao.data_validade).toLocaleDateString("pt-BR")
           : null,
         diasValidade: null,
         outroEnvolvido: rawClassificacao.outro_envolvido,
@@ -225,7 +225,6 @@ export function mapToNotificacaoDetalhe(raw: NotificacaoRaw): NotificacaoDetalhe
     // @db.Timestamptz — ISO 8601 com timezone
     dataAtualizacao: formatDateTime(raw.updated_at ?? raw.data_registro),
     descricao: raw.descricao,
-    condutaImediata: raw.condutaImediata ?? null,
     anonima: raw.anonima,
     unidade: raw.unidade?.nome ?? "(Não informado)",
     setor: (() => {

@@ -201,7 +201,7 @@ export function EditModal({
         <div className={styles.modalBody}>
           {/* Data + Turno */}
           <div className={styles.modalGrid}>
-            <div className={styles.infoItem}>
+            <div>
               <p className={styles.formQuestion}>Data do incidente</p>
               <input
                 type="date"

@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import type { AnaliseField, ChoiceOption, TableColumn, TableColumnType } from "../../types/analise";
 import { formatCurrencyInput } from "../../utils/currency";
 import { normalizeOption } from "../../types/analise";
 import { InfoTooltip } from "../common/ui/InfoTooltip";
+import { OUTRO_MAX_LENGTH } from "../../constants/limites";
 import styles from "./Analise.module.css";
 
 export type TableRow = Record<string, string> & { __label?: string };
@@ -13,6 +14,8 @@ type Props = {
   onChange: (rows: TableRow[]) => void;
   /** Somente leitura — desabilita edição e oculta os controles de adicionar/remover linha. */
   readOnly?: boolean;
+  /** Células a destacar em vermelho ("linha:colunaId"), quando há pendência de preenchimento. */
+  invalidCells?: string[];
   "data-testid"?: string;
 };
 
@@ -37,21 +40,39 @@ function ColumnLabel({
   label,
   helpText,
   helpTextItems,
+  required,
 }: {
   label: string;
   helpText?: string;
   helpTextItems?: TableColumn["helpTextItems"];
+  /** Tabela obrigatória (field.required): todas as colunas precisam ser preenchidas. */
+  required?: boolean;
 }) {
-  if (!helpText && !helpTextItems) return <>{label}</>;
+  const mark = required ? <span className={styles.required}>*</span> : null;
+  if (!helpText && !helpTextItems)
+    return (
+      <>
+        {label}
+        {mark}
+      </>
+    );
   return (
     <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
       {label}
+      {mark}
       <InfoTooltip text={helpText} items={helpTextItems} />
     </span>
   );
 }
 
-export function TableField({ field, value, onChange, readOnly, "data-testid": dataTestId }: Props) {
+export function TableField({
+  field,
+  value,
+  onChange,
+  readOnly,
+  invalidCells,
+  "data-testid": dataTestId,
+}: Props) {
   const columns = field.columns ?? [];
   const fixedRows = field.fixedRows;
 
@@ -94,7 +115,12 @@ export function TableField({ field, value, onChange, readOnly, "data-testid": da
     onChange(rows.filter((_, i) => i !== rowIndex));
   }
 
-  const showRemoveColumn = field.repeatable && !fixedRows && !readOnly;
+  // Com `lockMinRows`, não deixa remover abaixo do mínimo (ex.: 5 Porquês aberto = ao menos 1 nível).
+  const podeRemover = !field.lockMinRows || rows.length > (field.minRows ?? 0);
+  // Sem nenhuma linha removível (lockMinRows no mínimo), a coluna "Remover" nem aparece — assim as
+  // colunas de dados ocupam a largura toda.
+  const showRemoveColumn = field.repeatable && !fixedRows && !readOnly && podeRemover;
+  const limiteAtingido = !!field.maxRows && rows.length >= field.maxRows;
 
   // Colunas de texto longo (textarea) ficam ruins espremidas numa célula de tabela — nesse caso a
   // linha inteira vira um card (campos curtos lado a lado, texto longo ocupando a largura toda)
@@ -102,14 +128,27 @@ export function TableField({ field, value, onChange, readOnly, "data-testid": da
   const hasLongText = field.layout !== "table" && columns.some((col) => col.type === "textarea");
 
   const addButton = field.repeatable && !fixedRows && !readOnly && (
-    <button
-      type="button"
-      className={styles.addRowBtn}
-      onClick={addRow}
-      data-testid={dataTestId ? `${dataTestId}-add` : undefined}
-    >
-      {field.addButtonLabel ?? "+ Adicionar linha"}
-    </button>
+    <div className={styles.addRowWrap}>
+      <button
+        type="button"
+        className={styles.addRowBtn}
+        onClick={addRow}
+        disabled={limiteAtingido}
+        data-testid={dataTestId ? `${dataTestId}-add` : undefined}
+      >
+        {field.addButtonLabel ?? "+ Adicionar linha"}
+      </button>
+      {field.maxRows && (
+        <span
+          className={`${styles.rowLimitHint} ${limiteAtingido ? styles.rowLimitHintMax : ""}`}
+          data-testid={dataTestId ? `${dataTestId}-limite` : undefined}
+        >
+          {limiteAtingido
+            ? `Limite de ${field.maxRows} ${(field.itemLabel ?? "linha").toLowerCase()}s atingido.`
+            : `${rows.length}/${field.maxRows}`}
+        </span>
+      )}
+    </div>
   );
 
   if (hasLongText) {
@@ -127,8 +166,14 @@ export function TableField({ field, value, onChange, readOnly, "data-testid": da
             return (
               <div key={rowIndex} className={styles.tableCard}>
                 <div className={styles.tableCardHeader}>
-                  <span className={styles.tableCardTitle}>{cardTitle}</span>
-                  {showRemoveColumn && (
+                  <span className={styles.tableCardTitle}>
+                    {cardTitle}
+                    {/* Coluna única sem rótulo próprio: o asterisco de obrigatório vai no título. */}
+                    {columns.length === 1 &&
+                      (field.required || field.requireCompleteRows) &&
+                      !readOnly && <span className={styles.required}>*</span>}
+                  </span>
+                  {showRemoveColumn && podeRemover && (
                     <button
                       type="button"
                       className={styles.removeRowBtn}
@@ -141,7 +186,20 @@ export function TableField({ field, value, onChange, readOnly, "data-testid": da
                 </div>
                 <div className={styles.tableCardBody}>
                   {shortColumns.length > 0 && (
-                    <div className={styles.tableCardShortGrid}>
+                    <div
+                      className={
+                        shortColumns.some((col) => col.width)
+                          ? `${styles.tableCardShortGrid} ${styles.tableCardShortGridCustom}`
+                          : styles.tableCardShortGrid
+                      }
+                      style={
+                        {
+                          "--short-cols": shortColumns
+                            .map((col) => `minmax(0, ${col.width ?? 1}fr)`)
+                            .join(" "),
+                        } as CSSProperties
+                      }
+                    >
                       {shortColumns.map((col) => (
                         <div key={col.id} className={styles.tableCardField}>
                           <label className={styles.tableCardFieldLabel}>
@@ -149,6 +207,7 @@ export function TableField({ field, value, onChange, readOnly, "data-testid": da
                               label={col.label}
                               helpText={col.helpText}
                               helpTextItems={col.helpTextItems}
+                              required={(field.required || field.requireCompleteRows) && !readOnly}
                             />
                           </label>
                           {col.type === "auto-index" ? (
@@ -158,6 +217,9 @@ export function TableField({ field, value, onChange, readOnly, "data-testid": da
                               type={col.type}
                               options={col.options}
                               allowOther={col.allowOther}
+                              placeholder={col.placeholder}
+                              maxLength={col.maxLength}
+                              invalid={invalidCells?.includes(`${rowIndex}:${col.id}`)}
                               value={row[col.id] ?? ""}
                               onChange={(v) => updateCell(rowIndex, col.id, v)}
                               readOnly={readOnly}
@@ -172,17 +234,25 @@ export function TableField({ field, value, onChange, readOnly, "data-testid": da
                   )}
                   {longColumns.map((col) => (
                     <div key={col.id} className={styles.tableCardField}>
-                      <label className={styles.tableCardFieldLabel}>
-                        <ColumnLabel
-                          label={col.label}
-                          helpText={col.helpText}
-                          helpTextItems={col.helpTextItems}
-                        />
-                      </label>
+                      {/* Card de coluna única (ex.: Recomendações): o título do card já diz o que
+                          é ("Recomendação #1"), então o rótulo da coluna seria só repetição. */}
+                      {columns.length > 1 && (
+                        <label className={styles.tableCardFieldLabel}>
+                          <ColumnLabel
+                            label={col.label}
+                            helpText={col.helpText}
+                            helpTextItems={col.helpTextItems}
+                            required={(field.required || field.requireCompleteRows) && !readOnly}
+                          />
+                        </label>
+                      )}
                       <TableCell
                         type={col.type}
                         options={col.options}
                         allowOther={col.allowOther}
+                        placeholder={col.placeholder}
+                        maxLength={col.maxLength}
+                        invalid={invalidCells?.includes(`${rowIndex}:${col.id}`)}
                         value={row[col.id] ?? ""}
                         onChange={(v) => updateCell(rowIndex, col.id, v)}
                         readOnly={readOnly}
@@ -203,12 +273,12 @@ export function TableField({ field, value, onChange, readOnly, "data-testid": da
 
   return (
     <div data-testid={dataTestId}>
-      <div className={styles.tableWrap}>
+      <div className={`${styles.tableWrap} ${field.stackOnMobile ? styles.tableStackMobile : ""}`}>
         <table className={`${styles.table} ${styles.tableFixed}`}>
           <colgroup>
             {fixedRows && <col style={{ width: "150px" }} />}
             {columns.map((col) => (
-              <col key={col.id} style={{ width: COLUMN_WIDTH[col.type] }} />
+              <col key={col.id} style={{ width: col.tableWidth ?? COLUMN_WIDTH[col.type] }} />
             ))}
             {showRemoveColumn && <col style={{ width: "90px" }} />}
           </colgroup>
@@ -221,6 +291,11 @@ export function TableField({ field, value, onChange, readOnly, "data-testid": da
                     label={col.label}
                     helpText={col.helpText}
                     helpTextItems={col.helpTextItems}
+                    required={
+                      (field.required || field.requireCompleteRows) &&
+                      !readOnly &&
+                      col.type !== "auto-index"
+                    }
                   />
                 </th>
               ))}
@@ -239,7 +314,17 @@ export function TableField({ field, value, onChange, readOnly, "data-testid": da
               <tr key={rowIndex}>
                 {fixedRows && <td className={styles.rowLabelCell}>{row.__label}</td>}
                 {columns.map((col) => (
-                  <td key={col.id}>
+                  <td
+                    key={col.id}
+                    // Rótulo usado quando a tabela empilha no celular (stackOnMobile).
+                    data-label={
+                      (field.required || field.requireCompleteRows) &&
+                      !readOnly &&
+                      col.type !== "auto-index"
+                        ? `${col.label} *`
+                        : col.label
+                    }
+                  >
                     {col.type === "auto-index" ? (
                       <span className={styles.autoIndexCell}>{rowIndex + 1}</span>
                     ) : (
@@ -247,6 +332,12 @@ export function TableField({ field, value, onChange, readOnly, "data-testid": da
                         type={col.type}
                         options={col.options}
                         allowOther={col.allowOther}
+                        placeholder={col.placeholder}
+                        maxLength={col.maxLength}
+                        invalid={invalidCells?.includes(`${rowIndex}:${col.id}`)}
+                        // Na tabela, texto longo começa com a mesma altura dos outros campos da linha;
+                        // a pessoa expande arrastando o canto se precisar.
+                        rows={1}
                         value={row[col.id] ?? ""}
                         onChange={(v) => updateCell(rowIndex, col.id, v)}
                         readOnly={readOnly}
@@ -257,14 +348,16 @@ export function TableField({ field, value, onChange, readOnly, "data-testid": da
                 ))}
                 {showRemoveColumn && (
                   <td>
-                    <button
-                      type="button"
-                      className={styles.removeRowBtn}
-                      onClick={() => removeRow(rowIndex)}
-                      data-testid={dataTestId ? `${dataTestId}-row${rowIndex}-remove` : undefined}
-                    >
-                      Remover
-                    </button>
+                    {podeRemover && (
+                      <button
+                        type="button"
+                        className={styles.removeRowBtn}
+                        onClick={() => removeRow(rowIndex)}
+                        data-testid={dataTestId ? `${dataTestId}-row${rowIndex}-remove` : undefined}
+                      >
+                        Remover
+                      </button>
+                    )}
                   </td>
                 )}
               </tr>
@@ -286,6 +379,9 @@ function TableCell({
   readOnly,
   rows = 2,
   testId,
+  placeholder,
+  maxLength,
+  invalid,
 }: {
   type: string;
   options?: ChoiceOption[];
@@ -295,23 +391,42 @@ function TableCell({
   readOnly?: boolean;
   rows?: number;
   testId?: string;
+  placeholder?: string;
+  maxLength?: number;
+  invalid?: boolean;
 }) {
+  const inputCls = invalid ? `${styles.cellInput} ${styles.cellInputError}` : styles.cellInput;
+  // Campo vazio sempre explica o que digitar (exceto em modo somente leitura).
+  const ph = readOnly ? undefined : (placeholder ?? "Digite aqui...");
   if (type === "textarea") {
-    return (
+    const textarea = (
       <textarea
-        className={styles.cellInput}
+        className={inputCls}
         rows={rows}
+        placeholder={ph}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         disabled={readOnly}
         data-testid={testId}
       />
     );
+    if (!maxLength || readOnly) return textarea;
+    return (
+      <div>
+        {textarea}
+        <div
+          className={`${styles.charCounter} ${value.length > maxLength ? styles.charCounterOver : ""}`}
+          data-testid={testId ? `${testId}-contador` : undefined}
+        >
+          {value.length}/{maxLength}
+        </div>
+      </div>
+    );
   }
   if (type === "date") {
     return (
       <input
-        className={styles.cellInput}
+        className={inputCls}
         type="date"
         value={value}
         onChange={(e) => onChange(e.target.value)}
@@ -323,7 +438,7 @@ function TableCell({
   if (type === "time") {
     return (
       <input
-        className={styles.cellInput}
+        className={inputCls}
         type="time"
         value={value}
         onChange={(e) => onChange(e.target.value)}
@@ -335,7 +450,7 @@ function TableCell({
   if (type === "currency") {
     return (
       <input
-        className={styles.cellInput}
+        className={inputCls}
         type="text"
         inputMode="numeric"
         placeholder="R$ 0,00"
@@ -355,18 +470,34 @@ function TableCell({
         onChange={onChange}
         readOnly={readOnly}
         testId={testId}
+        invalid={invalid}
       />
     );
   }
-  return (
+  const textInput = (
     <input
-      className={styles.cellInput}
+      className={inputCls}
       type="text"
+      placeholder={ph}
       value={value}
       onChange={(e) => onChange(e.target.value)}
       disabled={readOnly}
       data-testid={testId}
     />
+  );
+  if (!maxLength || readOnly) return textInput;
+  // Com limite de caracteres: contador abaixo, vermelho ao ultrapassar (o aviso e o bloqueio do
+  // avanço ficam em AnaliseFlowPage, igual ao limite de campo).
+  return (
+    <div>
+      {textInput}
+      <div
+        className={`${styles.charCounter} ${value.length > maxLength ? styles.charCounterOver : ""}`}
+        data-testid={testId ? `${testId}-contador` : undefined}
+      >
+        {value.length}/{maxLength}
+      </div>
+    </div>
   );
 }
 
@@ -379,6 +510,7 @@ function TableChoiceCell({
   onChange,
   readOnly,
   testId,
+  invalid,
 }: {
   options: ChoiceOption[];
   allowOther?: boolean;
@@ -386,8 +518,16 @@ function TableChoiceCell({
   onChange: (v: string) => void;
   readOnly?: boolean;
   testId?: string;
+  invalid?: boolean;
 }) {
-  const optionValues = options.map((opt) => normalizeOption(opt).value);
+  // Com allowOther, a opção "Outro" sempre aparece no menu — mesmo que a lista do schema não a
+  // inclua explicitamente (antes só funcionava onde "Outro" estava escrito na lista, ex.: Fonte da
+  // cronologia; em Formação/Função/Setor da equipe ela nunca aparecia).
+  const allOptions: ChoiceOption[] =
+    allowOther && !options.some((opt) => normalizeOption(opt).value === "Outro")
+      ? [...options, "Outro"]
+      : options;
+  const optionValues = allOptions.map((opt) => normalizeOption(opt).value);
   const isCustomValue = allowOther && value !== "" && !optionValues.includes(value);
   const [customMode, setCustomMode] = useState(false);
   const showCustomInput = isCustomValue || customMode;
@@ -395,7 +535,11 @@ function TableChoiceCell({
   return (
     <div>
       <select
-        className={styles.cellSelect}
+        className={
+          invalid && !showCustomInput
+            ? `${styles.cellSelect} ${styles.cellInputError}`
+            : styles.cellSelect
+        }
         value={showCustomInput ? "Outro" : value}
         onChange={(e) => {
           if (allowOther && e.target.value === "Outro") {
@@ -410,7 +554,7 @@ function TableChoiceCell({
         data-testid={testId}
       >
         <option value="">Selecione...</option>
-        {options.map((opt) => {
+        {allOptions.map((opt) => {
           const o = normalizeOption(opt);
           return (
             <option key={o.value} value={o.value}>
@@ -420,16 +564,25 @@ function TableChoiceCell({
         })}
       </select>
       {showCustomInput && (
-        <input
-          className={styles.cellInput}
-          style={{ marginTop: 6 }}
-          type="text"
-          placeholder="Especifique"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          disabled={readOnly}
-          data-testid={testId ? `${testId}-outro` : undefined}
-        />
+        <>
+          <input
+            className={invalid ? `${styles.cellInput} ${styles.cellInputError}` : styles.cellInput}
+            style={{ marginTop: 6 }}
+            type="text"
+            placeholder="Especifique a opção"
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            disabled={readOnly}
+            data-testid={testId ? `${testId}-outro` : undefined}
+          />
+          {!readOnly && (
+            <div
+              className={`${styles.charCounter} ${value.length > OUTRO_MAX_LENGTH ? styles.charCounterOver : ""}`}
+            >
+              {value.length}/{OUTRO_MAX_LENGTH}
+            </div>
+          )}
+        </>
       )}
     </div>
   );

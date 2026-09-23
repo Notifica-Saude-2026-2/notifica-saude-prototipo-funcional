@@ -48,8 +48,6 @@ export type NotificacaoRaw = {
   data_registro: string;
   updated_at: string;
   descricao: string | null;
-  /** Promovido a coluna própria na criação, igual a `descricao` — ver CAMPO_IDS.CONDUTA_IMEDIATA. */
-  condutaImediata?: string | null;
   anonima: boolean;
   tenant_id: string;
   unidade_id: string;
@@ -104,7 +102,6 @@ export type NotificacaoDetalheDTO = {
   dataCadastroCompleto: string;
   dataAtualizacao: string; // Nova propriedade para incluir hora
   descricao: string | null;
-  condutaImediata: string | null;
   anonima: boolean;
   unidade: string;
   setor: string;
@@ -137,9 +134,8 @@ export const CAMPO_IDS = {
   PAPEL: "55555555-5555-4555-b555-000000000005",
   NOME_OPC: "55555555-5555-4555-b555-000000000006",
   CONTATO_OPC: "55555555-5555-4555-b555-000000000007",
-  // ⚠️ PROVISÓRIOS — não existem no seed.ts do backend ainda. Campos novos pedidos pela proponente
-  // (fluxo de Investigação ajustado). Confirmar com o backend os IDs definitivos antes de integrar
-  // de verdade; por ora servem só para o protótipo front-end funcionar de ponta a ponta.
-  CONDUTA_IMEDIATA: "55555555-5555-4555-b555-000000000011",
+  // ⚠️ PROVISÓRIO — não existe no seed.ts do backend ainda. Campo novo pedido pela proponente
+  // (fluxo de Investigação ajustado). Confirmar com o backend o ID definitivo antes de integrar
+  // de verdade; por ora serve só para o protótipo front-end funcionar de ponta a ponta.
   HORARIO: "55555555-5555-4555-b555-000000000012",
 } as const;

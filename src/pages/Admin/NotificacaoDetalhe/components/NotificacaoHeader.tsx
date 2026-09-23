@@ -33,6 +33,12 @@ export function NotificacaoHeader({ detalhe, onArquivarSuccess, onConcluirSucces
     (usuario?.perfil === "NSP" || usuario?.perfil === "ADMINISTRADOR") &&
     (detalhe.statusRaw === "ANALISADA" || detalhe.statusRaw === "EM_ACAO");
 
+  // Ações ainda "Em andamento" (inclui as pendentes de preenchimento): não impedem concluir o
+  // incidente, mas a confirmação avisa e pergunta se a pessoa tem certeza.
+  const acoesEmAndamento = (detalhe.planosAcao ?? []).filter(
+    (a) => a.status === "Em andamento",
+  ).length;
+
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState<"arquivar" | "concluir" | null>(null);
   const [confirmando, setConfirmando] = useState(false);
@@ -165,7 +171,9 @@ export function NotificacaoHeader({ detalhe, onArquivarSuccess, onConcluirSucces
             <p className={styles.confirmText}>
               {pendingAction === "arquivar"
                 ? "Tem certeza que deseja arquivar essa notificação? Essa decisão não poderá ser alterada."
-                : "Tem certeza que deseja concluir esse incidente? Essa decisão não poderá ser alterada."}
+                : acoesEmAndamento > 0
+                  ? `Ainda há ${acoesEmAndamento} ${acoesEmAndamento === 1 ? "ação em andamento" : "ações em andamento"} neste incidente. Tem certeza que deseja concluí-lo mesmo assim? Essa decisão não poderá ser alterada.`
+                  : "Tem certeza que deseja concluir esse incidente? Essa decisão não poderá ser alterada."}
             </p>
             {confirmError && <p className={styles.modalError}>{confirmError}</p>}
             <div className={styles.confirmActions}>

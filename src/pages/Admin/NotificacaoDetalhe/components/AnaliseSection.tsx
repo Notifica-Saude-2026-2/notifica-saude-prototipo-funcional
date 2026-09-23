@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { SectionInfoBox } from "../../../../components/analise/SectionInfoBox";
 import { useState } from "react";
 import { PaperAirplaneIcon } from "../../../../assets/icons/PaperAirplaneIcon";
 import { InfoTooltip } from "../../../../components/common/ui/InfoTooltip";
@@ -136,7 +137,7 @@ export function AnaliseSection({
                   size={14}
                 />
               </div>
-              <div className={styles.metaRow} style={{ gap: 10 }}>
+              <div className={styles.buttonRow}>
                 <button
                   className={styles.primaryButton}
                   onClick={() => navigate(`/incident/${detalhe.id}/analise`)}
@@ -182,8 +183,16 @@ export function AnaliseSection({
                   <span className={styles.sectionValue}>
                     Análise concluída pelo núcleo. Deseja encaminhar o resultado ao setor?
                   </span>
+                  <SectionInfoBox>
+                    As informações desta análise só poderão ser acessadas pelo setor conforme esta
+                    decisão. Ao <strong>encaminhar</strong>, o setor responsável recebe o resultado
+                    da análise e passa a ter acesso a este incidente. Se você{" "}
+                    <strong>não encaminhar</strong>, o setor <strong>não terá acesso</strong> a este
+                    incidente nem às informações da análise — eles ficam restritos ao núcleo, e é
+                    preciso registrar uma justificativa.
+                  </SectionInfoBox>
                   {podeGerenciar && (
-                    <div className={styles.metaRow} style={{ gap: 10 }}>
+                    <div className={styles.buttonRow}>
                       <button
                         className={styles.primaryButton}
                         onClick={onEncaminharPosAnalise}

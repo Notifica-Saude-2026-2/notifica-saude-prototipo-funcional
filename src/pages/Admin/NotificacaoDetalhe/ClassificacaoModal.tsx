@@ -8,6 +8,7 @@ import type { ClassificacaoRaw } from "../../../types/notificacaoDetalhe";
 import { ApiError } from "../../../services/api";
 import { ModalBase } from "./components/ModalBase";
 import { Toast } from "../../../components/common/ui/Toast";
+import { OUTRO_MAX_LENGTH } from "../../../constants/limites";
 import styles from "./NotificacaoDetalhe.module.css";
 
 // --------------------------------------------------------------------------
@@ -537,11 +538,14 @@ export function ClassificacaoModal({
                     placeholder="Especifique o tipo de incidente..."
                     value={outroTipoIncidente}
                     onChange={(e) => setOutroTipoIncidente(e.target.value)}
-                    maxLength={200}
+                    maxLength={OUTRO_MAX_LENGTH}
                     disabled={saving}
                     required
                     data-testid="classificacao-tipo-incidente-outro-input"
                   />
+                  <small style={{ color: "#666" }}>
+                    {outroTipoIncidente.length}/{OUTRO_MAX_LENGTH}
+                  </small>
                 </div>
               )}
             </div>
@@ -567,11 +571,14 @@ export function ClassificacaoModal({
                   placeholder="Especifique o envolvido..."
                   value={outroEnvolvido}
                   onChange={(e) => setOutroEnvolvido(e.target.value)}
-                  maxLength={200}
+                  maxLength={OUTRO_MAX_LENGTH}
                   disabled={saving}
                   required
                   data-testid="classificacao-envolvidos-outro-input"
                 />
+                <small style={{ color: "#666" }}>
+                  {outroEnvolvido.length}/{OUTRO_MAX_LENGTH}
+                </small>
               </div>
             )}
           </div>
@@ -626,7 +633,7 @@ export function ClassificacaoModal({
           </div>
         </div>
       </>
-      <Toast message="✓ Rascunho salvo" show={rascunhoSalvo} />
+      <Toast message="Rascunho salvo" show={rascunhoSalvo} variant="success" />
     </ModalBase>
   );
 }

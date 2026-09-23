@@ -64,19 +64,9 @@ export function InformacoesGeraisSection({ detalhe, isOpen, onToggle, onEdit }: 
             </div>
           </div>
 
-          <div className={styles.infoGrid}>
-            <div className={`${styles.infoItem} ${styles.infoItemFull}`}>
-              <div className={styles.fieldHeader}>Conduta imediata</div>
-              <div className={styles.fieldValue}>{detalhe.condutaImediata || "---"}</div>
-            </div>
-          </div>
-
-          <div className={styles.infoGrid}>
+          <div className={`${styles.infoGrid} ${styles.infoGridThree}`}>
             <InfoField label="Data do incidente" value={detalhe.dataIncidente} />
             <InfoField label="Horário" value={detalhe.horario} />
-          </div>
-
-          <div className={styles.infoGrid}>
             <InfoField label="Turno" value={detalhe.turno} />
           </div>
 

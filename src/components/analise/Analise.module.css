@@ -1,3 +1,8 @@
+/* Borda mais marcada (pedido da cliente: bordas e inputs estavam claros demais). */
+:root {
+  --border-strong: #c4c2cc;
+}
+
 .fieldBlock {
   display: flex;
   flex-direction: column;
@@ -29,11 +34,65 @@
 
 .infoBox {
   background: #eef2ff;
-  border: 1px solid #d6ddfd;
+  border: none;
   border-radius: 8px;
   padding: 10px 14px;
   font-size: 13px;
   color: #33395c;
+}
+
+/* Explicação curta da seção (ver SectionInfoBox.tsx) — azul claro do design system, com ícone de
+   info e sem título. Fica no topo do conteúdo de cada seção do formulário de análise. */
+.sectionInfoBox {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  background: var(--color-primary-wash);
+  border: none;
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin: 0 0 16px;
+}
+
+.sectionInfoBoxField {
+  margin: 2px 0 8px;
+}
+
+.sectionInfoIcon {
+  color: var(--color-primary);
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.sectionInfoText {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: #26315f;
+}
+
+.sectionInfoParagraph {
+  margin: 0;
+}
+
+/* Lista de exemplos dentro da caixa de informação (ex.: exemplos de PPC na Seção 3) — em duas
+   colunas no desktop pra não ocupar tanta altura; uma coluna no celular. */
+.sectionInfoList {
+  margin: 6px 0 0;
+  padding-left: 18px;
+  columns: 2;
+  column-gap: 28px;
+}
+
+.sectionInfoList li {
+  break-inside: avoid;
+  margin-bottom: 2px;
+}
+
+@media (max-width: 640px) {
+  .sectionInfoList {
+    columns: 1;
+  }
 }
 
 /* Caixa de orientação de preenchimento (ver OrientacaoBox.tsx) — verde para se distinguir do
@@ -43,7 +102,7 @@
   align-items: flex-start;
   gap: 8px;
   background: #e8f5e9;
-  border: 1px solid #b7dfb9;
+  border: none;
   border-radius: 8px;
   padding: 10px 14px;
   margin: 2px 0 4px;
@@ -88,8 +147,53 @@
 
 .tableWrap {
   overflow-x: auto;
-  border: 1px solid var(--border);
+  border: 1.5px solid var(--border-strong);
   border-radius: 8px;
+}
+
+/* Tabela que empilha no celular (field.stackOnMobile): cada linha vira um bloco, com o rótulo da
+   coluna acima de cada campo, em vez de rolar na horizontal. */
+@media (max-width: 640px) {
+  .tableStackMobile .table {
+    min-width: 0;
+  }
+
+  .tableStackMobile colgroup,
+  .tableStackMobile thead {
+    display: none;
+  }
+
+  .tableStackMobile .table,
+  .tableStackMobile tbody,
+  .tableStackMobile tr,
+  .tableStackMobile td {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .tableStackMobile tr {
+    padding: 6px 0;
+    border-bottom: 1.5px solid var(--border-strong);
+  }
+
+  .tableStackMobile tr:last-child {
+    border-bottom: none;
+  }
+
+  .tableStackMobile td {
+    border-bottom: none !important;
+    padding: 4px 10px;
+  }
+
+  .tableStackMobile td[data-label]::before {
+    content: attr(data-label);
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-h);
+    margin-bottom: 4px;
+  }
 }
 
 .table {
@@ -112,17 +216,17 @@
 
 .table th {
   text-align: left;
-  background: #f6f6f8;
+  background: #eeeef2;
   padding: 8px 10px;
   font-weight: 600;
   color: var(--text-h);
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1.5px solid var(--border-strong);
   white-space: nowrap;
 }
 
 .table td {
   padding: 6px 8px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1.5px solid var(--border-strong);
   vertical-align: top;
 }
 
@@ -155,12 +259,67 @@
 .cellInput {
   width: 100%;
   box-sizing: border-box;
-  border: 1px solid var(--border);
+  border: 1.5px solid var(--border-strong);
   border-radius: 6px;
-  padding: 6px 8px;
+  padding: 8px 10px;
   font-size: 13px;
   font-family: inherit;
   resize: vertical;
+}
+
+/* Altura única para campos de uma linha (texto, data, hora e menus) — sem isso o campo de hora
+   nativo do navegador fica um pouco mais alto que os outros e desalinha a linha. */
+input.cellInput,
+.cellSelect {
+  height: 35px;
+}
+
+/* Caixas de texto longo: a pessoa pode aumentar a altura arrastando o canto, mas só até um
+   limite — depois disso o texto rola dentro da própria caixa. */
+textarea.cellInput {
+  min-height: 44px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+/* Dentro de tabelas (ex.: Fato da cronologia) o limite é menor, pra linha não ficar gigante. */
+.table textarea.cellInput {
+  min-height: 0;
+  max-height: 110px;
+  line-height: 17px;
+}
+
+.charCounter {
+  margin-top: 4px;
+  font-size: 11.5px;
+  color: #7a7f8c;
+  text-align: right;
+}
+
+.charCounterOver {
+  color: #c62828;
+  font-weight: 600;
+}
+
+/* Pendência de preenchimento (ver validacao.ts): célula/campo em vermelho + mensagem abaixo. */
+.cellInputError {
+  border-color: #d92d20 !important;
+  background-color: #fff6f5;
+}
+
+/* Campo (não-tabela) com pendência: as bordas dos inputs/opções dentro dele ficam vermelhas. */
+.fieldBlockError {
+  --border-strong: #d92d20;
+}
+
+.fieldErrorMessage {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 6px 0 0;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #b42318;
 }
 
 .cellInput:focus {
@@ -179,9 +338,9 @@
 .cellSelect {
   width: 100%;
   box-sizing: border-box;
-  border: 1px solid var(--border);
+  border: 1.5px solid var(--border-strong);
   border-radius: 6px;
-  padding: 6px 8px;
+  padding: 8px 10px;
   font-size: 13px;
   font-family: inherit;
   background: #fff;
@@ -218,7 +377,33 @@
   margin-top: 8px;
 }
 
-.addRowBtn:hover {
+.addRowWrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.addRowWrap .addRowBtn {
+  margin-top: 0;
+}
+
+.addRowBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.rowLimitHint {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.rowLimitHintMax {
+  color: #c2410c;
+  font-weight: 500;
+}
+
+.addRowBtn:hover:not(:disabled) {
   background: #e8ecff;
 }
 
@@ -234,7 +419,7 @@
 }
 
 .tableCard {
-  border: 1px solid var(--border);
+  border: 1.5px solid var(--border-strong);
   border-radius: 10px;
   padding: 14px;
   background: #fafbff;
@@ -263,6 +448,12 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px 14px;
+}
+
+/* Larguras proporcionais definidas no schema (TableColumn.width) — ver TableField.tsx. No mobile a
+   regra de @media abaixo (1 coluna) continua valendo, por vir depois. */
+.tableCardShortGridCustom {
+  grid-template-columns: var(--short-cols);
 }
 
 .tableCardField {
@@ -295,7 +486,7 @@
 }
 
 .checklistItem {
-  border: 1px solid var(--border);
+  border: 1.5px solid var(--border-strong);
   border-radius: 8px;
   padding: 10px 12px;
   background: #fff;
@@ -348,10 +539,64 @@
   gap: 8px;
 }
 
+/* 5 Porquês embutido na categoria: mesmo recuo dos campos "O que foi identificado" / "Fonte". */
+.porquesIndent {
+  margin-left: 26px;
+}
+
+.porquesConfirm {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
+  padding: 10px 12px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  background: #fff4e5;
+  color: #7a2e0b;
+  font-size: 13px;
+}
+
+.porquesConfirmIcon {
+  color: #c2410c;
+  flex-shrink: 0;
+}
+
+.porquesConfirmText {
+  flex: 1 1 240px;
+}
+
+.porquesConfirmActions {
+  display: flex;
+  gap: 8px;
+}
+
+.porquesConfirmCancel,
+.porquesConfirmRemove {
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.porquesConfirmCancel {
+  background: #fff;
+  border: 1.5px solid var(--border-strong);
+  color: #1f2937;
+}
+
+.porquesConfirmRemove {
+  background: #b91c1c;
+  border: 1.5px solid #b91c1c;
+  color: #fff;
+}
+
 /* ----------------------------- Aprofundamento ----------------------------- */
 
 .groupItemCard {
-  border: 1px solid var(--border);
+  border: 1.5px solid var(--border-strong);
   border-radius: 10px;
   padding: 14px;
   margin-bottom: 12px;
@@ -371,8 +616,88 @@
   color: var(--text-h);
 }
 
+/* ----- Card colapsável (itens em análise da Seção 4A) ----- */
+.collapseHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+}
+
+.collapseHeaderText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.collapsePreview {
+  font-size: 12px;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.collapseChevron {
+  flex-shrink: 0;
+  color: var(--text-h);
+  transform: rotate(-90deg);
+  transition: transform 0.15s;
+}
+
+.collapseChevronOpen {
+  transform: rotate(0deg);
+}
+
+.collapseBadge {
+  flex-shrink: 0;
+  font-size: 11.5px;
+  font-weight: 500;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: #eef1ff;
+  color: #1c2e91;
+}
+
+.collapseBadgeError {
+  background: #fdecea;
+  color: #b3261e;
+}
+
+.collapseBody {
+  margin-top: 12px;
+}
+
+.collapseAllRow {
+  display: flex;
+  justify-content: flex-end;
+  gap: 14px;
+  margin-bottom: 8px;
+}
+
+.collapseAllBtn {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 12.5px;
+  color: var(--color-primary);
+  cursor: pointer;
+}
+
+.collapseAllBtn:hover {
+  text-decoration: underline;
+}
+
 .toolOption {
-  border: 1px solid var(--border);
+  border: 1.5px solid var(--border-strong);
   border-radius: 8px;
   padding: 8px 12px;
   cursor: pointer;
@@ -442,50 +767,43 @@
   margin-bottom: 2px;
 }
 
-/* ---------------------- Ishikawa — espinha de peixe (SVG) ---------------------- */
-
-.ishikawaItemLabel {
-  font-weight: 600;
-  font-size: 13px;
-  color: var(--text-h);
-  margin-bottom: 10px;
-}
+/* ---------------------- Ishikawa — espinha de peixe ---------------------- */
 
 .ishikawaFishboneScroll {
+  --fish: #1c2e91;
   overflow-x: auto;
-  padding-bottom: 6px;
+  padding: 4px 4px 6px 60px; /* à esquerda: espaço pra cauda */
 }
 
 .ishikawaFishboneGrid {
   display: grid;
-  grid-auto-rows: auto;
-  align-items: stretch;
+  column-gap: 0;
   min-width: max-content;
 }
 
-.ishikawaBoneBox {
-  width: 200px;
+/* Texto da categoria (sem caixa). Acima do eixo fica colado embaixo (perto do osso). */
+.ishikawaBoneText {
+  padding: 4px 14px 4px 18px;
   box-sizing: border-box;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 9px 11px;
-  background: #fafbff;
-  align-self: center;
+}
+
+.ishikawaBoneTextTop {
+  align-self: end;
 }
 
 .ishikawaBoneLabel {
-  font-weight: 600;
+  font-weight: 700;
   font-size: 12px;
-  color: var(--text-h);
-  margin-bottom: 4px;
+  color: var(--fish);
+  margin-bottom: 3px;
 }
 
 .ishikawaBoneList {
   margin: 0;
-  padding-left: 15px;
-  font-size: 11.5px;
-  line-height: 1.45;
-  color: var(--text);
+  padding-left: 13px;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--text-h);
 }
 
 .ishikawaBoneList li {
@@ -493,11 +811,21 @@
 }
 
 .ishikawaBoneList li::marker {
-  color: var(--color-primary);
+  color: var(--fish);
 }
 
-.ishikawaConnectorCell {
-  min-height: 54px;
+/* 5 Porquês da categoria: abaixo do achado, fonte menor e mais suave. */
+.ishikawaBonePorques {
+  margin: 2px 0 3px;
+  padding-left: 11px;
+  font-size: 9.5px;
+  line-height: 1.4;
+  color: #6b7280;
+  list-style-type: circle;
+}
+
+.ishikawaBonePorques li {
+  margin-bottom: 1px;
 }
 
 .ishikawaConnectorSvg {
@@ -505,44 +833,38 @@
   height: 100%;
   display: block;
   overflow: visible;
+  stroke: var(--fish);
 }
 
 .ishikawaSpineCell {
-  align-self: center;
   position: relative;
-  height: 4px;
-  background: var(--color-primary);
-  border-radius: 2px;
+  background: var(--fish);
+  border-radius: 3px 0 0 3px;
 }
 
-.ishikawaTailTriangle {
+.ishikawaTailSvg {
   position: absolute;
-  left: -1px;
+  right: 100%;
   top: 50%;
-  transform: translateY(-50%);
-  width: 0;
-  height: 0;
-  border-top: 6px solid transparent;
-  border-bottom: 6px solid transparent;
-  border-right: 10px solid var(--color-primary);
-  opacity: 0.55;
+  transform: translate(4px, -50%);
+  width: 56px;
+  height: 104px;
+  fill: var(--fish);
 }
 
 .ishikawaHeadCell {
   align-self: center;
   display: flex;
   align-items: center;
-  justify-content: center;
-  overflow: visible;
+  margin-left: -2px; /* encosta a cabeça na ponta do eixo */
 }
 
 .ishikawaHeadShape {
   position: relative;
-  width: 172px;
-  min-height: 84px;
+  width: 210px;
+  min-height: 80px;
   display: flex;
   align-items: center;
-  justify-content: center;
 }
 
 .ishikawaHeadSvg {
@@ -550,17 +872,18 @@
   inset: 0;
   width: 100%;
   height: 100%;
+  fill: var(--fish);
 }
 
 .ishikawaHeadText {
   position: relative;
-  z-index: 1;
-  padding: 6px 18px 6px 14px;
+  flex: 1;
+  padding: 18px 54px 18px 24px;
   font-weight: 700;
-  font-size: 13px;
-  color: var(--text-h);
-  text-align: center;
+  font-size: 12px;
   line-height: 1.3;
+  color: #fff;
+  text-align: center;
 }
 
 /* ------------------------------- Flow chrome ------------------------------- */
@@ -597,18 +920,27 @@
    mais claro/destacado (mesma linguagem de .infoBox) em vez do cinza neutro usado dentro da Seção
    1 — aqui ele precisa chamar mais atenção, já que fica sempre visível acima do formulário. */
 .flowResumoFixed {
-  background: #eef2ff;
-  border: 1px solid #d6ddfd;
+  /* Laranja (tom escolhido pela equipe) + texto branco + sino (ícone da marca Notifica) para
+     destacar o incidente em investigação. Obs.: #b96909 com branco tem contraste 4,1:1 — um
+     pouco abaixo do mínimo AA (4,5:1); #a85f08 é o tom mais próximo que atinge o mínimo. */
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #b96909;
+  border: 1px solid #b96909;
   border-radius: 8px;
-  padding: 9px 14px;
-  font-size: 12px;
-  color: #33395c;
-  margin-bottom: 18px;
+  padding: 10px 14px;
+  font-size: 13px;
+  color: #ffffff;
+}
+
+.flowResumoIcon {
+  flex-shrink: 0;
 }
 
 /* Resumo completo (Seção 1) — todos os dados da notificação e da classificação, em grade de
-   label/valor. No resumo fixo (compacto, acima do formulário a partir da Seção 2) isso não é
-   usado — lá fica só o texto corrido original, mais enxuto. */
+   label/valor. A partir da Seção 2, o bloco fixo (.flowResumoFixed) mostra só o incidente em
+   investigação. */
 .resumoGrid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -637,26 +969,5 @@
   border: none;
   border-top: 1px dashed var(--border);
   margin: 12px 0;
-}
-
-/* Versão enxuta do mesmo resumo (usada no resumo fixo, que fica grudado acima do formulário a
-   partir da Seção 2) — mesmo conteúdo, só com fonte e espaçamentos reduzidos pra ocupar menos
-   altura fixa na tela. */
-.resumoCompact .resumoGrid {
-  gap: 3px 18px;
-  margin-top: 6px;
-}
-
-.resumoCompact .resumoLabel {
-  font-size: 10px;
-  margin-bottom: 0;
-}
-
-.resumoCompact .resumoValue {
-  font-size: 12px;
-}
-
-.resumoCompact .resumoDivider {
-  margin: 8px 0;
 }
 

@@ -112,7 +112,7 @@
 
 .sectionHeader {
   padding: 10px 16px;
-  background: #333846;
+  background: #162783;
   border-bottom: 1px solid #eee;
   font-weight: 600;
   font-size: 13px;
@@ -126,7 +126,7 @@
 }
 
 .sectionHeader:hover {
-  background: #3d4250;
+  background: #1c2e91;
 }
 
 /* Chevron via CSS (border-rotate) */
@@ -152,6 +152,19 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+
+/* ─── Botões lado a lado, mesma altura (largura pelo conteúdo) ─── */
+.buttonRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.buttonRow > button {
+  margin-top: 0;
 }
 
 /* ─── Linha de meta + botão editar ─── */
@@ -202,8 +215,14 @@
   margin-top: 8px;
 }
 
+/* Linha com 3 campos (Data do incidente, Horário, Turno). No mobile vira 1 coluna pela
+   regra de .infoGrid no @media (max-width: 640px), que vem depois. */
+.infoGridThree {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
 .infoItem {
-  border: 1px solid #ececec;
+  border: 1px solid #dfdee4;
   border-radius: 8px;
   overflow: hidden;
   display: flex;
@@ -216,8 +235,7 @@
 }
 
 .fieldHeader {
-  background: #fafafa;
-  border-bottom: 1px solid #ececec;
+  background: #eeedf1;
   padding: 5px 10px;
   font-size: 11.5px;
   font-weight: 600;
@@ -378,9 +396,19 @@
 /* ─── ClassificationGrid (para seção Classificação) ─── */
 .classificationGrid {
   display: flex;
-  flex-direction: column;
+  flex-wrap: wrap;
   gap: 12px;
   margin-top: 12px;
+}
+
+/* Cards lado a lado; quebram para a linha de baixo só quando não cabem (mín. 200px cada). */
+.classificationGrid > .infoItem {
+  flex: 1 1 200px;
+}
+
+/* Observações (texto longo) sempre ocupam a linha inteira. */
+.classificationGrid > .classificationItemFull {
+  flex-basis: 100%;
 }
 
 /* ─── Badge de bloqueio de edição ─── */
@@ -844,6 +872,19 @@
 .actionPlanChoice { border: 0; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 20px; }
 .actionPlanChoice legend { width: 100%; }
 .actionPlanChoice label { font-size: 13px; cursor: pointer; }
+/* Formulário do plano de ação: mesmo espaço entre todas as perguntas. Cada pergunta é um bloco
+   único (título + explicação + campo); o contador de caracteres não soma altura ao bloco. */
+.planoBody { gap: 32px; }
+/* Campo travado (somente leitura) nos modais — ex.: "Ação selecionada" no Atualizar andamento. */
+.modalLocked { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border: 1.5px solid #d0cfd6; border-radius: 8px; background: #f3f3f6; color: #5b6070; font-size: 13px; cursor: not-allowed; }
+.modalLockedText { flex: 1; white-space: pre-wrap; word-break: break-word; }
+.modalLockedIcon { flex-shrink: 0; margin-top: 2px; color: #8a8f9c; }
+/* textarea é inline por padrão e ganha um vão de linha embaixo — em bloco, o espaço fica igual. */
+.planoBody textarea, .planoBody input:not([type="radio"]):not([type="checkbox"]), .planoBody select { display: block; }
+.planoBody .modalCharCounter { margin-bottom: -17px; line-height: 14px; }
+.planoBody .modalFieldError { margin: 8px 0 0; }
+.actionPlanChoiceOptions { display: flex; flex-wrap: wrap; gap: 20px; }
+.actionPlanChoiceOptions label { font-size: 13px; cursor: pointer; }
 .actionPlanCard { border: 1px solid #e5e4e7; border-radius: 8px; padding: 12px; background: #fafafa; font-size: 13px; }
 .actionPlanCard p { margin: 8px 0 0; }
 .actionCardsGrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
@@ -859,12 +900,32 @@
 }
 .actionCardHeader, .actionCardControls { display: flex; align-items: center; gap: 6px; }
 .actionCardHeader { justify-content: space-between; }
+/* "Ação N" nunca quebra; se o selo de status + botões não couberem ao lado, eles descem pra linha
+   de baixo (alinhados à direita) em vez de espremer o título. */
+.actionCardHeader { flex-wrap: wrap; row-gap: 6px; }
+.actionCardHeader > strong { white-space: nowrap; flex-shrink: 0; }
+.actionCardControls { flex-wrap: wrap; justify-content: flex-end; margin-left: auto; }
 .actionStatus { padding: 4px 7px; font-size: 11px; border-radius: 6px; white-space: nowrap; }
 .actionStatusInProgress { color: #2855a6; background: #e5edff; }
 .actionStatusCompleted { color: #26734d; background: #e3f5eb; }
 .actionStatusPartial { color: #946200; background: #fff2cc; }
 .actionStatusLate { color: #b42318; background: #fee4e2; }
 .actionStatusCancelled { color: #5b6475; background: #edf0f5; }
+/* Ação pré-criada a partir de recomendação da Análise que ainda não foi completada. */
+.actionStatusPending { color: #b54708; background: #fff1e0; }
+.actionPlanCardPending { border-color: #f5b971 !important; }
+.actionCardOrigem { margin-top: 8px !important; font-size: 11px; color: #68708a; font-style: italic; }
+.actionPendingBox { margin-top: 12px; padding: 10px 12px; border-radius: 8px; background: #fff7ed; display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+.actionPendingText { display: flex; align-items: center; gap: 6px; margin: 0 !important; font-size: 12px; color: #9a3412; }
+.actionPendingText svg { flex-shrink: 0; }
+.actionCompleteBtn { border: none; border-radius: 6px; padding: 7px 12px; font-size: 12.5px; font-weight: 600; color: #fff; background: #183eff; cursor: pointer; }
+.actionCompleteBtn:hover { opacity: 0.92; }
+/* Formulário do plano de ação: contador de caracteres, erro por campo e altura máxima do textarea. */
+.modalCharCounter { margin-top: 3px; text-align: right; font-size: 11px; color: #8a8f9c; }
+.modalCharCounterOver { color: #b3261e; font-weight: 600; }
+.modalInputError { border-color: #d92d20 !important; background-color: #fff6f5; }
+.modalTextarea { resize: vertical; min-height: 70px; max-height: 200px; }
+.modalFieldError { display: flex; align-items: center; gap: 6px; margin: -6px 0 0; font-size: 12.5px; color: #b3261e; }
 .actionIconButton { width: 28px; height: 25px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid #656565; border-radius: 5px; background: #fff; cursor: pointer; color: #333; }
 .actionIconButton:hover { color: #2f4fff; border-color: #2f4fff; }
 .actionIconButtonDanger:hover { color: #c62828; border-color: #c62828; }
@@ -877,6 +938,17 @@
 .actionDetails p { margin-top: 3px; font-size: 12px; }
 .actionAttachmentInput { margin-top: 2px; font-size: 13px; }
 .actionAttachmentList { display: flex; flex-direction: column; gap: 3px; margin-top: 8px; font-size: 12px; color: #68708a; }
+/* Anexos no "Atualizar andamento": botão próprio (o input de arquivo nativo fica escondido), formatos
+   aceitos ao lado e lista com opção de remover. */
+.visuallyHiddenFile { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; pointer-events: none; }
+.attachRow { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+.attachButton { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border: 1.5px solid #183eff; border-radius: 8px; color: #183eff; background: #fff; font-size: 13px; font-weight: 600; cursor: pointer; }
+.attachButton:hover { background: #eef1ff; }
+.attachHint { font-size: 12px; color: #68708a; }
+.attachList { list-style: none; margin: 10px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.attachList li { display: flex; align-items: center; gap: 8px; padding: 6px 10px; border: 1px solid #e3e6ef; border-radius: 6px; background: #fafbff; font-size: 12.5px; color: #333; }
+.attachName { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.attachRemove { display: inline-flex; border: none; background: none; color: #b3261e; cursor: pointer; padding: 2px; }
 
 /* Bloco "Anexos" na visualização detalhada da ação — ocupa as 2 colunas do grid de detalhes. */
 .actionDetailsFull { grid-column: 1 / -1; }

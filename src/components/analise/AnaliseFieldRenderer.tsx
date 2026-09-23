@@ -1,4 +1,5 @@
 import type { AnaliseField, AnaliseValues } from "../../types/analise";
+import { OUTRO_MAX_LENGTH } from "../../constants/limites";
 import { normalizeOption } from "../../types/analise";
 import { evalCondition } from "./condition";
 import { TableField, type TableRow } from "./TableField";
@@ -22,6 +23,8 @@ type Props = {
   resumoNotificacao?: React.ReactNode;
   /** Modo de visualização — desabilita edição em todos os tipos de campo. */
   readOnly?: boolean;
+  /** Células de tabela a destacar em vermelho ("linha:colunaId") — ver validacao.ts. */
+  invalidCells?: string[];
   "data-testid"?: string;
 };
 
@@ -36,6 +39,7 @@ export function AnaliseFieldRenderer({
   siblingFields: _siblingFields,
   resumoNotificacao,
   readOnly,
+  invalidCells,
   "data-testid": dataTestId,
 }: Props) {
   const testId = dataTestId ?? `field-${field.id}`;
@@ -60,23 +64,40 @@ export function AnaliseFieldRenderer({
       );
     }
 
-    case "text":
-      return (
+    case "text": {
+      const texto = (value as string) ?? "";
+      const input = (
         <input
           className={styles.cellInput}
           type="text"
-          value={(value as string) ?? ""}
+          placeholder={readOnly ? undefined : (field.placeholder ?? "Digite aqui...")}
+          value={texto}
           onChange={(e) => onChange(e.target.value)}
           disabled={readOnly}
           data-testid={testId}
         />
       );
+      if (!field.maxLength || readOnly) return input;
+      const excedeu = texto.length > field.maxLength;
+      return (
+        <div>
+          {input}
+          <div
+            className={`${styles.charCounter} ${excedeu ? styles.charCounterOver : ""}`}
+            data-testid={`${testId}-contador`}
+          >
+            {texto.length}/{field.maxLength}
+          </div>
+        </div>
+      );
+    }
 
     case "textarea":
       return (
         <textarea
           className={styles.cellInput}
           rows={3}
+          placeholder={readOnly ? undefined : (field.placeholder ?? "Digite aqui...")}
           value={(value as string) ?? ""}
           onChange={(e) => onChange(e.target.value)}
           disabled={readOnly}
@@ -144,15 +165,24 @@ export function AnaliseFieldRenderer({
               testId={`${testId}-option-outro`}
             >
               {selected.includes("OUTRO") && (
-                <input
-                  className={styles.cellInput}
-                  type="text"
-                  placeholder="Especifique..."
-                  value={state.outro ?? ""}
-                  onClick={(e) => e.stopPropagation()}
-                  onChange={(e) => onChange({ ...state, outro: e.target.value })}
-                  disabled={readOnly}
-                />
+                <div onClick={(e) => e.stopPropagation()}>
+                  <input
+                    className={styles.cellInput}
+                    type="text"
+                    placeholder="Especifique a opção"
+                    value={state.outro ?? ""}
+                    onChange={(e) => onChange({ ...state, outro: e.target.value })}
+                    disabled={readOnly}
+                    data-testid={`${testId}-outro-texto`}
+                  />
+                  {!readOnly && (
+                    <div
+                      className={`${styles.charCounter} ${(state.outro ?? "").length > OUTRO_MAX_LENGTH ? styles.charCounterOver : ""}`}
+                    >
+                      {(state.outro ?? "").length}/{OUTRO_MAX_LENGTH}
+                    </div>
+                  )}
+                </div>
               )}
             </ChoiceRow>
           </div>
@@ -219,6 +249,7 @@ export function AnaliseFieldRenderer({
           value={value as TableRow[] | undefined}
           onChange={(rows) => onChange(rows)}
           readOnly={readOnly}
+          invalidCells={invalidCells}
           data-testid={testId}
         />
       );
@@ -230,6 +261,7 @@ export function AnaliseFieldRenderer({
           value={value as ChecklistState | undefined}
           onChange={(v) => onChange(v)}
           readOnly={readOnly}
+          invalidCells={invalidCells}
           data-testid={testId}
         />
       );

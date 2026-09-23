@@ -9,6 +9,9 @@
   font-size: 13px;
   font-weight: 500;
   font-family: "Inter", sans-serif;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   padding: 10px 18px;
   border-radius: 8px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
@@ -20,4 +23,23 @@
 .toast.show {
   opacity: 1;
   transform: translate(-50%, 0);
+}
+
+.icon {
+  flex-shrink: 0;
+}
+
+/* Fundo colorido por tipo, com texto e ícone brancos. Tons mais escuros de propósito: o verde,
+   o vermelho e o laranja "vivos" (#22c55e, #ef4444, #f59e0b) ficam com contraste baixo demais com
+   texto branco. Estes passam no mínimo de acessibilidade (WCAG AA, 4,5:1). */
+.success {
+  background: #15803d;
+}
+
+.error {
+  background: #b91c1c;
+}
+
+.warning {
+  background: #c2410c;
 }

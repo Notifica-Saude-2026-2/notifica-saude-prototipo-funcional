@@ -42,6 +42,17 @@ export type TableColumn = {
   id: string;
   label: string;
   type: TableColumnType;
+  /** Texto de exemplo exibido no campo vazio. Sem isso, texto livre usa "Digite aqui...". */
+  placeholder?: string;
+  /** Limite de caracteres da célula (colunas text/textarea). Mesmo comportamento do `maxLength`
+      de campo: contador, toast ao ultrapassar e bloqueio do avanço de seção. */
+  maxLength?: number;
+  /** Largura fixa da coluna quando a tabela é exibida como grade (ex.: "420px") — sobrescreve a
+      largura padrão por tipo (ver COLUMN_WIDTH em TableField.tsx). */
+  tableWidth?: string;
+  /** Peso da largura da coluna na linha de campos curtos do card (ex.: 2, 6, 2 = 20%/60%/20%).
+      Sem isso, os campos curtos dividem a linha em duas colunas iguais. */
+  width?: number;
   options?: ChoiceOption[];
   helpText?: string;
   /** Legenda estruturada (uma linha por item, com bolinha colorida opcional) para o tooltip do
@@ -63,7 +74,12 @@ export type TableColumn = {
 };
 
 export type ChecklistItemDef = { id: string; label: string; example?: string };
-export type DetailFieldDef = { id: string; label: string; type: "textarea" | "text" };
+export type DetailFieldDef = {
+  id: string;
+  label: string;
+  type: "textarea" | "text";
+  placeholder?: string;
+};
 
 export type ItemCommonFieldDef = { id: string; label: string; type: "text" };
 
@@ -114,11 +130,24 @@ export type AnaliseField = {
   helpText?: string;
   /** Ver TableColumn.helpTextItems — mesma ideia, pro tooltip do rótulo do campo (não de coluna). */
   helpTextItems?: TooltipLegendItem[];
+  /** Mostra o `helpText` como caixa de informação (azul claro, ícone de info) logo abaixo do
+      rótulo do campo, em vez de escondido no ícone "i" com tooltip. */
+  helpTextInline?: boolean;
+  /** Texto de exemplo exibido no campo vazio (text/textarea). Sem isso, usa "Digite aqui...". */
+  placeholder?: string;
   designNote?: string;
   description?: string;
   source?: string;
-  /** Marca o campo como obrigatório para avançar de seção — ver formCanAdvance em AnaliseFlowPage. */
+  /** Marca o campo como obrigatório para avançar de seção — ver formCanAdvance em AnaliseFlowPage.
+      Em campos "table", exige ao menos uma linha e TODAS as colunas preenchidas em cada linha
+      (inclusive o texto de "Outro", quando essa opção for escolhida). */
   required?: boolean;
+  /** Tabela opcional (pode ficar sem nenhuma linha), mas cada linha adicionada precisa ter TODAS
+      as colunas preenchidas para avançar de seção. Ex.: "Demais membros participantes". */
+  requireCompleteRows?: boolean;
+  /** Limite de caracteres de um campo de texto. Ultrapassar exibe um toast de aviso e bloqueia o
+      avanço de seção (ver handleNext em AnaliseFlowPage) — não corta o texto digitado. */
+  maxLength?: number;
   options?: ChoiceOption[];
   multiple?: boolean;
   allowOther?: boolean;
@@ -126,6 +155,11 @@ export type AnaliseField = {
   visibleIf?: AnaliseCondition;
   repeatable?: boolean;
   minRows?: number;
+  /** Máximo de linhas de uma tabela repetível — ao atingir, o botão de adicionar é desabilitado e
+      aparece um aviso (ex.: 5 Porquês, até 15 níveis). */
+  maxRows?: number;
+  /** Impede remover linhas abaixo de `minRows` (o botão "Remover" some da última linha restante). */
+  lockMinRows?: boolean;
   fixedRows?: string[];
   columns?: TableColumn[];
   /** Força a tabela repetível a renderizar como grid (linhas/colunas) mesmo tendo coluna de texto
@@ -133,6 +167,9 @@ export type AnaliseField = {
       o valor de ter tudo alinhado em colunas (ex.: cronologia, 5 Porquês) supera o aperto do
       texto longo, que quebra dentro da célula normalmente. */
   layout?: "table" | "cards";
+  /** Em telas estreitas (celular), cada linha da tabela vira um bloco empilhado (rótulo acima de
+      cada campo) em vez de rolar na horizontal. Usado nas tabelas do plano de ação. */
+  stackOnMobile?: boolean;
   /** Nome no singular de cada linha de uma tabela repetível (ex.: "PPC", "Recomendação",
       "Entrevista") — usado no título do card de cada linha ("PPC #1"). Sem isso, cai no genérico
       "Linha N". */

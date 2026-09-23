@@ -15,10 +15,17 @@ type Props = {
 type Bone = {
   key: string;
   label: string;
-  bullets: string[];
+  /** Uma entrada por item em análise que marcou a categoria: o achado + os 5 Porquês dele. */
+  entradas: BoneEntry[];
 };
 
-const HEAD_GAP = 18; // precisa bater com o column-gap do grid (ver estilo inline abaixo)
+type BoneEntry = {
+  /** Nome do item (ex.: "Evento 1: ") — só quando há mais de um item selecionado. */
+  prefixo: string;
+  achado?: string;
+  /** Níveis do 5 Porquês ("Por que …? — resposta"), exibidos menores, abaixo do achado. */
+  porques: string[];
+};
 
 /** Diagrama de Ishikawa (espinha de peixe) — UM diagrama só pro resultado final da investigação,
     juntando todos os itens selecionados na Seção 4 (eventos da cronologia + PPCs). Cada osso é uma
@@ -49,60 +56,45 @@ export function IshikawaDiagram({ field, values }: Props) {
   // na ordem em que aparecer entre os itens selecionados.
   const bones = new Map<string, Bone>();
   for (const item of FATORES_CONTRIBUINTES_ITEMS) {
-    bones.set(item.id, { key: item.id, label: item.label, bullets: [] });
+    bones.set(item.id, { key: item.id, label: item.label, entradas: [] });
   }
 
   for (const card of selectedCards) {
     const state = perItem[card.key]?.[source.checklistFieldId] as ChecklistState | undefined;
     if (!state) continue;
 
-    const addBullets = (boneKey: string, label: string, achado?: string, fonte?: string) => {
-      if (!achado && !fonte) return;
-      const bone = bones.get(boneKey) ?? { key: boneKey, label, bullets: [] };
-      const prefix = multiplosItens ? `${card.title}: ` : "";
-      if (achado) bone.bullets.push(`${prefix}${achado}`);
-      if (fonte) bone.bullets.push(`${prefix}Fonte: ${fonte}`);
-      bones.set(boneKey, bone);
-    };
+    const prefixo = multiplosItens ? `${card.title}: ` : "";
 
     // boneKey identifica a caixinha no diagrama; porquesKey é a chave usada dentro de
     // `state.porques` — pra categorias padrão as duas são iguais (o id da categoria), mas pra
     // "outro" a caixinha é uma por texto digitado (`outro:<texto>`) enquanto os 5 Porquês desse
-    // item sempre ficam salvos sob a chave fixa "outro".
-    const addPorques = (boneKey: string, porquesKey: string) => {
-      const rows = state.porques?.[porquesKey];
-      if (!rows) return;
-      const bone = bones.get(boneKey);
-      if (!bone) return;
-      const prefix = multiplosItens ? `${card.title}: ` : "";
-      for (const row of rows) {
-        const pergunta = (row.pergunta as string) || "(pergunta não preenchida)";
-        const resposta = row.resposta ? ` — ${row.resposta as string}` : "";
-        bone.bullets.push(`${prefix}${pergunta}${resposta}`);
-      }
+    // item sempre ficam salvos sob a chave fixa "outro". A fonte/evidência não entra no diagrama.
+    const addEntrada = (boneKey: string, label: string, porquesKey: string, achado?: string) => {
+      const porques = (state.porques?.[porquesKey] ?? [])
+        .filter((row) => row.pergunta || row.resposta)
+        .map((row) => {
+          const pergunta = (row.pergunta as string) || "(pergunta não preenchida)";
+          return row.resposta ? `${pergunta} — ${row.resposta as string}` : pergunta;
+        });
+      if (!achado?.trim() && porques.length === 0) return;
+      const bone = bones.get(boneKey) ?? { key: boneKey, label, entradas: [] };
+      bone.entradas.push({ prefixo, achado: achado?.trim(), porques });
+      bones.set(boneKey, bone);
     };
 
     for (const item of FATORES_CONTRIBUINTES_ITEMS) {
       if (!state.checked[item.id]) continue;
-      addBullets(
-        item.id,
-        item.label,
-        state.details[item.id]?.["achado"],
-        state.details[item.id]?.["fonte"],
-      );
-      addPorques(item.id, item.id);
+      addEntrada(item.id, item.label, item.id, state.details[item.id]?.["achado"]);
     }
 
     if (state.otherChecked) {
       const label = state.otherText?.trim() || "Outro";
       const key = `outro:${label.toLowerCase()}`;
-      if (!bones.has(key)) bones.set(key, { key, label, bullets: [] });
-      addBullets(key, label, state.otherDetail?.["achado"], state.otherDetail?.["fonte"]);
-      addPorques(key, "outro");
+      addEntrada(key, label, "outro", state.otherDetail?.["achado"]);
     }
   }
 
-  const finalBones = [...bones.values()].filter((bone) => bone.bullets.length > 0);
+  const finalBones = [...bones.values()].filter((bone) => bone.entradas.length > 0);
   const headTitle =
     (values["incidente_investigado"] as string | undefined)?.trim() || "Resultado da investigação";
 
@@ -120,33 +112,40 @@ export function IshikawaDiagram({ field, values }: Props) {
   );
 }
 
-/** A espinha única do resultado final — eixo central horizontal (com uma pequena cauda na ponta
-    esquerda, só decorativa) terminando numa "cabeça" em forma de seta com o incidente investigado,
-    e um osso diagonal por categoria com achado, alternando acima/abaixo do eixo. */
+/** A espinha de peixe do resultado final — layout propositalmente simples (grid CSS, sem cálculo
+    de coordenadas), pra não quebrar com textos longos ou muitas categorias:
+    - cada coluna tem até 2 categorias: uma acima do eixo e outra abaixo, e os ossos das duas se
+      encontram no mesmo ponto do eixo;
+    - as categorias são só texto (título + marcadores), sem caixa — o texto cresce livremente;
+    - cauda (nadadeira preenchida) à esquerda e cabeça preenchida com o incidente à direita. */
 function FishboneDiagram({ title, bones }: { title: string; bones: Bone[] }) {
-  const n = bones.length;
+  const cols = Math.ceil(bones.length / 2);
   return (
     <div className={styles.ishikawaFishboneScroll}>
       <div
         className={styles.ishikawaFishboneGrid}
         style={{
-          gridTemplateColumns: `repeat(${n}, minmax(160px, max-content)) 172px`,
-          gridTemplateRows: "auto 54px 4px 54px auto",
-          columnGap: HEAD_GAP,
+          gridTemplateColumns: `repeat(${cols}, 200px) auto`,
+          gridTemplateRows: "auto 48px 6px 48px auto",
         }}
       >
         {bones.map((bone, i) => (
-          <FishboneBone key={bone.key} bone={bone} col={i + 1} isTop={i % 2 === 0} />
+          <FishboneBone
+            key={bone.key}
+            bone={bone}
+            col={Math.floor(i / 2) + 1}
+            isTop={i % 2 === 0}
+          />
         ))}
         <div
           className={styles.ishikawaSpineCell}
-          style={{ gridColumn: `1 / span ${n}`, gridRow: 3 }}
+          style={{ gridColumn: `1 / span ${cols}`, gridRow: 3 }}
         >
-          <span className={styles.ishikawaTailTriangle} />
+          <FishTail />
         </div>
         <div
           className={styles.ishikawaHeadCell}
-          style={{ gridColumn: n + 1, gridRow: 3, marginLeft: -HEAD_GAP }}
+          style={{ gridColumn: cols + 1, gridRow: "2 / span 3" }}
         >
           <FishHead title={title} />
         </div>
@@ -155,50 +154,61 @@ function FishboneDiagram({ title, bones }: { title: string; bones: Bone[] }) {
   );
 }
 
-/** A "cabeça" do peixe: uma seta apontando pra dentro do eixo, com o incidente investigado
-    centralizado. O deslocamento negativo no wrapper (ver marginLeft acima) faz a borda reta dela
-    encostar exatamente na ponta do eixo, sem o respiro do gap do grid. */
+/** Cauda: nadadeira em meia-lua, preenchida, encaixada na ponta esquerda do eixo. */
+function FishTail() {
+  return (
+    <svg className={styles.ishikawaTailSvg} viewBox="0 0 60 110" aria-hidden="true">
+      <path d="M 60,55 C 42,30 22,10 4,2 C 20,32 20,78 4,108 C 22,100 42,80 60,55 Z" />
+    </svg>
+  );
+}
+
+/** Cabeça: forma preenchida com o incidente investigado em branco. O SVG estica na vertical
+    conforme o texto (até 100 caracteres), então a forma continua fechando o texto. */
 function FishHead({ title }: { title: string }) {
   return (
     <div className={styles.ishikawaHeadShape}>
       <svg
         className={styles.ishikawaHeadSvg}
-        viewBox="0 0 172 84"
+        viewBox="0 0 200 100"
         preserveAspectRatio="none"
         aria-hidden="true"
       >
-        <polygon
-          points="3,4 120,4 168,42 120,80 3,80"
-          style={{ fill: "var(--color-primary-wash)", stroke: "var(--color-primary)" }}
-          strokeWidth={3}
-          strokeLinejoin="round"
-        />
+        <path d="M 2,2 C 110,0 172,14 198,50 C 172,86 110,100 2,98 Q 14,50 2,2 Z" />
       </svg>
       <div className={styles.ishikawaHeadText}>{title}</div>
     </div>
   );
 }
 
-/** Um osso (bone) do diagrama: a caixinha com os achados já consolidados da categoria + o conector
-    diagonal em SVG que liga essa caixinha ao eixo central, sempre convergindo "pra frente" (em
-    direção à cabeça). */
+/** Uma categoria: texto (título + achados + 5 Porquês) acima ou abaixo do eixo, e o osso — uma
+    linha diagonal que sai do texto e chega no eixo, inclinada "pra frente" (em direção à cabeça). */
 function FishboneBone({ bone, col, isTop }: { bone: Bone; col: number; isTop: boolean }) {
-  const boxRow = isTop ? 1 : 5;
-  const connectorRow = isTop ? 2 : 4;
-
   return (
     <>
-      <div className={styles.ishikawaBoneBox} style={{ gridColumn: col, gridRow: boxRow }}>
+      <div
+        className={`${styles.ishikawaBoneText} ${isTop ? styles.ishikawaBoneTextTop : ""}`}
+        style={{ gridColumn: col, gridRow: isTop ? 1 : 5 }}
+      >
         <div className={styles.ishikawaBoneLabel}>{bone.label}</div>
         <ul className={styles.ishikawaBoneList}>
-          {bone.bullets.map((text, i) => (
-            <li key={i}>{text}</li>
+          {bone.entradas.map((e, i) => (
+            <li key={i}>
+              {e.achado ? `${e.prefixo}${e.achado}` : e.prefixo.replace(/: $/, "")}
+              {e.porques.length > 0 && (
+                <ul className={styles.ishikawaBonePorques}>
+                  {e.porques.map((texto, j) => (
+                    <li key={j}>{texto}</li>
+                  ))}
+                </ul>
+              )}
+            </li>
           ))}
         </ul>
       </div>
       <div
         className={styles.ishikawaConnectorCell}
-        style={{ gridColumn: col, gridRow: connectorRow }}
+        style={{ gridColumn: col, gridRow: isTop ? 2 : 4 }}
       >
         <svg
           className={styles.ishikawaConnectorSvg}
@@ -206,12 +216,11 @@ function FishboneBone({ bone, col, isTop }: { bone: Bone; col: number; isTop: bo
           preserveAspectRatio="none"
         >
           <line
-            x1={4}
+            x1={30}
             y1={isTop ? 0 : 100}
-            x2={96}
+            x2={100}
             y2={isTop ? 100 : 0}
-            style={{ stroke: "var(--color-primary)" }}
-            strokeWidth={4}
+            strokeWidth={2}
             strokeLinecap="round"
             vectorEffect="non-scaling-stroke"
           />

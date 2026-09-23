@@ -1,8 +1,14 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { BsBellFill } from "react-icons/bs";
 import { AdminLayout } from "../../../components/admin/AdminLayout/AdminLayout";
 import { StepForm } from "../../../components/form/StepForm/StepForm";
 import { AnaliseSectionForm } from "../../../components/analise/AnaliseSectionForm";
+import { SectionInfoBox } from "../../../components/analise/SectionInfoBox";
+import { listar, validarSecao } from "../../../components/analise/validacao";
+import type { MultiChoiceWithOtherValue } from "../../../components/analise/AnaliseFieldRenderer";
+import type { ChecklistState } from "../../../components/analise/ChecklistWithDetailField";
+import { OUTRO_MAX_LENGTH } from "../../../constants/limites";
 import { evalCondition } from "../../../components/analise/condition";
 import type { TableRow } from "../../../components/analise/TableField";
 import styles from "../../../components/analise/Analise.module.css";
@@ -18,7 +24,7 @@ import {
 } from "../../../services/notificacaoDetalheService";
 import type { NotificacaoDetalheDTO } from "../../../types/notificacaoDetalhe";
 import type { AnaliseFlowId, AnaliseValues, RecomendacaoExtraida } from "../../../types/analise";
-import { ANALISE_FLOW_LABEL, METODOLOGIA_TO_FLOW } from "../../../types/analise";
+import { ANALISE_FLOW_LABEL, METODOLOGIA_TO_FLOW, normalizeOption } from "../../../types/analise";
 
 function escalateToLondresCompleto(values: AnaliseValues): AnaliseValues {
   const next: AnaliseValues = { ...values };
@@ -89,24 +95,20 @@ function ResumoItem({
 }
 
 /**
- * Resumo da notificação + classificação — mesmo conteúdo nos dois lugares em que aparece (Seção 1
- * e o resumo fixo que gruda acima do formulário a partir da Seção 2), só que o fixo é mais enxuto:
- * fonte/espaçamento menores (classe .resumoCompact) e sem os dados do notificante (não é essencial
- * pra quem já está no meio da análise, e ajuda a ocupar menos altura fixa na tela).
+ * Resumo completo da notificação + classificação — exibido só na Seção 1. A partir da Seção 2,
+ * acima do formulário, aparece apenas o "Incidente em investigação" informado na Seção 1.
  */
 function ResumoNotificacao({
   detalhe,
-  compact,
   incidenteInvestigado,
 }: {
   detalhe: NotificacaoDetalheDTO;
-  compact?: boolean;
   /** Texto livre informado pelo analista na Seção 1, identificando qual incidente está sendo investigado. */
   incidenteInvestigado?: string;
 }) {
   const classificacao = detalhe.classificacao;
   return (
-    <div className={compact ? styles.resumoCompact : undefined}>
+    <div>
       <p style={{ margin: "0 0 4px" }}>
         <strong>Notificação #{detalhe.codigo}</strong> — {detalhe.unidade} · {detalhe.setor}
       </p>
@@ -119,7 +121,6 @@ function ResumoNotificacao({
 
       <div className={styles.resumoGrid}>
         <ResumoItem label="Descrição" value={detalhe.descricao} full />
-        <ResumoItem label="Conduta imediata" value={detalhe.condutaImediata} full />
         <ResumoItem label="Data do incidente" value={detalhe.dataIncidente} />
         <ResumoItem label="Horário" value={detalhe.horario} />
         <ResumoItem label="Turno" value={detalhe.turno} />
@@ -131,15 +132,14 @@ function ResumoNotificacao({
         ) : (
           <ResumoItem label="Paciente" value="Não envolve o paciente" full />
         )}
-        {!compact &&
-          (detalhe.anonima ? (
-            <ResumoItem label="Notificante" value="Notificação anônima" full />
-          ) : (
-            <>
-              <ResumoItem label="Nome do notificante" value={detalhe.notificante.nome} />
-              <ResumoItem label="Celular/E-mail" value={detalhe.notificante.contato} />
-            </>
-          ))}
+        {detalhe.anonima ? (
+          <ResumoItem label="Notificante" value="Notificação anônima" full />
+        ) : (
+          <>
+            <ResumoItem label="Nome do notificante" value={detalhe.notificante.nome} />
+            <ResumoItem label="Celular/E-mail" value={detalhe.notificante.contato} />
+          </>
+        )}
       </div>
 
       {classificacao && (
@@ -183,6 +183,15 @@ export default function AnaliseFlowPage() {
   const [values, setValues] = useState<AnaliseValues>({});
   const [savedHint, setSavedHint] = useState(false);
   const [finishing, setFinishing] = useState(false);
+  const [limiteToast, setLimiteToast] = useState<string | null>(null);
+  /** "Foto" do que estava pendente no último clique em "Próximo". Só isso fica destacado — e cada
+      item some quando é corrigido. O que for criado DEPOIS do clique (ex.: uma linha nova na
+      cronologia) não aparece em vermelho até a próxima tentativa de avançar. */
+  const [pendenciasDoClique, setPendenciasDoClique] = useState<{
+    campos: Set<string>;
+    celulas: Set<string>;
+  } | null>(null);
+  const limiteToastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (!id) return;
@@ -213,15 +222,136 @@ export default function AnaliseFlowPage() {
       ) : null,
     [detalhe, incidenteInvestigado],
   );
-  const resumoNotificacaoCompacto = useMemo(
-    () =>
-      detalhe ? (
-        <ResumoNotificacao detalhe={detalhe} compact incidenteInvestigado={incidenteInvestigado} />
-      ) : null,
-    [detalhe, incidenteInvestigado],
-  );
+
+  function mostrarAviso(mensagem: string) {
+    setLimiteToast(mensagem);
+    if (limiteToastTimer.current) clearTimeout(limiteToastTimer.current);
+    limiteToastTimer.current = setTimeout(() => setLimiteToast(null), 4000);
+  }
+
+  function mostrarAvisoLimite(label: string, max: number, atual: number) {
+    mostrarAviso(`"${label}" deve ter no máximo ${max} caracteres (atual: ${atual}).`);
+  }
+
+  // Pendências da seção atual (campos obrigatórios vazios, limites de caracteres...) — recalculadas
+  // a cada alteração, então somem da tela assim que a pessoa corrige.
+  const pendencias = section ? validarSecao(section, values, flow?.sections) : [];
+  const pendenciasPorCampo = pendenciasDoClique
+    ? pendencias.reduce<Record<string, { message: string; cells?: string[] }[]>>((acc, p) => {
+        if (!pendenciasDoClique.campos.has(p.fieldId)) return acc;
+        let { message, cells } = p;
+        if (cells) {
+          cells = cells.filter((cell) => pendenciasDoClique.celulas.has(`${p.fieldId}|${cell}`));
+          if (cells.length === 0) return acc;
+          // Células vazias: remonta a mensagem só com as colunas que continuam pendentes.
+          if (p.cellLabels) {
+            const colunas = [...new Set(cells.map((cell) => p.cellLabels![cell]))];
+            const linhas = new Set(
+              cells.filter((cell) => /^\d+:/.test(cell)).map((cell) => cell.split(":")[0]),
+            );
+            message = `Preencha ${listar(colunas)}${linhas.size > 1 ? " nas linhas destacadas" : ""}.`;
+          }
+        }
+        (acc[p.fieldId] ??= []).push({ message, cells });
+        return acc;
+      }, {})
+    : undefined;
+
+  /** Textos que passaram do `maxLength` do schema na seção atual — tanto campos de texto quanto
+      células de tabela (ex.: coluna "Nome" do condutor/membros). */
+  function textosAcimaDoLimite(vals: AnaliseValues) {
+    if (!section) return [];
+    const excedidos: { label: string; max: number; atual: number }[] = [];
+    for (const f of section.fields) {
+      if (f.visibleIf && !evalCondition(vals, f.visibleIf)) continue;
+      const v = vals[f.id];
+      if (f.maxLength && typeof v === "string" && v.length > f.maxLength) {
+        excedidos.push({ label: f.label, max: f.maxLength, atual: v.length });
+      }
+      if (f.type === "table" && Array.isArray(v)) {
+        for (const col of f.columns ?? []) {
+          for (const row of v as TableRow[]) {
+            const cell = row[col.id] ?? "";
+            if (col.maxLength && cell.length > col.maxLength) {
+              excedidos.push({
+                label: (f.columns ?? []).length === 1 ? f.label : `${f.label} — ${col.label}`,
+                max: col.maxLength,
+                atual: cell.length,
+              });
+            }
+            // Texto livre de "Outro" num menu de seleção da tabela (valor fora da lista de opções).
+            if (col.type === "choice" && col.allowOther && cell.length > OUTRO_MAX_LENGTH) {
+              const opcoes = (col.options ?? []).map((o) => normalizeOption(o).value);
+              if (!opcoes.includes(cell)) {
+                excedidos.push({
+                  label: `${f.label} — ${col.label} (Outro)`,
+                  max: OUTRO_MAX_LENGTH,
+                  atual: cell.length,
+                });
+              }
+            }
+          }
+        }
+      }
+      // "Outro" em escolha múltipla (ex.: Fontes consultadas).
+      if (f.type === "choice" && f.multiple && f.allowOther && v) {
+        const st = v as MultiChoiceWithOtherValue;
+        const outro = st.outro ?? "";
+        if (st.selected?.includes("OUTRO") && outro.length > OUTRO_MAX_LENGTH) {
+          excedidos.push({
+            label: `${f.label} (Outro)`,
+            max: OUTRO_MAX_LENGTH,
+            atual: outro.length,
+          });
+        }
+      }
+    }
+    // "Outro / não mapeado" no checklist de fatores contribuintes — que pode estar numa seção
+    // repetida por item (valores guardados em values[section.id][item][campo]).
+    const checklists = section.fields.filter(
+      (f) => f.type === "checklist_with_detail" && f.allowOther,
+    );
+    const instancias: Record<string, unknown>[] = section.repeatablePerSelectedItemOf
+      ? Object.values((vals[section.id] as Record<string, Record<string, unknown>>) ?? {})
+      : [vals];
+    for (const inst of instancias) {
+      for (const f of checklists) {
+        const st = inst?.[f.id] as ChecklistState | undefined;
+        const txt = st?.otherText ?? "";
+        if (st?.otherChecked && txt.length > OUTRO_MAX_LENGTH) {
+          excedidos.push({
+            label: `${f.otherLabel ?? "Outro"}`,
+            max: OUTRO_MAX_LENGTH,
+            atual: txt.length,
+          });
+        }
+      }
+    }
+    return excedidos;
+  }
 
   function updateField(fieldId: string, value: unknown) {
+    // Avisa no momento em que um texto passa do limite (não a cada tecla depois disso).
+    const antes = textosAcimaDoLimite(values).length;
+    const depois = textosAcimaDoLimite({ ...values, [fieldId]: value });
+    if (depois.length > antes) {
+      const novo = depois[depois.length - 1];
+      mostrarAvisoLimite(novo.label, novo.max, novo.atual);
+    } else if (section?.repeatablePerSelectedItemOf) {
+      // Seção repetida por item (ex.: 5 Porquês da 4A): usa a validação completa pra detectar o
+      // momento em que algum texto passa do limite.
+      const limite = (p: { message: string }) => p.message.includes("máximo de");
+      const qtd = (ps: { cells?: string[] }[]) =>
+        ps.reduce((n, p) => n + (p.cells?.length ?? 1), 0);
+      const antesR = qtd(validarSecao(section, values, flow?.sections).filter(limite));
+      const depoisR = validarSecao(section, { ...values, [fieldId]: value }, flow?.sections).filter(
+        limite,
+      );
+      if (qtd(depoisR) > antesR) {
+        const novo = depoisR[depoisR.length - 1];
+        mostrarAviso(novo.message.split(" · ").pop()!.replace(/\.$/, "") + ".");
+      }
+    }
     setValues((current) => ({ ...current, [fieldId]: value }));
   }
 
@@ -244,27 +374,30 @@ export default function AnaliseFlowPage() {
     navigate(`/incident/${id}`, { state: { analiseRecomendacoes: recomendacoes } });
   }
 
-  function decisionCanAdvance(): boolean {
-    if (!section || section.kind !== "decision") return true;
-    return section.fields.every((f) => {
-      if (f.type === "readonly" || f.type === "info") return true;
-      const v = values[f.id];
-      return Array.isArray(v) ? v.length > 0 : !!v;
-    });
-  }
-
-  function formCanAdvance(): boolean {
-    if (!section || section.kind !== "form") return true;
-    return section.fields.every((f) => {
-      if (!f.required) return true;
-      if (f.visibleIf && !evalCondition(values, f.visibleIf)) return true;
-      const v = values[f.id];
-      return Array.isArray(v) ? v.length > 0 : !!v;
-    });
-  }
-
   async function handleNext() {
     if (!flow || !section) return;
+
+    // Pendências: não avança, destaca os campos com problema, avisa e rola até o primeiro.
+    if (pendencias.length > 0) {
+      setPendenciasDoClique({
+        campos: new Set(pendencias.map((p) => p.fieldId)),
+        celulas: new Set(
+          pendencias.flatMap((p) => (p.cells ?? []).map((cell) => `${p.fieldId}|${cell}`)),
+        ),
+      });
+      mostrarAviso(
+        pendencias.length === 1
+          ? `${pendencias[0].label}: ${pendencias[0].message}`
+          : `Corrija os ${pendencias.length} itens destacados para continuar.`,
+      );
+      setTimeout(() => {
+        document
+          .querySelector('[data-pendencia="true"]')
+          ?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 50);
+      return;
+    }
+    setPendenciasDoClique(null);
 
     // Seção de decisão com lógica de escalonamento (Londres Rápido → Completo)
     if (section.kind === "decision" && section.decisionLogic) {
@@ -316,6 +449,7 @@ export default function AnaliseFlowPage() {
   }
 
   function handlePrev() {
+    setPendenciasDoClique(null);
     if (sectionIndex === 0) {
       if (id) navigate(`/incident/${id}`);
       return;
@@ -358,35 +492,44 @@ export default function AnaliseFlowPage() {
 
         {flow.globalNote && <div className={styles.flowNote}>{flow.globalNote}</div>}
 
-        {/* Resumo da notificação e classificação: na Seção 1 ele já é o próprio conteúdo da seção
-            (ver schema); a partir da Seção 2 esse campo não existe mais, então fixamos o mesmo
-            resumo acima do formulário pra ele não sumir da tela quando o usuário avança. */}
-        {resumoNotificacaoCompacto && sectionIndex > 0 && (
-          <div className={styles.flowResumoFixed}>{resumoNotificacaoCompacto}</div>
+        {sectionIndex > 0 && incidenteInvestigado?.trim() && (
+          <div
+            className={styles.flowResumoFixed}
+            data-testid="analise-incidente-investigado"
+            style={{ marginBottom: 12 }}
+          >
+            <BsBellFill className={styles.flowResumoIcon} size={15} aria-hidden="true" />
+            <span>
+              <strong>Incidente em investigação:</strong> {incidenteInvestigado}
+            </span>
+          </div>
         )}
 
         <StepForm
           currentStep={sectionIndex + 1}
           totalSteps={flow.sections.length}
           stepTitle={section.title}
-          stepTitleTooltip={section.description}
           onNext={handleNext}
           onPrev={handlePrev}
           isLastStep={!!section.onSubmit}
-          canAdvance={decisionCanAdvance() && formCanAdvance() && !finishing}
+          // Sempre clicável: com pendências, o clique mostra o que falta em vez de não fazer nada.
+          canAdvance={!finishing}
           submitLabel="Concluir investigação"
           compact
         >
+          {section.description && <SectionInfoBox>{section.description}</SectionInfoBox>}
           <AnaliseSectionForm
             section={section}
             values={values}
             onFieldChange={updateField}
             resumoNotificacao={resumoNotificacaoCompleto}
             allSections={flow.sections}
+            pendencias={pendenciasPorCampo}
           />
         </StepForm>
 
-        <Toast message="✓ Rascunho salvo" show={savedHint} />
+        <Toast message="Rascunho salvo" show={savedHint && !limiteToast} variant="success" />
+        <Toast message={limiteToast ?? ""} show={!!limiteToast} variant="warning" />
       </div>
     </AdminLayout>
   );

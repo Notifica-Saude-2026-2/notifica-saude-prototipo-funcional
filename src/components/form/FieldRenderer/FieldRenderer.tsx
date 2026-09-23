@@ -1,4 +1,5 @@
 import React from "react";
+import { OUTRO_MAX_LENGTH } from "../../../constants/limites";
 import type { CampoDinamico } from "../../../types/formulario";
 import { Input } from "../../common/ui/Input";
 import { Textarea } from "../../common/ui/Textarea";
@@ -164,6 +165,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
           {isOutroSelected && (
             <Input
               label="Especifique"
+              maxLength={OUTRO_MAX_LENGTH}
               value={outroValue ?? ""}
               onChange={(e) => onOutroChange?.(e.target.value)}
               placeholder="Digite aqui..."
@@ -213,6 +215,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
           {isOutroChecked && (
             <Input
               label="Especifique"
+              maxLength={OUTRO_MAX_LENGTH}
               value={outroValue ?? ""}
               onChange={(e) => onOutroChange?.(e.target.value)}
               placeholder="Digite aqui..."

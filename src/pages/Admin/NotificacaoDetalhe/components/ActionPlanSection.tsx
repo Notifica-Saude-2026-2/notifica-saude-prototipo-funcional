@@ -1,5 +1,7 @@
 import { useState } from "react";
-import { FiEdit3, FiEye, FiEyeOff, FiTrash2 } from "react-icons/fi";
+import { FiEdit2, FiEdit3, FiEye, FiEyeOff, FiRefreshCw, FiTrash2 } from "react-icons/fi";
+import { MdWarningAmber } from "react-icons/md";
+import { camposPendentesPlano, nomesResponsaveis } from "../../../../types/actionPlan";
 import type { ActionPlan } from "./ActionPlanModal";
 import styles from "../NotificacaoDetalhe.module.css";
 
@@ -8,12 +10,18 @@ type Props = {
   onToggle: () => void;
   onRegister: () => void;
   canRegister: boolean;
+  /** Pode editar/completar as ações existentes — basta a análise estar concluída (as ações
+      pré-criadas pelas recomendações já existem antes da decisão de encaminhamento). */
+  canEdit: boolean;
   // Incidente concluído: apenas leitura — sem editar andamento, sem excluir ações.
   readOnly?: boolean;
   actions: ActionPlan[];
   visibleActionId: string | null;
   onToggleDetails: (id: string) => void;
   onUpdate: (action: ActionPlan) => void;
+  /** Editar os dados da ação (todos os campos do plano) — também usado para completar as ações
+      pré-criadas a partir das recomendações da Análise. */
+  onEdit: (action: ActionPlan) => void;
   onDelete: (actionId: string) => Promise<void> | void;
 };
 
@@ -22,11 +30,13 @@ export function ActionPlanSection({
   onToggle,
   onRegister,
   canRegister,
+  canEdit,
   readOnly = false,
   actions,
   visibleActionId,
   onToggleDetails,
   onUpdate,
+  onEdit,
   onDelete,
 }: Props) {
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
@@ -64,22 +74,45 @@ export function ActionPlanSection({
             <div className={styles.actionCardsGrid}>
               {actions.map((action, index) => {
                 const detailsVisible = visibleActionId === action.id;
+                // Ação pré-criada a partir de uma recomendação da Análise (só com o "O que será
+                // feito"): precisa ser completada antes de ter o andamento acompanhado.
+                const pendentes = camposPendentesPlano(action);
+                const incompleta = pendentes.length > 0;
                 return (
-                  <article className={styles.actionPlanCard} key={action.id}>
+                  <article
+                    className={`${styles.actionPlanCard} ${incompleta ? styles.actionPlanCardPending : ""}`}
+                    key={action.id}
+                    data-testid={`acao-${index + 1}`}
+                  >
                     <div className={styles.actionCardHeader}>
                       <strong>Ação {index + 1}</strong>
                       <div className={styles.actionCardControls}>
-                        <span className={`${styles.actionStatus} ${statusClass(action.status)}`}>
-                          {action.status}
-                        </span>
-                        {!readOnly && (
+                        {/* Ação incompleta não mostra status — o aviso de campos obrigatórios
+                            pendentes, logo abaixo, já explica a situação. */}
+                        {!incompleta && (
+                          <span className={`${styles.actionStatus} ${statusClass(action.status)}`}>
+                            {action.status}
+                          </span>
+                        )}
+                        {!readOnly && canEdit && (
+                          <button
+                            className={styles.actionIconButton}
+                            aria-label="Editar ação"
+                            title="Editar ação"
+                            onClick={() => onEdit(action)}
+                            data-testid={`acao-${index + 1}-editar`}
+                          >
+                            <FiEdit2 />
+                          </button>
+                        )}
+                        {!readOnly && !incompleta && (
                           <button
                             className={styles.actionIconButton}
                             aria-label="Atualizar andamento da ação"
                             title="Atualizar andamento da ação"
                             onClick={() => onUpdate(action)}
                           >
-                            <FiEdit3 />
+                            <FiRefreshCw />
                           </button>
                         )}
                         <button
@@ -102,10 +135,33 @@ export function ActionPlanSection({
                         )}
                       </div>
                     </div>
+                    {action.origemRecomendacao && (
+                      <p className={styles.actionCardOrigem}>Veio de uma recomendação da análise</p>
+                    )}
                     <p className={styles.actionCardLabel}>O que será feito</p>
-                    <p className={styles.actionCardValue}>{action.what}</p>
+                    <p className={styles.actionCardValue}>{action.what || "Não informado"}</p>
+                    {incompleta && (
+                      <div className={styles.actionPendingBox}>
+                        <p className={styles.actionPendingText}>
+                          <MdWarningAmber size={15} aria-hidden="true" /> Faltam {pendentes.length}{" "}
+                          campo{pendentes.length > 1 ? "s" : ""} obrigatório
+                          {pendentes.length > 1 ? "s" : ""} para essa ação poder ser acompanhada.
+                        </p>
+                        {!readOnly && canEdit && (
+                          <button
+                            className={styles.actionCompleteBtn}
+                            onClick={() => onEdit(action)}
+                            data-testid={`acao-${index + 1}-completar`}
+                          >
+                            Completar preenchimento
+                          </button>
+                        )}
+                      </div>
+                    )}
                     <p className={styles.actionCardLabel}>Responsável</p>
-                    <p className={styles.actionCardValue}>{action.responsible}</p>
+                    <p className={styles.actionCardValue}>
+                      {nomesResponsaveis(action) || "Não informado"}
+                    </p>
                     <p className={styles.actionCardDates}>
                       <b>Início:</b> {formatDate(action.startDate)} &nbsp; <b>Fim:</b>{" "}
                       {formatDate(action.conclusionDate)}
@@ -120,10 +176,7 @@ export function ActionPlanSection({
                         <Detail label="Resultado esperado" value={action.expectedResult} />
                         <Detail label="Como verificar" value={action.verification} />
                         <Detail label="Quando verificar" value={action.verificationDate} />
-                        <Detail
-                          label="Resultado observado"
-                          value={action.observedResult || "Não informado"}
-                        />
+                        <Detail label="Resultado observado" value={action.observedResult} />
                         {action.attachments.length > 0 && (
                           <div className={styles.actionDetailsFull}>
                             <span>Anexos</span>
@@ -197,11 +250,13 @@ export function ActionPlanSection({
   );
 }
 
-function Detail({ label, value }: { label: string; value: string }) {
+/** Um campo nos detalhes da ação — vazio aparece sempre como "Não informado" (mesmo padrão do
+    card), nunca em branco. */
+function Detail({ label, value }: { label: string; value: string | undefined }) {
   return (
     <div>
       <span>{label}</span>
-      <p>{value}</p>
+      <p>{value?.trim() ? value : "Não informado"}</p>
     </div>
   );
 }

@@ -6,7 +6,7 @@ import type {
 } from "../types/notificacaoDetalhe";
 import type { ClassificarPayload, UpdateNotificacaoPayload } from "./notificacaoDetalheService";
 import type { ActionPlan } from "../types/actionPlan";
-import { createEmptyActionPlan } from "../types/actionPlan";
+import { camposPendentesPlano, createEmptyActionPlan } from "../types/actionPlan";
 import type {
   AnaliseFlowId,
   AnaliseRaw,
@@ -20,7 +20,7 @@ const NOTIFICACOES_KEY = "notifica_saude_prototipo_notificacoes";
 const HISTORICO_KEY = "notifica_saude_prototipo_historico";
 const SEED_VERSION_KEY = "notifica_saude_prototipo_seed_versao";
 
-const SEED_VERSION = "2";
+const SEED_VERSION = "3";
 
 export const unidades = [
   { id: "unidade-hospital-regional", nome: "Hospital Regional de Mato Grosso do Sul" },
@@ -121,15 +121,6 @@ export const camposFormulario: CampoDinamico[] = [
     secao: "Tela 4 - Descrição do Incidente e Papel do Notificador",
     placeholder: "Descreva o que aconteceu",
   },
-  // ⚠️ PROVISÓRIO — ver CAMPO_IDS.CONDUTA_IMEDIATA em types/notificacaoDetalhe.ts.
-  {
-    id: "55555555-5555-4555-b555-000000000011",
-    label: "Conduta imediata adotada",
-    tipo: "AREA",
-    obrigatorio: false,
-    secao: "Tela 4 - Descrição do Incidente e Papel do Notificador",
-    placeholder: "Ex.: avaliação médica, analgesia, exame de imagem, comunicação à família",
-  },
   {
     id: "55555555-5555-4555-b555-000000000005",
     label: "Papel do notificante",
@@ -207,7 +198,6 @@ function seed(): NotificacaoRaw[] {
     data_registro: "2026-08-21T12:00:00.000Z",
     updated_at: "2026-08-22T14:30:00.000Z",
     descricao,
-    condutaImediata: "Avaliação médica, analgesia, exame de imagem e comunicação à família.",
     anonima: false,
     tenant_id: "prototipo",
     unidade_id: unidades[0].id,
@@ -440,9 +430,6 @@ export function criarLocal(payload: NotificacaoPayload): NotificacaoRaw {
   const descricao =
     valueFor(payload.respostas.find((r) => r.campo_id.endsWith("000004")) ?? { campo_id: "" }) ??
     "Sem descrição";
-  const condutaImediata = valueFor(
-    payload.respostas.find((r) => r.campo_id.endsWith("000011")) ?? { campo_id: "" },
-  );
   const item: NotificacaoRaw = {
     id,
     codigo: 1000 + items.length + 1,
@@ -452,7 +439,6 @@ export function criarLocal(payload: NotificacaoPayload): NotificacaoRaw {
     data_registro: now(),
     updated_at: now(),
     descricao,
-    condutaImediata,
     anonima: payload.anonima,
     tenant_id: "prototipo",
     unidade_id: payload.unidade_id,
@@ -737,10 +723,22 @@ export function registrarPlanoAcaoLocal(id: string, plan: ActionPlan): Notificac
 
 export function atualizarPlanoAcaoLocal(id: string, plano: ActionPlan): NotificacaoRaw {
   const { items, index, item } = requireNotificacao(id);
+  const anterior = (item.planos_acao ?? []).find((p) => p.id === plano.id);
   const planos = (item.planos_acao ?? []).map((p) => (p.id === plano.id ? plano : p));
-  items[index] = { ...item, planos_acao: planos, updated_at: now() };
+  // Completar uma ação pré-criada pela Análise equivale a registrá-la: a notificação entra em ação.
+  const completou =
+    !!anterior &&
+    camposPendentesPlano(anterior).length > 0 &&
+    camposPendentesPlano(plano).length === 0;
+  const status = completou && item.status === "ANALISADA" ? "EM_ACAO" : item.status;
+  items[index] = { ...item, planos_acao: planos, status, updated_at: now() };
   saveNotificacoes(items);
-  addHistorico(id, `plano de ação atualizado: ${plano.what} (${plano.status})`);
+  addHistorico(
+    id,
+    completou
+      ? `plano de ação completado: ${plano.what}`
+      : `plano de ação atualizado: ${plano.what} (${plano.status})`,
+  );
   return clone(items[index]);
 }
 

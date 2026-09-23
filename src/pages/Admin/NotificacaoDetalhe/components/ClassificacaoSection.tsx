@@ -127,7 +127,7 @@ export function ClassificacaoSection({ detalhe, isOpen, onToggle, onClassificar 
                 </div>
 
                 {detalhe.classificacao.observacoes && (
-                  <div className={styles.infoItem}>
+                  <div className={`${styles.infoItem} ${styles.classificationItemFull}`}>
                     <div className={styles.fieldHeader}>Observações do NSP</div>
                     <div className={styles.fieldValue}>{detalhe.classificacao.observacoes}</div>
                   </div>
