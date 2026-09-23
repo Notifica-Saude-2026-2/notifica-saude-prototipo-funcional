@@ -8,6 +8,10 @@ pre-commit:
       glob: "*.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"
 
     format:
-      run: npm run fmt {staged_files}
+      # --no-error-on-unmatched-pattern: arquivos que o oxfmt ignora por padrão (ex.: package-lock.json)
+      # não devem travar o commit com "Expected at least one target file".
+      run: npm run fmt -- --no-error-on-unmatched-pattern {staged_files}
       stage_fixed: true
       glob: "*.{md,yml,yaml,toml,json,js,mjs,cjs,ts,mts,cts,jsx,tsx}"
+      exclude:
+        - "package-lock.json"
