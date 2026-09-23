@@ -320,6 +320,11 @@ Qualquer status exceto CONCLUIDA/ARQUIVADA ──arquivar──▶ ARQUIVADA
 - **RN-AN-08** ✅ Ao concluir a análise, **cada recomendação** registrada vira automaticamente um
   **plano de ação pré-criado** (campo "O que será feito" já preenchido com o texto da
   recomendação e vínculo com a recomendação de origem).
+- **RN-AN-24** ✅ **Escolha do caminho da análise (incidente Classificado).** Abaixo de "Analisar
+  agora ou encaminhar ao setor?" (texto em preto) há uma caixa de informação (azul, ⓘ — no lugar
+  do antigo ícone de tooltip): ao **registrar a análise**, ela é feita pelo próprio núcleo (NSP);
+  ao **encaminhar**, o profissional do setor passa a ter acesso ao incidente e fica responsável
+  por registrar a análise — sem o encaminhamento, o setor não consegue registrá-la.
 - **RN-AN-09** ✅ **Análise feita pelo setor (via encaminhamento)**: ao concluir, o status vai
   direto para **Analisado**.
 - **RN-AN-10** ✅ **Análise feita pelo NSP (sem encaminhamento)**: ao concluir, o status continua

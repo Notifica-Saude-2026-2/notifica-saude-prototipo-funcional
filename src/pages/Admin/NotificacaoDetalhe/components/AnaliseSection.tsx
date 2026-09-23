@@ -2,7 +2,6 @@ import { useNavigate } from "react-router-dom";
 import { SectionInfoBox } from "../../../../components/analise/SectionInfoBox";
 import { useState } from "react";
 import { PaperAirplaneIcon } from "../../../../assets/icons/PaperAirplaneIcon";
-import { InfoTooltip } from "../../../../components/common/ui/InfoTooltip";
 import { useAuth } from "../../../../hooks/useAuth";
 import type { NotificacaoDetalheDTO } from "../../../../types/notificacaoDetalhe";
 import type { AnaliseRaw } from "../../../../types/analise";
@@ -127,16 +126,13 @@ export function AnaliseSection({
           {/* ── Classificado: bifurcação — analisar direto ou encaminhar pro setor ── */}
           {detalhe.statusRaw === "CLASSIFICADA" && podeEscolherCaminho && (
             <>
-              <div
-                className={styles.metaRow}
-                style={{ justifyContent: "flex-start", gap: 6, marginTop: 0, marginBottom: 2 }}
-              >
-                <span className={styles.metaText}>Analisar agora ou encaminhar ao setor?</span>
-                <InfoTooltip
-                  text="O profissional do setor só poderá registrar a análise deste incidente se ele for encaminhado. Sem o encaminhamento, a análise deve ser feita pelo próprio núcleo (NSP)."
-                  size={14}
-                />
-              </div>
+              <span className={styles.sectionValue}>Analisar agora ou encaminhar ao setor?</span>
+              <SectionInfoBox>
+                Ao <strong>registrar a análise</strong>, ela é feita pelo próprio núcleo (NSP). Ao{" "}
+                <strong>encaminhar</strong>, o profissional do setor passa a ter acesso ao incidente
+                e fica responsável por registrar a análise — sem o encaminhamento, o setor não
+                consegue registrá-la.
+              </SectionInfoBox>
               <div className={styles.buttonRow}>
                 <button
                   className={styles.primaryButton}
