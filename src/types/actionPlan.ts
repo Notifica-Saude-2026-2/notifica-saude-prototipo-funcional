@@ -68,7 +68,7 @@ export type ActionPlan = {
   evidenceLocation: string;
   attachments: ActionAttachment[];
   updatedAt: string;
-  /** Texto da recomendação (Análise ACR/Londres) que originou esta ação, quando aplicável. */
+  /** Texto da recomendação (análise do incidente) que originou esta ação, quando aplicável. */
   origemRecomendacao?: string;
 };
 

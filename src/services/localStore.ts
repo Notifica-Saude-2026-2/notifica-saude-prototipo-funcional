@@ -7,20 +7,15 @@ import type {
 import type { ClassificarPayload, UpdateNotificacaoPayload } from "./notificacaoDetalheService";
 import type { ActionPlan } from "../types/actionPlan";
 import { camposPendentesPlano, createEmptyActionPlan } from "../types/actionPlan";
-import type {
-  AnaliseFlowId,
-  AnaliseRaw,
-  AnaliseValues,
-  MetodologiaAbordagem,
-  RecomendacaoExtraida,
-} from "../types/analise";
-import { FLOW_TO_METODOLOGIA, METODOLOGIA_LABEL } from "../types/analise";
+import type { AnaliseRaw, AnaliseValues, RecomendacaoExtraida } from "../types/analise";
 
 const NOTIFICACOES_KEY = "notifica_saude_prototipo_notificacoes";
 const HISTORICO_KEY = "notifica_saude_prototipo_historico";
 const SEED_VERSION_KEY = "notifica_saude_prototipo_seed_versao";
 
-const SEED_VERSION = "3";
+// "4": removida a noção de metodologia da análise (campos metodologia_analise / metodologia /
+// flowAtivo) — o seed é recriado para não sobrar dado antigo com esses campos.
+const SEED_VERSION = "4";
 
 export const unidades = [
   { id: "unidade-hospital-regional", nome: "Hospital Regional de Mato Grosso do Sul" },
@@ -266,13 +261,10 @@ function seed(): NotificacaoRaw[] {
           observacoes: "Análise concluída e ações corretivas necessárias foram definidas.",
         },
       ),
-      metodologia_analise: "ACR" as MetodologiaAbordagem,
       analise_via_encaminhamento: true,
       analise: {
         id: "analise-4",
         notificacao_id: "notificacao-4",
-        metodologia: "ACR",
-        flowAtivo: "acr",
         concluida: true,
         valores: {},
         recomendacoes: [
@@ -336,13 +328,10 @@ function seed(): NotificacaoRaw[] {
           observacoes: "Núcleo optou por analisar diretamente, sem encaminhar ao setor.",
         },
       ),
-      metodologia_analise: "ACR" as MetodologiaAbordagem,
       analise_via_encaminhamento: false,
       analise: {
         id: "analise-5",
         notificacao_id: "notificacao-5",
-        metodologia: "ACR",
-        flowAtivo: "acr",
         concluida: true,
         valores: {},
         recomendacoes: [
@@ -583,15 +572,8 @@ export function encaminharLocal(id: string, setorDestinoId?: string) {
   return clone(items[index]);
 }
 
-export function salvarAnaliseRascunhoLocal(
-  id: string,
-  flowAtivo: AnaliseFlowId,
-  valores: AnaliseValues,
-): AnaliseRaw {
+export function salvarAnaliseRascunhoLocal(id: string, valores: AnaliseValues): AnaliseRaw {
   const { items, index, item } = requireNotificacao(id);
-  // Não existe mais uma etapa dedicada de "escolher metodologia" antes de iniciar a análise — ela
-  // fica implícita no fluxo que o usuário está de fato seguindo (ver FLOW_TO_METODOLOGIA).
-  const metodologia = item.metodologia_analise ?? FLOW_TO_METODOLOGIA[flowAtivo];
 
   const viaEncaminhamento = item.status === "ENCAMINHADA_SETOR";
   const analiseViaEncaminhamento = item.analise
@@ -605,8 +587,6 @@ export function salvarAnaliseRascunhoLocal(
   const analise: AnaliseRaw = {
     id: item.analise?.id ?? newLocalId(),
     notificacao_id: id,
-    metodologia,
-    flowAtivo,
     concluida: false,
     valores,
     recomendacoes: item.analise?.recomendacoes ?? [],
@@ -619,7 +599,6 @@ export function salvarAnaliseRascunhoLocal(
     analise,
     status: novoStatus,
     analise_via_encaminhamento: analiseViaEncaminhamento,
-    metodologia_analise: metodologia,
     updated_at: now(),
   };
   saveNotificacoes(items);
@@ -643,20 +622,13 @@ function extrairPlanosDeAcaoPreenchidos(recomendacoes: RecomendacaoExtraida[]): 
 
 export function concluirAnaliseLocal(
   id: string,
-  flowAtivo: AnaliseFlowId,
   valores: AnaliseValues,
   recomendacoes: RecomendacaoExtraida[],
 ): { notificacao: NotificacaoRaw; analise: AnaliseRaw } {
   const { items, index, item } = requireNotificacao(id);
-  // Idem salvarAnaliseRascunhoLocal: sem etapa dedicada de escolha, a metodologia é implícita no
-  // fluxo seguido (normalmente já persistida desde o primeiro rascunho, mas o default cobre o
-  // caso de concluir num único passo, sem rascunho intermediário).
-  const metodologia = item.metodologia_analise ?? FLOW_TO_METODOLOGIA[flowAtivo];
   const analise: AnaliseRaw = {
     id: item.analise?.id ?? newLocalId(),
     notificacao_id: id,
-    metodologia,
-    flowAtivo,
     concluida: true,
     valores,
     recomendacoes,
@@ -673,15 +645,14 @@ export function concluirAnaliseLocal(
     analise,
     status,
     planos_acao: planosAcao,
-    metodologia_analise: metodologia,
     updated_at: now(),
   };
   saveNotificacoes(items);
-  addHistorico(id, `análise concluída (${METODOLOGIA_LABEL[metodologia]})`);
+  addHistorico(id, "análise concluída");
   if (planosPreCriados.length > 0) {
     addHistorico(
       id,
-      `${planosPreCriados.length} ${planosPreCriados.length === 1 ? "plano de ação pré-criado" : "planos de ação pré-criados"} a partir do plano de ação preenchido na análise`,
+      `${planosPreCriados.length} ${planosPreCriados.length === 1 ? "ação criada" : "ações criadas"} no plano de ação a partir das recomendações da análise`,
     );
   }
   return { notificacao: clone(items[index]), analise: clone(analise) };

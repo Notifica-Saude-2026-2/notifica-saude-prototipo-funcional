@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import type { NotificacaoDetalheDTO } from "../../../../types/notificacaoDetalhe";
-import { ANALISE_FLOW_LABEL } from "../../../../types/analise";
 import styles from "../NotificacaoDetalhe.module.css";
 
 type HistoricoItem = {
@@ -40,18 +39,14 @@ export function HistoricoSection({ detalhe, historico, isOpen, onToggle }: Props
     setPage(1);
   }, [historico.data]);
 
-  /** Troca o id técnico do fluxo (ex.: "londres_completo") pelo nome de verdade (ex.: "Protocolo
-      de Londres — Investigação completa") — aplicado na exibição, então corrige também entradas
-      de histórico já salvas antes desse mapeamento existir, sem precisar migrar dado nenhum. */
-  const traduzirIdsTecnicos = (texto: string) =>
-    Object.entries(ANALISE_FLOW_LABEL).reduce(
-      (acc, [flowId, label]) => acc.replace(new RegExp(`\\b${flowId}\\b`, "g"), label),
-      texto,
-    );
+  /** Históricos antigos gravavam a metodologia junto da conclusão da análise (ex.: "análise
+      concluída (Registro de ACR — Análise de Causa Raiz)"). Não existe mais metodologia, então
+      esse complemento é removido na exibição. */
+  const semMetodologia = (texto: string) => texto.replace(/(análise concluída)\s*\([^)]*\)/i, "$1");
 
   /** Deixa a 1ª letra maiúscula e garante o ponto final — sem mexer no resto do texto. */
   const formatAcao = (texto: string) => {
-    const semPrefixo = traduzirIdsTecnicos(texto.replace("resposta_campo:", ""));
+    const semPrefixo = semMetodologia(texto.replace("resposta_campo:", ""));
     const comMaiuscula = semPrefixo.charAt(0).toUpperCase() + semPrefixo.slice(1);
     return comMaiuscula.endsWith(".") ? comMaiuscula : `${comMaiuscula}.`;
   };

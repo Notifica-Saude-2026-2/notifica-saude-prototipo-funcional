@@ -9,7 +9,7 @@ type Props = {
   values: AnaliseValues;
 };
 
-/** Um "osso" já consolidado: uma categoria do Protocolo de Londres (ou uma categoria "outro"
+/** Um "osso" já consolidado: uma das 8 categorias fixas de fatores contribuintes (ou uma categoria "outro"
     digitada à mão), com os achados de TODOS os itens selecionados que marcaram essa categoria
     já juntados numa lista só de marcadores. */
 type Bone = {
@@ -29,7 +29,7 @@ type BoneEntry = {
 
 /** Diagrama de Ishikawa (espinha de peixe) — UM diagrama só pro resultado final da investigação,
     juntando todos os itens selecionados na Seção 4 (eventos da cronologia + PPCs). Cada osso é uma
-    categoria do Protocolo de Londres; quando mais de um item contribuiu pra mesma categoria, os
+    categoria de fator contribuinte; quando mais de um item contribuiu pra mesma categoria, os
     achados de cada um entram como marcadores separados na mesma caixinha (prefixados com o nome do
     item quando há mais de um selecionado, pra manter a rastreabilidade). */
 export function IshikawaDiagram({ field, values }: Props) {
@@ -51,7 +51,7 @@ export function IshikawaDiagram({ field, values }: Props) {
   const selectedCards = cards.filter((card) => selection[card.key]);
   const multiplosItens = selectedCards.length > 1;
 
-  // Mapa ordenado: primeiro as 8 categorias fixas do Protocolo de Londres (nessa ordem, mesmo que
+  // Mapa ordenado: primeiro as 8 categorias fixas de fatores contribuintes (nessa ordem, mesmo que
   // fiquem vazias e sejam descartadas no fim), depois qualquer categoria "outro" digitada à mão,
   // na ordem em que aparecer entre os itens selecionados.
   const bones = new Map<string, Bone>();

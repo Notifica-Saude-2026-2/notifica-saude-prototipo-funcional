@@ -16,12 +16,7 @@ import {
   salvarAnaliseRascunhoLocal,
   setores,
 } from "./localStore";
-import type {
-  AnaliseFlowId,
-  AnaliseRaw,
-  AnaliseValues,
-  RecomendacaoExtraida,
-} from "../types/analise";
+import type { AnaliseRaw, AnaliseValues, RecomendacaoExtraida } from "../types/analise";
 import type { ActionPlan } from "../types/actionPlan";
 import {
   CAMPO_IDS,
@@ -256,7 +251,6 @@ export function mapToNotificacaoDetalhe(raw: NotificacaoRaw): NotificacaoDetalhe
       contato: getRespostaValor(respostas, CAMPO_IDS.CONTATO_OPC),
     },
     classificacao,
-    metodologiaAnalise: raw.metodologia_analise ?? null,
     analise: raw.analise ?? null,
     aguardandoDecisaoEncaminhamento:
       raw.status === "EM_ANALISE" &&
@@ -413,19 +407,17 @@ export async function atualizarClassificacao(
 
 export async function salvarAnaliseRascunho(
   id: string,
-  flowAtivo: AnaliseFlowId,
   valores: AnaliseValues,
 ): Promise<AnaliseRaw> {
-  return salvarAnaliseRascunhoLocal(id, flowAtivo, valores);
+  return salvarAnaliseRascunhoLocal(id, valores);
 }
 
 export async function concluirAnalise(
   id: string,
-  flowAtivo: AnaliseFlowId,
   valores: AnaliseValues,
   recomendacoes: RecomendacaoExtraida[],
 ): Promise<{ notificacao: NotificacaoRaw; analise: AnaliseRaw }> {
-  return concluirAnaliseLocal(id, flowAtivo, valores, recomendacoes);
+  return concluirAnaliseLocal(id, valores, recomendacoes);
 }
 
 export async function decidirEncaminhamentoPosAnalise(

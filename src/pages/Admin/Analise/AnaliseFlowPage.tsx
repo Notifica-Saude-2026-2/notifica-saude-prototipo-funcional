@@ -14,7 +14,7 @@ import type { TableRow } from "../../../components/analise/TableField";
 import styles from "../../../components/analise/Analise.module.css";
 import { BackButton } from "../../../components/common/ui/BackButton";
 import { Toast } from "../../../components/common/ui/Toast";
-import { ANALISE_FLOWS } from "../../../constants/analiseSchema";
+import { ANALISE_FORM } from "../../../constants/analiseSchema";
 import { getGrauDanoColorByLabel } from "../../../utils/statusColors";
 import {
   getNotificacaoById,
@@ -23,33 +23,8 @@ import {
   concluirAnalise,
 } from "../../../services/notificacaoDetalheService";
 import type { NotificacaoDetalheDTO } from "../../../types/notificacaoDetalhe";
-import type { AnaliseFlowId, AnaliseValues, RecomendacaoExtraida } from "../../../types/analise";
-import { ANALISE_FLOW_LABEL, METODOLOGIA_TO_FLOW, normalizeOption } from "../../../types/analise";
-
-function escalateToLondresCompleto(values: AnaliseValues): AnaliseValues {
-  const next: AnaliseValues = { ...values };
-  const linha = (values["linha_do_tempo"] as TableRow[] | undefined) ?? [];
-  next["cronologia_ampliada"] = linha.map((r) => ({
-    data: r.data ?? "",
-    hora: r.horario ?? "",
-    fato: r.fato ?? "",
-    fonte: r.fonte ?? "",
-    status: "Confirmado",
-  }));
-  const problemas = (values["problemas_cuidado"] as TableRow[] | undefined) ?? [];
-  const ppc: TableRow[] = problemas.map((r, i) => ({
-    numero: String(i + 1),
-    esperado: r.esperado ?? "",
-    ocorrido: r.ocorrido ?? "",
-    fonte: "",
-  }));
-  next["ppc"] = ppc;
-  const checklist = values["fatores_contribuintes"];
-  if (checklist && ppc.length > 0) {
-    next["secao7"] = [{ ppc_referencia: ppc[0].numero, fatores_contribuintes: checklist }];
-  }
-  return next;
-}
+import type { AnaliseValues, RecomendacaoExtraida } from "../../../types/analise";
+import { normalizeOption } from "../../../types/analise";
 
 function extrairRecomendacoes(values: AnaliseValues): RecomendacaoExtraida[] {
   const rows = (values["recomendacoes"] as TableRow[] | undefined) ?? [];
@@ -178,7 +153,6 @@ export default function AnaliseFlowPage() {
 
   const [detalhe, setDetalhe] = useState<NotificacaoDetalheDTO | null>(null);
   const [loading, setLoading] = useState(true);
-  const [flowId, setFlowId] = useState<AnaliseFlowId | null>(null);
   const [sectionIndex, setSectionIndex] = useState(0);
   const [values, setValues] = useState<AnaliseValues>({});
   const [savedHint, setSavedHint] = useState(false);
@@ -198,20 +172,14 @@ export default function AnaliseFlowPage() {
     getNotificacaoById(id).then((raw) => {
       const dto = mapToNotificacaoDetalhe(raw);
       setDetalhe(dto);
-      // Não existe mais uma etapa dedicada de "escolher metodologia" antes de iniciar a análise —
-      // o usuário começa direto pelo fluxo ACR (o mais comum) e o sistema vai adaptando as seções
-      // conforme as respostas (ver decisionLogic dos fluxos em analiseSchema.ts).
-      const initialFlow: AnaliseFlowId =
-        raw.analise?.flowAtivo ??
-        (dto.metodologiaAnalise ? METODOLOGIA_TO_FLOW[dto.metodologiaAnalise] : "acr");
-      setFlowId(initialFlow);
       setValues(raw.analise?.valores ?? {});
       setLoading(false);
     });
   }, [id]);
 
-  const flow = flowId ? ANALISE_FLOWS[flowId] : null;
-  const section = flow?.sections[sectionIndex];
+  // A análise é um formulário único (sem escolha de metodologia) — ver ANALISE_FORM.
+  const flow = ANALISE_FORM;
+  const section = flow.sections[sectionIndex];
 
   const incidenteInvestigado = values["incidente_investigado"] as string | undefined;
 
@@ -235,7 +203,7 @@ export default function AnaliseFlowPage() {
 
   // Pendências da seção atual (campos obrigatórios vazios, limites de caracteres...) — recalculadas
   // a cada alteração, então somem da tela assim que a pessoa corrige.
-  const pendencias = section ? validarSecao(section, values, flow?.sections) : [];
+  const pendencias = section ? validarSecao(section, values, flow.sections) : [];
   const pendenciasPorCampo = pendenciasDoClique
     ? pendencias.reduce<Record<string, { message: string; cells?: string[] }[]>>((acc, p) => {
         if (!pendenciasDoClique.campos.has(p.fieldId)) return acc;
@@ -343,8 +311,8 @@ export default function AnaliseFlowPage() {
       const limite = (p: { message: string }) => p.message.includes("máximo de");
       const qtd = (ps: { cells?: string[] }[]) =>
         ps.reduce((n, p) => n + (p.cells?.length ?? 1), 0);
-      const antesR = qtd(validarSecao(section, values, flow?.sections).filter(limite));
-      const depoisR = validarSecao(section, { ...values, [fieldId]: value }, flow?.sections).filter(
+      const antesR = qtd(validarSecao(section, values, flow.sections).filter(limite));
+      const depoisR = validarSecao(section, { ...values, [fieldId]: value }, flow.sections).filter(
         limite,
       );
       if (qtd(depoisR) > antesR) {
@@ -356,9 +324,9 @@ export default function AnaliseFlowPage() {
   }
 
   async function saveDraft(nextValues: AnaliseValues) {
-    if (!id || !flowId) return;
+    if (!id) return;
     try {
-      await salvarAnaliseRascunho(id, flowId, nextValues);
+      await salvarAnaliseRascunho(id, nextValues);
       setSavedHint(true);
       setTimeout(() => setSavedHint(false), 2000);
     } catch {
@@ -367,15 +335,15 @@ export default function AnaliseFlowPage() {
   }
 
   async function handleFinish(nextValues: AnaliseValues) {
-    if (!id || !flowId) return;
+    if (!id) return;
     setFinishing(true);
     const recomendacoes = extrairRecomendacoes(nextValues);
-    await concluirAnalise(id, flowId, nextValues, recomendacoes);
+    await concluirAnalise(id, nextValues, recomendacoes);
     navigate(`/incident/${id}`, { state: { analiseRecomendacoes: recomendacoes } });
   }
 
   async function handleNext() {
-    if (!flow || !section) return;
+    if (!section) return;
 
     // Pendências: não avança, destaca os campos com problema, avisa e rola até o primeiro.
     if (pendencias.length > 0) {
@@ -398,39 +366,6 @@ export default function AnaliseFlowPage() {
       return;
     }
     setPendenciasDoClique(null);
-
-    // Seção de decisão com lógica de escalonamento (Londres Rápido → Completo)
-    if (section.kind === "decision" && section.decisionLogic) {
-      const rule = section.decisionLogic.find((r) => evalCondition(values, r.if));
-      const goto = rule?.next.goto;
-      if (goto && goto.includes(".")) {
-        const [targetFlowId, targetSectionId] = goto.split(".") as [AnaliseFlowId, string];
-        const escalatedValues =
-          targetFlowId === "londres_completo" ? escalateToLondresCompleto(values) : values;
-        const targetIndex = ANALISE_FLOWS[targetFlowId].sections.findIndex(
-          (s) => s.id === targetSectionId,
-        );
-        setValues(escalatedValues);
-        setFlowId(targetFlowId);
-        setSectionIndex(targetIndex >= 0 ? targetIndex : 0);
-        await saveDraft(escalatedValues);
-        return;
-      }
-      // "Checagem de suficiência" concluindo que a análise já está completa (Londres Rápido) —
-      // não há mais uma seção de Plano de Ação própria pra ir em seguida, então encerra aqui.
-      if (goto === "fim") {
-        await handleFinish(values);
-        return;
-      }
-      if (goto) {
-        const targetIndex = flow.sections.findIndex((s) => s.id === goto);
-        if (targetIndex >= 0) {
-          setSectionIndex(targetIndex);
-          await saveDraft(values);
-          return;
-        }
-      }
-    }
 
     if (section.onSubmit) {
       await handleFinish(values);
@@ -467,7 +402,7 @@ export default function AnaliseFlowPage() {
     );
   }
 
-  if (!detalhe || !flow || !section) {
+  if (!detalhe || !section) {
     return (
       <AdminLayout>
         <div className={styles.flowPage}>
@@ -487,7 +422,7 @@ export default function AnaliseFlowPage() {
           <BackButton data-testid="btn-voltar-analise" onClick={() => navigate(`/incident/${id}`)}>
             Voltar para a notificação
           </BackButton>
-          <h1 style={{ fontSize: 20 }}>{ANALISE_FLOW_LABEL[flowId as AnaliseFlowId]}</h1>
+          <h1 style={{ fontSize: 20 }}>Análise do incidente</h1>
         </div>
 
         {flow.globalNote && <div className={styles.flowNote}>{flow.globalNote}</div>}

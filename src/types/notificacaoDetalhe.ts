@@ -1,4 +1,4 @@
-import type { AnaliseRaw, MetodologiaAbordagem } from "./analise";
+import type { AnaliseRaw } from "./analise";
 import type { ActionPlan } from "./actionPlan";
 
 // --------------------------------------------------------------------------
@@ -57,7 +57,6 @@ export type NotificacaoRaw = {
   setor: { nome: string } | null;
   classificacao: ClassificacaoRaw | null;
   respostas: RespostaItemRaw[];
-  metodologia_analise?: MetodologiaAbordagem | null;
   analise?: AnaliseRaw | null;
   /** true = análise feita direto pelo núcleo (sem encaminhamento prévio); false = veio de um encaminhamento. */
   analise_via_encaminhamento?: boolean | null;
@@ -114,7 +113,6 @@ export type NotificacaoDetalheDTO = {
     contato: string | null;
   };
   classificacao: ClassificacaoDTO | null;
-  metodologiaAnalise: MetodologiaAbordagem | null;
   analise: AnaliseRaw | null;
   /** true quando o núcleo concluiu a análise sozinho e ainda precisa decidir se encaminha ou justifica. */
   aguardandoDecisaoEncaminhamento: boolean;

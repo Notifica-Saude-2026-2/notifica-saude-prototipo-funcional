@@ -71,7 +71,7 @@ export default function NotificacaoDetalhe() {
   // Incidente concluído é somente leitura: nada pode mais ser editado, adicionado ou excluído.
   const incidenteConcluido = detalhe?.statusRaw === "CONCLUIDA";
 
-  // Próxima recomendação da Análise (ACR/Londres) ainda sem um plano de ação vinculado —
+  // Próxima recomendação da análise ainda sem um plano de ação vinculado —
   // usada para pré-preencher o modal de novo plano de ação.
   const recomendacoesPendentes = (detalhe?.analise?.recomendacoes ?? []).filter(
     (r) => !actionPlans.some((p) => p.origemRecomendacao === r.texto),

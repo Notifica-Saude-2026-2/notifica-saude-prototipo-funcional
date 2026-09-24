@@ -30,7 +30,7 @@ export type {
 type Props = {
   onClose: () => void;
   onSave: (plan: ActionPlan) => void;
-  /** Pré-preenche "O que será feito" (ex.: recomendação vinda da Análise ACR/Londres). */
+  /** Pré-preenche "O que será feito" (ex.: recomendação vinda da análise do incidente). */
   initialWhat?: string;
   /** Marca a ação como originada de uma recomendação da Análise, para não sugeri-la de novo. */
   origemRecomendacao?: string;

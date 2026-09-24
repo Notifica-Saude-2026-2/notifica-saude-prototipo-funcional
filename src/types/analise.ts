@@ -1,7 +1,7 @@
 // --------------------------------------------------------------------------
-// Tipos estruturais da jornada de Análise de Incidente (ACR / Protocolo de
-// Londres). Modelam o schema (declarativo, orientado a dados) usado pelo
-// motor genérico de renderização em src/components/analise.
+// Tipos estruturais do formulário de Análise de Incidente. Modelam o schema
+// (declarativo, orientado a dados) usado pelo motor genérico de renderização
+// em src/components/analise.
 // --------------------------------------------------------------------------
 
 import type { TooltipLegendItem } from "../components/common/ui/InfoTooltip";
@@ -239,42 +239,13 @@ export type AnaliseSectionSchema = {
   repeatablePerSelectedItemOf?: string;
 };
 
-export type AnaliseFlowId = "acr" | "londres_rapido" | "londres_completo";
-
-export type AnaliseFlowSchema = {
-  flowId: AnaliseFlowId;
-  flowName: string;
+/** O formulário de análise — um só, com todas as seções. Não existe escolha de metodologia: o
+    próprio formulário decide quais seções/campos aparecem conforme as respostas (campos que não se
+    aplicam simplesmente ficam sem valor). */
+export type AnaliseFormSchema = {
+  /** Aviso fixo exibido no topo do formulário (ex.: princípio de cultura justa). */
   globalNote?: string;
   sections: AnaliseSectionSchema[];
-};
-
-export type MetodologiaAbordagem = "ACR" | "LONDRES_RAPIDO" | "LONDRES_COMPLETO";
-
-export const METODOLOGIA_LABEL: Record<MetodologiaAbordagem, string> = {
-  ACR: "Registro de ACR — Análise de Causa Raiz",
-  LONDRES_RAPIDO: "Protocolo de Londres — Investigação rápida",
-  LONDRES_COMPLETO: "Protocolo de Londres — Investigação completa",
-};
-
-export const ANALISE_FLOW_LABEL: Record<AnaliseFlowId, string> = {
-  acr: "Registro de ACR — Análise de Causa Raiz",
-  londres_rapido: "Protocolo de Londres — Investigação rápida",
-  londres_completo: "Protocolo de Londres — Investigação completa",
-};
-
-export const METODOLOGIA_TO_FLOW: Record<MetodologiaAbordagem, AnaliseFlowId> = {
-  ACR: "acr",
-  LONDRES_RAPIDO: "londres_rapido",
-  LONDRES_COMPLETO: "londres_completo",
-};
-
-/** Sentido inverso de METODOLOGIA_TO_FLOW — usado para preencher a metodologia automaticamente a
-    partir do fluxo ativo, já que não existe mais uma etapa dedicada de "escolher metodologia"
-    antes de iniciar a análise (ela fica implícita no fluxo que o usuário está de fato seguindo). */
-export const FLOW_TO_METODOLOGIA: Record<AnaliseFlowId, MetodologiaAbordagem> = {
-  acr: "ACR",
-  londres_rapido: "LONDRES_RAPIDO",
-  londres_completo: "LONDRES_COMPLETO",
 };
 
 // --------------------------------------------------------------------------
@@ -289,9 +260,6 @@ export type RecomendacaoExtraida = {
 export type AnaliseRaw = {
   id: string;
   notificacao_id: string;
-  metodologia: MetodologiaAbordagem;
-  /** Id do fluxo de schema ativo no momento (pode mudar se Londres Rápido escalar para Completo). */
-  flowAtivo: AnaliseFlowId;
   concluida: boolean;
   valores: AnaliseValues;
   recomendacoes: RecomendacaoExtraida[];

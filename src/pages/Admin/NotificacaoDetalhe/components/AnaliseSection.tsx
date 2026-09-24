@@ -5,7 +5,7 @@ import { PaperAirplaneIcon } from "../../../../assets/icons/PaperAirplaneIcon";
 import { useAuth } from "../../../../hooks/useAuth";
 import type { NotificacaoDetalheDTO } from "../../../../types/notificacaoDetalhe";
 import type { AnaliseRaw } from "../../../../types/analise";
-import { ANALISE_FLOWS } from "../../../../constants/analiseSchema";
+import { ANALISE_FORM } from "../../../../constants/analiseSchema";
 import { AnaliseSectionForm } from "../../../../components/analise/AnaliseSectionForm";
 import styles from "../NotificacaoDetalhe.module.css";
 import analiseStyles from "../../../../components/analise/Analise.module.css";
@@ -19,10 +19,8 @@ function noop() {}
  * no preenchimento (AnaliseSectionForm), então o layout dos campos é idêntico.
  */
 function AnaliseResumoInline({ analise }: { analise: AnaliseRaw }) {
-  const flow = ANALISE_FLOWS[analise.flowAtivo];
-  const [openSectionId, setOpenSectionId] = useState<string | null>(flow?.sections[0]?.id ?? null);
-
-  if (!flow) return null;
+  const flow = ANALISE_FORM;
+  const [openSectionId, setOpenSectionId] = useState<string | null>(flow.sections[0]?.id ?? null);
 
   return (
     <div style={{ marginTop: 8 }}>
@@ -92,7 +90,7 @@ export function AnaliseSection({
 
   const podeGerenciar = usuario?.perfil === "NSP" || usuario?.perfil === "ADMINISTRADOR";
 
-  // Logo após a Classificação (com metodologia já escolhida), o núcleo decide entre analisar
+  // Logo após a Classificação, o núcleo decide entre analisar
   // diretamente ou encaminhar o caso para o setor analisar primeiro.
   const podeEscolherCaminho = podeGerenciar && detalhe.statusRaw === "CLASSIFICADA";
   // Setor (ou núcleo) registrando a análise depois de um encaminhamento prévio.

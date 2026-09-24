@@ -21,7 +21,7 @@
 | RN-PA-12          | Confirmação de ação irreversível antes de concluir o incidente pelo modal                                                                                                                       |
 | RN-GER-06         | Conclusão manual pelo menu (⋮) continua existindo                                                                                                                                               |
 | RN-CL-10          | Prazo de validade da análise calculado pelo grau do dano (CA05)                                                                                                                                 |
-| RN-AN-05          | Não existe escolha de metodologia — remover toda menção a essa abstração                                                                                                                        |
+| RN-AN-05          | Não existe escolha de metodologia — análise é um formulário único, sem rótulos de metodologia — ✅ já implementada                                                                              |
 | RN-AN-12          | "Informe o incidente em investigação" com no máximo 100 caracteres (toast + bloqueio) — ✅ já implementada                                                                                      |
 | RN-AN-13/14/15/16 | Condutor 100% obrigatório e membros opcionais porém completos; "Outro" com texto livre nos menus da equipe; orientações em caixa visível; placeholders em todos os campos — ✅ já implementadas |
 | RNF-UI-01 a 04    | Sistema sempre informa o status das ações ("Salvando...", confirmação, erro, atenção) com toasts padronizados — toasts ✅ prontos; aplicar em todas as telas 🆕                                 |
@@ -144,17 +144,18 @@ Qualquer status exceto CONCLUIDA/ARQUIVADA ──arquivar──▶ ARQUIVADA
 - **RN-AN-04** ✅ Ao salvar o primeiro rascunho da análise, o status vai de Classificado/Encaminhado
   para **Em análise**. O rascunho é salvo automaticamente a cada avanço de seção e pode ser
   retomado ("Continuar análise").
-- **RN-AN-05** 🆕 **Não existe escolha de metodologia.** O usuário não escolhe entre
-  metodologias — ele apenas **registra a análise**, e o **sistema vai decidindo o caminho**
-  (quais seções aparecem) conforme as respostas.
-  - O **fluxo atual da análise está correto e não muda**.
-  - O que muda é a forma de tratar: a análise **não é mais apresentada nem documentada** como
-    "ACR", "Protocolo de Londres rápido/completo" ou qualquer outra metodologia — o sistema já
-    desmembrou essa abstração nas próprias seções. Nos requisitos, descrever a análise pelas suas
+- **RN-AN-05** ✅ **Não existe escolha de metodologia.** A análise é **um único formulário**, com
+  todas as seções e campos; o usuário apenas **registra a análise** (campos não aplicáveis podem
+  ficar sem valor, conforme as regras de cada seção).
+  - A análise **não é apresentada, registrada nem documentada** como "ACR", "Protocolo de Londres
+    rápido/completo" ou qualquer outra metodologia. Nos requisitos, descrever a análise pelas suas
     seções e regras, sem esses rótulos.
-  - Remover da tela e dos dados as menções a "metodologia" como algo escolhido/registrado
-    (ex.: título "Registro de ACR — Análise de Causa Raiz" no topo do formulário, texto
-    "análise concluída (Registro de ACR…)" no histórico, campo `metodologia_analise`).
+  - Implementado: título do formulário "Análise do incidente"; histórico registra apenas "análise
+    concluída" (registros antigos com o nome da metodologia entre parênteses são exibidos sem ele);
+    removidos o campo `metodologia_analise`, os tipos/rótulos de metodologia e os fluxos
+    alternativos "Londres rápido/completo" (incluindo a opção de escalar de um para o outro).
+  - Os dados de exemplo locais do protótipo foram recriados (versão 4) sem nenhum campo de
+    metodologia.
 - **RN-AN-06** ✅ **Seções do formulário de análise** (caminho atual):
   1. **Informações da notificação** — resumo somente leitura da notificação e da classificação +
      "Informe o incidente em investigação" (**obrigatório**, **máx. 100 caracteres** — ver
