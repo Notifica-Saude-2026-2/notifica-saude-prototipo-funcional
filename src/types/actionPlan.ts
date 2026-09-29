@@ -32,6 +32,8 @@ export const PLANO_LIMITES = {
   ondeOutro: 50,
   /** Nome do responsável (igual ao condutor da análise). */
   nomeResponsavel: 50,
+  /** Campos de texto do "Atualizar andamento da ação" (resultado observado, motivos...). */
+  andamento: 200,
 } as const;
 
 export type ActionPlan = {
@@ -123,6 +125,18 @@ export function datasPlanoInvalidas(plan: ActionPlan): boolean {
   return !!plan.startDate && !!plan.conclusionDate && plan.startDate > plan.conclusionDate;
 }
 
+/** Separador dos locais em "Onde será feito?" (vários setores + "Outro"), guardados num texto só. */
+export const ONDE_SEPARADOR = "; ";
+
+/** Divide o "Onde será feito" salvo em setores da lista e o texto livre de "Outro". */
+export function separarOnde(where: string, setores: string[]) {
+  const partes = where ? where.split(ONDE_SEPARADOR) : [];
+  return {
+    setores: partes.filter((p) => setores.includes(p)),
+    outro: partes.filter((p) => !setores.includes(p)).join(ONDE_SEPARADOR),
+  };
+}
+
 /** Textos acima do limite de caracteres (rótulo + limite + tamanho atual). `opcoes` = valores
     fixos dos menus com "Outro" (o que não estiver na lista é texto de "Outro"). */
 export function limitesExcedidosPlano(
@@ -136,7 +150,8 @@ export function limitesExcedidosPlano(
     if (n > max) msgs.push(`${rotulo} (máx. ${max}, atual ${n})`);
   };
   checar("O que será feito", plan.what, L.textoLongo);
-  checar("Onde será feito", plan.where, L.ondeOutro);
+  // "Onde será feito" pode ter vários setores; o limite vale só para o texto de "Outro".
+  checar("Onde será feito (Outro)", separarOnde(plan.where, opcoes.setor).outro, L.ondeOutro);
   (plan.responsaveis ?? []).forEach((r, i) => {
     checar(`Responsável ${i + 1} — Nome`, r.nome, L.nomeResponsavel);
     if (r.funcao && !opcoes.funcao.includes(r.funcao))

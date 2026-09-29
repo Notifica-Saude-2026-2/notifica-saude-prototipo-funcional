@@ -66,13 +66,18 @@
 
 .sectionInfoText {
   margin: 0;
-  font-size: 13px;
-  line-height: 1.45;
+  font-size: 12.5px;
+  line-height: 1.6;
   color: #26315f;
 }
 
 .sectionInfoParagraph {
   margin: 0;
+}
+
+/* Descrição com mais de um parágrafo (uma linha por ideia). */
+.sectionInfoParagraph + .sectionInfoParagraph {
+  margin-top: 4px;
 }
 
 /* Lista de exemplos dentro da caixa de informação (ex.: exemplos de PPC na Seção 3) — em duas
@@ -212,6 +217,13 @@
 .tableFixed td,
 .tableFixed th {
   overflow-wrap: break-word;
+}
+
+/* Com largura fixa, cabeçalho longo quebra linha em vez de invadir a coluna ao lado. (Seletor
+   mais específico que ".table th", que define nowrap.) */
+.table.tableFixed th {
+  white-space: normal;
+  vertical-align: bottom;
 }
 
 .table th {
@@ -490,7 +502,9 @@ textarea.cellInput {
   border-radius: 8px;
   padding: 10px 12px;
   background: #fff;
-  transition: border-color 0.15s, background 0.15s;
+  transition:
+    border-color 0.15s,
+    background 0.15s;
 }
 
 /* Sinaliza que o card inteiro é clicável antes da seleção (afordância visual — hoje só existia
@@ -749,6 +763,18 @@ textarea.cellInput {
   background: #fbfbfd;
 }
 
+/* Ações do diagrama (Exportar) no canto superior direito. */
+.ishikawaToolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 8px;
+}
+
+/* Texto azul no botão contornado (o padrão do Button é preto); no hover volta ao branco. */
+button.ishikawaExportBtn:not(:hover) {
+  color: var(--color-primary);
+}
+
 .ishikawaEmpty {
   font-size: 13px;
   color: var(--text);
@@ -781,10 +807,14 @@ textarea.cellInput {
   min-width: max-content;
 }
 
-/* Texto da categoria (sem caixa). Acima do eixo fica colado embaixo (perto do osso). */
+/* Categoria em cartão claro. Acima do eixo fica colado embaixo (perto do osso). */
 .ishikawaBoneText {
-  padding: 4px 14px 4px 18px;
+  margin: 0 6px;
+  padding: 10px 12px;
   box-sizing: border-box;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
 }
 
 .ishikawaBoneTextTop {
@@ -793,16 +823,33 @@ textarea.cellInput {
 
 .ishikawaBoneLabel {
   font-weight: 700;
-  font-size: 12px;
+  font-size: 13px;
   color: var(--fish);
-  margin-bottom: 3px;
+  margin-bottom: 6px;
+}
+
+.ishikawaGrupo + .ishikawaGrupo {
+  margin-top: 8px;
+}
+
+/* Etiqueta do PPC ao qual os fatores abaixo se relacionam — laranja do "incidente em
+   investigação" (flowResumoFixed), em tom suave. */
+.ishikawaPpc {
+  background: #fff3e6;
+  color: #a85f08;
+  border-radius: 6px;
+  padding: 4px 8px;
+  margin-bottom: 4px;
+  font-size: 11.5px;
+  font-weight: 600;
+  line-height: 1.4;
 }
 
 .ishikawaBoneList {
   margin: 0;
-  padding-left: 13px;
-  font-size: 11px;
-  line-height: 1.4;
+  padding-left: 14px;
+  font-size: 11.5px;
+  line-height: 1.45;
   color: var(--text-h);
 }
 
@@ -814,14 +861,18 @@ textarea.cellInput {
   color: var(--fish);
 }
 
-/* 5 Porquês da categoria: abaixo do achado, fonte menor e mais suave. */
+/* Respostas do 5 Porquês: abaixo do fator, com travessão, fonte menor e mais suave. */
 .ishikawaBonePorques {
   margin: 2px 0 3px;
-  padding-left: 11px;
-  font-size: 9.5px;
-  line-height: 1.4;
-  color: #6b7280;
-  list-style-type: circle;
+  padding-left: 12px;
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--text);
+  list-style: none;
+}
+
+.ishikawaBonePorques li::before {
+  content: "— ";
 }
 
 .ishikawaBonePorques li {
@@ -962,6 +1013,16 @@ textarea.cellInput {
 
 .resumoValue {
   font-size: 13px;
+  color: #2e2a36;
+}
+
+/* Linhas do topo do resumo (unidade/setor e incidente em investigação) — resposta mais escura,
+   rótulo em negrito mantém a cor padrão. */
+.resumoCabecalho {
+  color: #2e2a36;
+}
+
+.resumoCabecalho strong {
   color: var(--text);
 }
 
@@ -971,3 +1032,974 @@ textarea.cellInput {
   margin: 12px 0;
 }
 
+/* ------------------------- Guia de investigação ------------------------- */
+/* Tela de apresentação antes da Seção 1 (ver GuiaInvestigacao.tsx). Mesmo cartão do StepForm. */
+
+.guia {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 16px rgba(20, 30, 70, 0.08);
+  padding: 28px 32px 24px;
+}
+
+.guiaTitulo {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-h);
+  margin: 0 0 8px;
+}
+
+.guiaIntro {
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--text);
+  margin: 0 0 20px;
+}
+
+.guiaIntro strong {
+  color: var(--text-h);
+}
+
+.guiaAvisoTexto strong {
+  color: var(--color-primary-dark);
+}
+
+/* Aviso laranja — mesma família de laranja das badges de rascunho/bloqueio do detalhe. */
+.guiaAviso {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  background: #fff7ef;
+  border-radius: 12px;
+  padding: 18px 20px;
+  margin-bottom: 24px;
+}
+
+.guiaAvisoIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: #ffe6cc;
+  color: #f58220;
+  flex-shrink: 0;
+}
+
+.guiaAvisoTexto {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #2e2a36;
+}
+
+.guiaSubtitulo {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-h);
+  margin: 0 0 14px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
+}
+
+.guiaEtapas {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.guiaEtapa {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* Linha vertical ligando os números (até o próximo item). */
+.guiaEtapa:not(:last-child)::before {
+  content: "";
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  height: calc(100% + 10px);
+  border-left: 2px solid var(--color-primary);
+  z-index: 0;
+}
+
+.guiaEtapaNumero {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: #fff;
+  font-weight: 700;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.guiaEtapaCard {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 110px 190px 1fr;
+  align-items: center;
+  gap: 12px;
+  background: #f4f6ff;
+  border-radius: 8px;
+  padding: 10px 14px;
+}
+
+.guiaEtapaBadge {
+  justify-self: start;
+  background: #fff;
+  color: var(--color-primary-dark);
+  border-radius: 999px;
+  padding: 2px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.guiaEtapaTitulo {
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--text-h);
+}
+
+.guiaEtapaDescricao {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+/* "Próximo passo" (Plano de Ação) — fora da análise, em tom neutro. */
+.guiaEtapaProximo .guiaEtapaNumero {
+  background: #e5e4e7;
+  color: var(--text-h);
+}
+
+.guiaEtapaProximo .guiaEtapaCard {
+  background: #f4f4f6;
+}
+
+.guiaEtapaProximo .guiaEtapaBadge {
+  background: #fff;
+  color: var(--text-h);
+}
+
+.guiaRodape {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.guiaNaoMostrar {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.guiaNaoMostrar input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--color-primary);
+  cursor: pointer;
+}
+
+@media (max-width: 760px) {
+  .guia {
+    padding: 20px 16px;
+  }
+
+  .guiaEtapa {
+    align-items: flex-start;
+  }
+
+  .guiaEtapa:not(:last-child)::before {
+    top: 16px;
+  }
+
+  .guiaEtapaCard {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+
+  .guiaRodape {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+}
+
+/* ------------- Blocos de orientação das seções (ver GuiaBlocos.tsx) ------------- */
+/* Explicação para quem está começando — tons neutros, sem competir com o formulário. */
+
+.sectionInfoText strong {
+  color: inherit;
+}
+
+/* Cabeçalho clicável com seta — recolhe exemplos e textos maiores. */
+.recolhivelHeader {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-h);
+  cursor: pointer;
+}
+
+.recolhivelHeader .collapseChevron {
+  color: var(--text);
+}
+
+.recolhivelBody {
+  margin-top: 8px;
+}
+
+/* "Como preencher" dentro da caixa de informação da seção. */
+.comoPreencher {
+  margin-top: 8px;
+}
+
+.exemplosBox {
+  background: #f7f7f9;
+  border-radius: 10px;
+  padding: 12px 16px;
+}
+
+.listaNumerada {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12.5px;
+  line-height: 1.65;
+  color: var(--text);
+}
+
+.listaNumerada li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.listaNumerada strong {
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.listaNumero {
+  flex-shrink: 0;
+  min-width: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #9a96a3;
+}
+
+/* Exemplo em mini tabela — imita a tabela real de preenchimento, em tamanho menor. */
+.exemploTabelaWrap {
+  overflow-x: auto;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.exemploTabela {
+  width: 100%;
+  min-width: 560px;
+  border-collapse: collapse;
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--text);
+}
+
+.exemploTabela th {
+  text-align: left;
+  background: #eeeef2;
+  padding: 6px 10px;
+  font-weight: 600;
+  color: var(--text-h);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.exemploTabela td {
+  padding: 6px 10px;
+  vertical-align: top;
+  border-bottom: 1px solid var(--border);
+}
+
+.exemploTabela tr:last-child td {
+  border-bottom: none;
+}
+
+.exemploTabela td:nth-child(-n + 2) {
+  white-space: nowrap;
+}
+
+/* "Antes de seguir, confira" + aviso ao lado. */
+.revisaoBox {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  background: #f7f7f9;
+  border-radius: 10px;
+  padding: 12px 16px;
+  margin-top: 6px;
+}
+
+.revisaoChecklist {
+  flex: 1;
+  min-width: 0;
+}
+
+.revisaoTitulo {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-h);
+  margin: 0 0 6px;
+}
+
+.revisaoLista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px 24px;
+  font-size: 12.5px;
+  line-height: 1.65;
+  color: var(--text);
+}
+
+.revisaoLista li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.revisaoCheck {
+  color: #9a96a3;
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+
+/* Aviso — só aparece quando há fato "Em análise"; laranja suave do Guia de investigação. */
+.revisaoAlerta {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: 280px;
+  flex-shrink: 0;
+  background: #fff7ef;
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+.revisaoAlertaIcon {
+  color: #f58220;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.revisaoAlertaTitulo {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-h);
+  margin: 0;
+}
+
+.revisaoAlertaTexto {
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--text);
+  margin: 0;
+}
+
+@media (max-width: 760px) {
+  .revisaoBox {
+    flex-direction: column;
+  }
+
+  .revisaoLista {
+    grid-template-columns: 1fr;
+  }
+
+  .revisaoAlerta {
+    width: 100%;
+  }
+}
+
+/* ---------------- "Como identificar um PPC" (PainelComoIdentificar) ---------------- */
+
+.painelGrid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 1fr;
+  gap: 20px;
+}
+
+.painelColuna {
+  border-left: 1px solid var(--border);
+  padding-left: 20px;
+}
+
+.painelColunaTitulo {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 0 0 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1.45;
+  color: var(--text-h);
+}
+
+.painelIconeSim,
+.painelIconeNao {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.painelIconeSim {
+  color: #2e7d32;
+}
+
+.painelIconeNao {
+  color: #b42318;
+}
+
+.painelLista {
+  margin: 0;
+  padding-left: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--text);
+}
+
+@media (max-width: 900px) {
+  .painelGrid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .painelColuna {
+    border-left: none;
+    border-top: 1px solid var(--border);
+    padding: 12px 0 0;
+  }
+}
+
+/* ---------------- Seção 4 — cartões de PPC (FatoresPorPpcField) ---------------- */
+
+.ppcLista {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ppcCard {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.ppcCardErro {
+  border-color: #d92d20;
+}
+
+.ppcCardTopo {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 16px;
+}
+
+.ppcNumero {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #f4f6ff;
+  color: var(--color-primary-dark);
+  font-size: 13px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.ppcTextos {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.ppcEmAnalise {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--color-primary-wash);
+  color: var(--color-primary-dark);
+  margin-bottom: 2px;
+}
+
+.ppcTitulo {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.ppcLinha {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--text);
+}
+
+.ppcLinha strong {
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.ppcAcao {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.ppcContagem {
+  font-size: 11.5px;
+  font-weight: 500;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: #f1f1f4;
+  color: var(--text-h);
+  white-space: nowrap;
+}
+
+.ppcDica {
+  margin: 0;
+  max-width: 220px;
+  padding-left: 16px;
+  border-left: 1px solid var(--border);
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--text);
+}
+
+.ppcChevron {
+  display: inline-flex;
+  padding: 4px;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.ppcCorpo {
+  border-top: 1px solid var(--border);
+  padding: 14px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ppcAdicionar {
+  background: #f7f7f9;
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+
+.ppcAdicionarTopo {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.ppcAdicionarIcone {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #fff;
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+/* Texto azul no botão contornado (o padrão do Button é preto); no hover volta ao branco. */
+button.ppcAdicionarBtn:not(:hover) {
+  color: var(--color-primary);
+}
+
+.ppcAdicionarForm {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+@media (max-width: 900px) {
+  .ppcCardTopo,
+  .ppcAdicionarTopo {
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+
+  .ppcAcao {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .ppcDica {
+    display: none;
+  }
+}
+
+/* ---------------- Fatores de um PPC (FatoresChecklist) ---------------- */
+
+.fatoresLista {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.fatorItem {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.fatorItemAberto {
+  border-color: var(--border-strong);
+}
+
+.fatorItemErro {
+  border-color: #d92d20;
+}
+
+.fatorHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  cursor: pointer;
+}
+
+.fatorItemAberto .fatorHeader {
+  background: #f7f7f9;
+  border-radius: 8px 8px 0 0;
+}
+
+.fatorCheckbox {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  accent-color: var(--color-primary);
+  cursor: pointer;
+}
+
+.fatorHeaderTexto {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.fatorLabel {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.fatorExemplo {
+  font-size: 11.5px;
+  color: #8a8594;
+}
+
+.fatorResumo {
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fatorCorpo {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px 12px 14px 38px;
+}
+
+.fatorDetalhe {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.fatorDetalheLabel {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.fatorOpcional {
+  font-weight: 400;
+  color: #8a8594;
+}
+
+.fatorOpcoesLinha {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+}
+
+.fatorOpcao {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.fatorOpcao input {
+  width: 14px;
+  height: 14px;
+  accent-color: var(--color-primary);
+  cursor: pointer;
+}
+
+.fatorAcoes {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* 5 Porquês do fator. */
+.porquesBloco {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.porquesTitulo {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.porquesInfo {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  background: var(--color-primary-wash);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: #26315f;
+}
+
+.porquesInfo p {
+  margin: 0;
+}
+
+.porquesInfo p + p {
+  margin-top: 4px;
+}
+
+.porquesLinhas {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.porquesLinha {
+  display: grid;
+  grid-template-columns: 96px 1fr 1fr 28px;
+  align-items: start;
+  gap: 12px;
+}
+
+.porquesNivel {
+  margin-top: 22px;
+  justify-self: start;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 6px;
+  background: #f1f1f4;
+  color: var(--text-h);
+  white-space: nowrap;
+}
+
+.porquesCampo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.porquesCampoLabel {
+  font-size: 12px;
+  color: var(--text);
+}
+
+.porquesRemover {
+  margin-top: 26px;
+  display: inline-flex;
+  padding: 4px;
+  border: none;
+  background: none;
+  color: #8a8594;
+  cursor: pointer;
+}
+
+.porquesRemover:hover {
+  color: #b42318;
+}
+
+.porquesRemoverVazio {
+  width: 28px;
+}
+
+.porquesAdicionar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding: 8px 14px;
+  border: 1px dashed var(--border-strong);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--color-primary-dark);
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.porquesAdicionar:hover {
+  background: #f7f7f9;
+}
+
+@media (max-width: 760px) {
+  .fatorCorpo {
+    padding-left: 12px;
+  }
+
+  .porquesLinha {
+    grid-template-columns: 1fr 28px;
+  }
+
+  .porquesNivel {
+    margin-top: 0;
+    grid-column: 1 / -1;
+  }
+
+  .porquesCampo {
+    grid-column: 1;
+  }
+
+  .porquesRemover,
+  .porquesRemoverVazio {
+    grid-column: 2;
+    grid-row: 2;
+    margin-top: 22px;
+  }
+}
+
+/* ---------------- Tabela em layout "lista" (ex.: Recomendações de melhoria) ---------------- */
+
+.listaLinhas {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.listaLinha {
+  display: grid;
+  grid-template-columns: auto 1fr 28px;
+  align-items: start;
+  gap: 10px;
+}
+
+.listaRotulo {
+  margin-top: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 6px;
+  background: #f1f1f4;
+  color: var(--text-h);
+  white-space: nowrap;
+}
+
+.listaCampo {
+  min-width: 0;
+}
+
+.listaRemover {
+  margin-top: 6px;
+  display: inline-flex;
+  padding: 4px;
+  border: none;
+  background: none;
+  color: #8a8594;
+  cursor: pointer;
+}
+
+.listaRemover:hover {
+  color: #b42318;
+}
+
+@media (max-width: 640px) {
+  .listaLinha {
+    grid-template-columns: 1fr 28px;
+  }
+
+  .listaRotulo {
+    grid-column: 1 / -1;
+    justify-self: start;
+    margin-top: 0;
+  }
+}

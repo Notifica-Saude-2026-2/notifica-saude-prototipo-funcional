@@ -36,7 +36,7 @@
 
 .incidentId {
   font-size: 13.5px;
-  font-family: 'Poppins', sans-serif;
+  font-family: "Poppins", sans-serif;
   background: #fff1e4;
   color: #ff7a00;
   padding: 5px 13px;
@@ -63,7 +63,7 @@
   font-weight: 600;
   font-size: 12.5px;
   color: #222;
-  font-family: 'Poppins', sans-serif;
+  font-family: "Poppins", sans-serif;
 }
 
 .headerBadge {
@@ -72,7 +72,7 @@
   border-radius: 100px;
   font-size: 12.5px;
   font-weight: 600;
-  font-family: 'Poppins', sans-serif;
+  font-family: "Poppins", sans-serif;
 }
 
 .statusSelect {
@@ -81,13 +81,15 @@
   border: 1px solid #ddd;
   border-radius: 8px;
   font-size: 12.5px;
-  font-family: 'Raleway', sans-serif;
+  font-family: "Raleway", sans-serif;
   background: #fff;
   color: #222;
   cursor: pointer;
   outline: none;
   min-width: 140px;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
 }
 
 .statusSelect:focus {
@@ -116,7 +118,7 @@
   border-bottom: 1px solid #eee;
   font-weight: 600;
   font-size: 13px;
-  font-family: 'Poppins', sans-serif;
+  font-family: "Poppins", sans-serif;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -189,7 +191,7 @@
   gap: 6px;
   background: #fff;
   color: #2e2e2e;
-  font-family: 'Poppins', sans-serif;
+  font-family: "Poppins", sans-serif;
   font-weight: 600;
   font-size: 12px;
   cursor: pointer;
@@ -239,7 +241,7 @@
   padding: 5px 10px;
   font-size: 11.5px;
   font-weight: 600;
-  font-family: 'Poppins', sans-serif;
+  font-family: "Poppins", sans-serif;
   color: #6b6375;
   text-transform: uppercase;
   letter-spacing: 0.02em;
@@ -303,7 +305,7 @@
   border-radius: 100px;
   font-size: 12px;
   font-weight: 600;
-  font-family: 'Poppins', sans-serif;
+  font-family: "Poppins", sans-serif;
   color: #222;
   margin-right: 15px;
 }
@@ -377,12 +379,14 @@
   width: fit-content;
   background: var(--color-primary);
   color: #fff;
-  font-family: 'Poppins', sans-serif;
+  font-family: "Poppins", sans-serif;
   font-weight: 600;
   font-size: 13px;
   cursor: pointer;
   box-shadow: 0 6px 16px rgba(24, 62, 255, 0.25);
-  transition: opacity 0.2s, transform 0.1s;
+  transition:
+    opacity 0.2s,
+    transform 0.1s;
 }
 
 .primaryButton:hover {
@@ -494,7 +498,7 @@
 .modalTitle {
   font-size: 15px;
   font-weight: 700;
-  font-family: 'Poppins', sans-serif;
+  font-family: "Poppins", sans-serif;
   color: #16181d;
   margin: 0;
 }
@@ -527,7 +531,7 @@
 /* Label do sistema (Poppins, sem chip de fundo) — segue o mesmo padrão dos títulos de seção. */
 .formQuestion {
   font-size: 14px;
-  font-family: 'Poppins', sans-serif;
+  font-family: "Poppins", sans-serif;
   color: #16181d;
   padding: 0;
   /* Só a margem inferior aumenta (espaço até a 1ª opção) — o espaçamento entre as opções em si
@@ -561,7 +565,9 @@
   font-size: 13px;
   color: #222;
   outline: none;
-  transition: border-color 0.15s, box-shadow 0.15s;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
 }
 
 .modalInput:focus {
@@ -621,19 +627,21 @@
   border-radius: 8px;
   cursor: pointer;
   position: relative;
-  transition: border-color 0.15s, background 0.15s;
+  transition:
+    border-color 0.15s,
+    background 0.15s;
 }
 
 .selectItem:hover {
   border-color: var(--color-primary-wash-border);
 }
 
-.selectItem[data-checked='true'] {
+.selectItem[data-checked="true"] {
   border-color: var(--color-primary);
   background: var(--color-primary-wash);
 }
 
-.selectItem[data-disabled='true'] {
+.selectItem[data-disabled="true"] {
   cursor: not-allowed;
   opacity: 0.6;
 }
@@ -652,10 +660,12 @@
   font-size: 10px;
   font-weight: 700;
   color: #fff;
-  transition: background 0.1s, border-color 0.1s;
+  transition:
+    background 0.1s,
+    border-color 0.1s;
 }
 
-.selectItem[data-checked='true'] .selectBox {
+.selectItem[data-checked="true"] .selectBox {
   background: var(--color-primary);
   border-color: var(--color-primary);
 }
@@ -686,7 +696,7 @@
   font-weight: 600;
   color: #555;
   cursor: pointer;
-  font-family: 'Poppins', sans-serif;
+  font-family: "Poppins", sans-serif;
   transition: all 0.15s;
 }
 
@@ -704,7 +714,7 @@
   font-weight: 600;
   color: #fff;
   cursor: pointer;
-  font-family: 'Poppins', sans-serif;
+  font-family: "Poppins", sans-serif;
   box-shadow: 0 6px 16px rgba(24, 62, 255, 0.25);
   transition: opacity 0.15s;
 }
@@ -728,7 +738,7 @@
   font-weight: 600;
   color: var(--color-primary);
   cursor: pointer;
-  font-family: 'Poppins', sans-serif;
+  font-family: "Poppins", sans-serif;
   transition: all 0.15s;
 }
 
@@ -843,7 +853,7 @@
   color: #2e7d32;
   font-size: 12px;
   font-weight: 600;
-  font-family: 'Poppins', sans-serif;
+  font-family: "Poppins", sans-serif;
   border: 1px solid #c8e6c9;
   margin-top: 4px;
   width: fit-content;
@@ -860,7 +870,9 @@
   outline: none;
   background-color: #fff;
   cursor: pointer;
-  transition: border-color 0.15s, box-shadow 0.15s;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
 }
 
 .modalSelect:focus {
@@ -868,26 +880,91 @@
   box-shadow: 0 0 0 3px var(--color-primary-wash);
 }
 
-.actionPlanIntro { margin: 0; font-size: 13px; color: #222; }
-.actionPlanChoice { border: 0; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 20px; }
-.actionPlanChoice legend { width: 100%; }
-.actionPlanChoice label { font-size: 13px; cursor: pointer; }
+.actionPlanIntro {
+  margin: 0;
+  font-size: 13px;
+  color: #222;
+}
+.actionPlanChoice {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+.actionPlanChoice legend {
+  width: 100%;
+}
+.actionPlanChoice label {
+  font-size: 13px;
+  cursor: pointer;
+}
 /* Formulário do plano de ação: mesmo espaço entre todas as perguntas. Cada pergunta é um bloco
    único (título + explicação + campo); o contador de caracteres não soma altura ao bloco. */
-.planoBody { gap: 32px; }
+.planoBody {
+  gap: 32px;
+}
 /* Campo travado (somente leitura) nos modais — ex.: "Ação selecionada" no Atualizar andamento. */
-.modalLocked { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border: 1.5px solid #d0cfd6; border-radius: 8px; background: #f3f3f6; color: #5b6070; font-size: 13px; cursor: not-allowed; }
-.modalLockedText { flex: 1; white-space: pre-wrap; word-break: break-word; }
-.modalLockedIcon { flex-shrink: 0; margin-top: 2px; color: #8a8f9c; }
+.modalLocked {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1.5px solid #d0cfd6;
+  border-radius: 8px;
+  background: #f3f3f6;
+  color: #5b6070;
+  font-size: 13px;
+  cursor: not-allowed;
+}
+.modalLockedText {
+  flex: 1;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.modalLockedIcon {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: #8a8f9c;
+}
 /* textarea é inline por padrão e ganha um vão de linha embaixo — em bloco, o espaço fica igual. */
-.planoBody textarea, .planoBody input:not([type="radio"]):not([type="checkbox"]), .planoBody select { display: block; }
-.planoBody .modalCharCounter { margin-bottom: -17px; line-height: 14px; }
-.planoBody .modalFieldError { margin: 8px 0 0; }
-.actionPlanChoiceOptions { display: flex; flex-wrap: wrap; gap: 20px; }
-.actionPlanChoiceOptions label { font-size: 13px; cursor: pointer; }
-.actionPlanCard { border: 1px solid #e5e4e7; border-radius: 8px; padding: 12px; background: #fafafa; font-size: 13px; }
-.actionPlanCard p { margin: 8px 0 0; }
-.actionCardsGrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.planoBody textarea,
+.planoBody input:not([type="radio"]):not([type="checkbox"]),
+.planoBody select {
+  display: block;
+}
+.planoBody .modalCharCounter {
+  margin-bottom: -17px;
+  line-height: 14px;
+}
+.planoBody .modalFieldError {
+  margin: 8px 0 0;
+}
+.actionPlanChoiceOptions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+.actionPlanChoiceOptions label {
+  font-size: 13px;
+  cursor: pointer;
+}
+.actionPlanCard {
+  border: 1px solid #e5e4e7;
+  border-radius: 8px;
+  padding: 12px;
+  background: #fafafa;
+  font-size: 13px;
+}
+.actionPlanCard p {
+  margin: 8px 0 0;
+}
+.actionCardsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
 
 /* Override do grid de 3 colunas em telas estreitas — esta regra precisa vir DEPOIS da
    definição base de .actionCardsGrid acima, pois com especificidade igual o CSS usa a
@@ -898,60 +975,289 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
-.actionCardHeader, .actionCardControls { display: flex; align-items: center; gap: 6px; }
-.actionCardHeader { justify-content: space-between; }
+.actionCardHeader,
+.actionCardControls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.actionCardHeader {
+  justify-content: space-between;
+}
 /* "Ação N" nunca quebra; se o selo de status + botões não couberem ao lado, eles descem pra linha
    de baixo (alinhados à direita) em vez de espremer o título. */
-.actionCardHeader { flex-wrap: wrap; row-gap: 6px; }
-.actionCardHeader > strong { white-space: nowrap; flex-shrink: 0; }
-.actionCardControls { flex-wrap: wrap; justify-content: flex-end; margin-left: auto; }
-.actionStatus { padding: 4px 7px; font-size: 11px; border-radius: 6px; white-space: nowrap; }
-.actionStatusInProgress { color: #2855a6; background: #e5edff; }
-.actionStatusCompleted { color: #26734d; background: #e3f5eb; }
-.actionStatusPartial { color: #946200; background: #fff2cc; }
-.actionStatusLate { color: #b42318; background: #fee4e2; }
-.actionStatusCancelled { color: #5b6475; background: #edf0f5; }
+.actionCardHeader {
+  flex-wrap: wrap;
+  row-gap: 6px;
+}
+.actionCardHeader > strong {
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.actionCardControls {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  margin-left: auto;
+}
+.actionStatus {
+  padding: 4px 7px;
+  font-size: 11px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+.actionStatusInProgress {
+  color: #2855a6;
+  background: #e5edff;
+}
+.actionStatusCompleted {
+  color: #26734d;
+  background: #e3f5eb;
+}
+.actionStatusPartial {
+  color: #946200;
+  background: #fff2cc;
+}
+.actionStatusLate {
+  color: #b42318;
+  background: #fee4e2;
+}
+.actionStatusCancelled {
+  color: #5b6475;
+  background: #edf0f5;
+}
 /* Ação pré-criada a partir de recomendação da Análise que ainda não foi completada. */
-.actionStatusPending { color: #b54708; background: #fff1e0; }
-.actionPlanCardPending { border-color: #f5b971 !important; }
-.actionCardOrigem { margin-top: 8px !important; font-size: 11px; color: #68708a; font-style: italic; }
-.actionPendingBox { margin-top: 12px; padding: 10px 12px; border-radius: 8px; background: #fff7ed; display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
-.actionPendingText { display: flex; align-items: center; gap: 6px; margin: 0 !important; font-size: 12px; color: #9a3412; }
-.actionPendingText svg { flex-shrink: 0; }
-.actionCompleteBtn { border: none; border-radius: 6px; padding: 7px 12px; font-size: 12.5px; font-weight: 600; color: #fff; background: #183eff; cursor: pointer; }
-.actionCompleteBtn:hover { opacity: 0.92; }
+.actionStatusPending {
+  color: #b54708;
+  background: #fff1e0;
+}
+.actionPlanCardPending {
+  border-color: #f5b971 !important;
+}
+.actionCardOrigem {
+  margin-top: 8px !important;
+  font-size: 11px;
+  color: #68708a;
+  font-style: italic;
+}
+.actionPendingBox {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #fff7ed;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+}
+.actionPendingText {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 !important;
+  font-size: 12px;
+  color: #9a3412;
+}
+.actionPendingText svg {
+  flex-shrink: 0;
+}
+.actionCompleteBtn {
+  border: none;
+  border-radius: 6px;
+  padding: 7px 12px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #fff;
+  background: #183eff;
+  cursor: pointer;
+}
+.actionCompleteBtn:hover {
+  opacity: 0.92;
+}
 /* Formulário do plano de ação: contador de caracteres, erro por campo e altura máxima do textarea. */
-.modalCharCounter { margin-top: 3px; text-align: right; font-size: 11px; color: #8a8f9c; }
-.modalCharCounterOver { color: #b3261e; font-weight: 600; }
-.modalInputError { border-color: #d92d20 !important; background-color: #fff6f5; }
-.modalTextarea { resize: vertical; min-height: 70px; max-height: 200px; }
-.modalFieldError { display: flex; align-items: center; gap: 6px; margin: -6px 0 0; font-size: 12.5px; color: #b3261e; }
-.actionIconButton { width: 28px; height: 25px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid #656565; border-radius: 5px; background: #fff; cursor: pointer; color: #333; }
-.actionIconButton:hover { color: #2f4fff; border-color: #2f4fff; }
-.actionIconButtonDanger:hover { color: #c62828; border-color: #c62828; }
-.actionCardLabel { color: #68708a; font-weight: 600; margin-top: 11px !important; }
-.actionCardValue { margin-top: 2px !important; }
-.actionCardDates { font-size: 12px; }
-.actionCardUpdated { font-size: 11px; font-weight: 600; }
-.actionDetails { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 16px; margin-top: 12px; padding-top: 12px; border-top: 1px solid #e3e6ef; }
-.actionDetails span { display: block; color: #68708a; font-size: 11px; font-weight: 600; }
-.actionDetails p { margin-top: 3px; font-size: 12px; }
-.actionAttachmentInput { margin-top: 2px; font-size: 13px; }
-.actionAttachmentList { display: flex; flex-direction: column; gap: 3px; margin-top: 8px; font-size: 12px; color: #68708a; }
+.modalCharCounter {
+  margin-top: 3px;
+  text-align: right;
+  font-size: 11px;
+  color: #8a8f9c;
+}
+.modalCharCounterOver {
+  color: #b3261e;
+  font-weight: 600;
+}
+.modalInputError {
+  border-color: #d92d20 !important;
+  background-color: #fff6f5;
+}
+.modalTextarea {
+  resize: vertical;
+  min-height: 70px;
+  max-height: 200px;
+}
+.modalFieldError {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: -6px 0 0;
+  font-size: 12.5px;
+  color: #b3261e;
+}
+.actionIconButton {
+  width: 28px;
+  height: 25px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #656565;
+  border-radius: 5px;
+  background: #fff;
+  cursor: pointer;
+  color: #333;
+}
+.actionIconButton:hover {
+  color: #2f4fff;
+  border-color: #2f4fff;
+}
+.actionIconButtonDanger:hover {
+  color: #c62828;
+  border-color: #c62828;
+}
+.actionCardLabel {
+  color: #68708a;
+  font-weight: 600;
+  margin-top: 11px !important;
+}
+.actionCardValue {
+  margin-top: 2px !important;
+}
+.actionCardDates {
+  font-size: 12px;
+}
+.actionCardUpdated {
+  font-size: 11px;
+  font-weight: 600;
+}
+.actionDetails {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 16px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #e3e6ef;
+}
+.actionDetails span {
+  display: block;
+  color: #68708a;
+  font-size: 11px;
+  font-weight: 600;
+}
+.actionDetails p {
+  margin-top: 3px;
+  font-size: 12px;
+}
+.actionAttachmentInput {
+  margin-top: 2px;
+  font-size: 13px;
+}
+.actionAttachmentList {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: 8px;
+  font-size: 12px;
+  color: #68708a;
+}
 /* Anexos no "Atualizar andamento": botão próprio (o input de arquivo nativo fica escondido), formatos
    aceitos ao lado e lista com opção de remover. */
-.visuallyHiddenFile { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; pointer-events: none; }
-.attachRow { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
-.attachButton { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border: 1.5px solid #183eff; border-radius: 8px; color: #183eff; background: #fff; font-size: 13px; font-weight: 600; cursor: pointer; }
-.attachButton:hover { background: #eef1ff; }
-.attachHint { font-size: 12px; color: #68708a; }
-.attachList { list-style: none; margin: 10px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
-.attachList li { display: flex; align-items: center; gap: 8px; padding: 6px 10px; border: 1px solid #e3e6ef; border-radius: 6px; background: #fafbff; font-size: 12.5px; color: #333; }
-.attachName { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.attachRemove { display: inline-flex; border: none; background: none; color: #b3261e; cursor: pointer; padding: 2px; }
+.visuallyHiddenFile {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.attachRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.attachButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: 1.5px solid #183eff;
+  border-radius: 8px;
+  color: #183eff;
+  background: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.attachButton:hover {
+  background: #eef1ff;
+}
+.attachHint {
+  font-size: 12px;
+  color: #68708a;
+}
+/* Limite de 10 anexos atingido (US-5.6 CA12): "Escolher arquivos" desabilitado. */
+.attachButtonDisabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+.attachCount {
+  margin-left: auto;
+  font-size: 12px;
+  font-weight: 600;
+  color: #68708a;
+}
+.attachSize {
+  flex-shrink: 0;
+  font-size: 12px;
+  color: #68708a;
+}
+.attachList {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.attachList li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border: 1px solid #e3e6ef;
+  border-radius: 6px;
+  background: #fafbff;
+  font-size: 12.5px;
+  color: #333;
+}
+.attachName {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.attachRemove {
+  display: inline-flex;
+  border: none;
+  background: none;
+  color: #b3261e;
+  cursor: pointer;
+  padding: 2px;
+}
 
 /* Bloco "Anexos" na visualização detalhada da ação — ocupa as 2 colunas do grid de detalhes. */
-.actionDetailsFull { grid-column: 1 / -1; }
+.actionDetailsFull {
+  grid-column: 1 / -1;
+}
 
 /* Nome do anexo funciona como link de download (sem pré-visualização, só baixar pelo clique). */
 .actionAttachmentLink {
@@ -964,7 +1270,6 @@
 .actionAttachmentLink:hover {
   text-decoration: underline;
 }
-
 
 /* ─── Menu de contexto de status ─── */
 .contextMenuWrapper {
@@ -1014,7 +1319,7 @@
   text-align: left;
   white-space: nowrap;
   font-size: 13px;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   color: #33395c;
   font-weight: 500;
   cursor: pointer;
@@ -1070,7 +1375,7 @@
   font-weight: 600;
   color: #fff;
   cursor: pointer;
-  font-family: 'Poppins', sans-serif;
+  font-family: "Poppins", sans-serif;
   transition: opacity 0.15s;
 }
 
@@ -1081,4 +1386,132 @@
 .saveBtnDanger:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+/* ─── Plano de ação em tabela (ActionPlanSection) ─── */
+.planoTabelaWrap {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.planoTabela {
+  width: 100%;
+  min-width: 760px;
+  border-collapse: collapse;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--text-h);
+}
+
+.planoTabela th {
+  text-align: left;
+  vertical-align: bottom;
+  background: #eeeef2;
+  padding: 8px 10px;
+  font-weight: 600;
+  border-bottom: 1px solid var(--border);
+}
+
+.planoTabela td {
+  padding: 8px 10px;
+  vertical-align: middle;
+  border-bottom: 1px solid var(--border);
+}
+
+.planoTabela tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.planoLinhaAberta td {
+  background: #f7f7f9;
+}
+
+.planoAcaoTexto {
+  min-width: 150px;
+}
+
+.planoData {
+  white-space: nowrap;
+}
+
+.planoNovoPrazo {
+  display: block;
+  font-size: 11.5px;
+  color: #b42318;
+}
+
+/* Status em pílula com bolinha, usando as cores de .actionStatus*. */
+.planoStatus {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.planoStatus::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.planoAcoes {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 4px;
+}
+
+/* Botões de ação um pouco menores na tabela, para caberem sempre lado a lado. */
+.planoAcoes .actionIconButton {
+  width: 26px;
+  height: 24px;
+  flex-shrink: 0;
+  font-size: 13px;
+}
+
+.planoDetalhesLinha td {
+  background: #f7f7f9;
+  padding: 4px 16px 14px;
+}
+
+/* "Onde será feito?" (plano de ação): setores marcáveis, um abaixo do outro */
+.ondeLista {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ondeItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border: 1px solid #e5e4e7;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 13px;
+  color: #222;
+  cursor: pointer;
+}
+
+.ondeItem input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--color-primary);
+  cursor: pointer;
+}
+
+.ondeItemMarcado {
+  border-color: #c4c2cc;
+  background: #f7f7f9;
+}
+
+.ondeListaErro .ondeItem {
+  border-color: #d92d20;
 }

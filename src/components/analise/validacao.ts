@@ -3,7 +3,7 @@
 // de avançar, campo a campo (em vez de só desabilitar o botão "Próximo").
 // --------------------------------------------------------------------------
 
-import type { AnaliseSectionSchema, AnaliseValues } from "../../types/analise";
+import type { AnaliseField, AnaliseSectionSchema, AnaliseValues } from "../../types/analise";
 import { normalizeOption } from "../../types/analise";
 import { OUTRO_MAX_LENGTH, PORQUES_MAX_NIVEIS } from "../../constants/limites";
 import { evalCondition } from "./condition";
@@ -137,6 +137,22 @@ export function validarSecao(
       continue;
     }
 
+    // ---- Fatores por PPC (Seção 4): ao menos 1 PPC e, em cada um, ao menos 1 fator ----
+    if (f.type === "ppc_fatores") {
+      const fonteId = f.ppcSourceFieldId ?? "ppc";
+      const ppcs = (values[fonteId] as TableRow[] | undefined) ?? [];
+      if (obrigatorio && ppcs.length === 0) {
+        add({ fieldId: f.id, label: f.label, message: "Adicione pelo menos 1 PPC." });
+        continue;
+      }
+      const porPpc = (v as Record<string, ChecklistState> | undefined) ?? {};
+      ppcs.forEach((_, i) => {
+        const chave = `${fonteId}#${i}`;
+        validarChecklistFatores(add, `${f.id}:${chave}`, `PPC ${i + 1}`, f, porPpc[chave]);
+      });
+      continue;
+    }
+
     // ---- Checklist de fatores com "Outro / não mapeado" (limite do texto) ----
     if (f.type === "checklist_with_detail") {
       const st = v as ChecklistState | undefined;
@@ -172,9 +188,7 @@ export function validarSecao(
   }
 
   // Seção repetida por item selecionado (ex.: 4A) — valida cada item em análise separadamente.
-  // O fieldId da pendência é "<seção>:<chave do item>:<campo>" (ver AnaliseSectionForm) e as
-  // células usam prefixos próprios do checklist: "det:<categoria>:<campo>", "outro:texto" e
-  // "porq:<categoria>:<linha>:<coluna>".
+  // O fieldId da pendência é "<seção>:<chave do item>:<campo>" (ver AnaliseSectionForm).
   if (section.repeatablePerSelectedItemOf) {
     const selectorId = section.repeatablePerSelectedItemOf;
     const selecao = (values[selectorId] as Record<string, boolean> | undefined) ?? {};
@@ -183,7 +197,6 @@ export function validarSecao(
     const fontes = (allSections ?? [])
       .flatMap((s) => s.fields)
       .find((f) => f.id === selectorId)?.selectorSources;
-    const porquesCols = FIVE_WHYS_NIVEIS_COLUMNS.filter((c) => c.type !== "auto-index");
 
     for (const chave of chaves) {
       const inst = porItem[chave] ?? {};
@@ -193,86 +206,105 @@ export function validarSecao(
 
       for (const f of section.fields) {
         if (f.type !== "checklist_with_detail") continue;
-        const fieldId = `${section.id}:${chave}:${f.id}`;
-        const label = `${titulo} — ${f.label}`;
-        const st = (inst[f.id] as ChecklistState | undefined) ?? { checked: {}, details: {} };
-        const detalhes = f.detailFields ?? [];
-        const marcadas = (f.items ?? []).filter((it) => st.checked?.[it.id]).map((it) => it.id);
-        if (f.allowOther && st.otherChecked) marcadas.push("outro");
-
-        // 1) Pelo menos uma categoria marcada.
-        if (f.required && marcadas.length === 0) {
-          add({ fieldId, label, message: "Marque ao menos um fator contribuinte." });
-          continue;
-        }
-
-        const vazias: string[] = [];
-        const rotulos: Record<string, string> = {};
-        const longas: string[] = [];
-        const msgsLimite: string[] = [];
-        const vazia = (cell: string, rotulo: string) => {
-          vazias.push(cell);
-          rotulos[cell] = rotulo;
-        };
-
-        for (const cat of marcadas) {
-          // 2) Campos da categoria marcada (achado, fonte...) obrigatórios.
-          const det = cat === "outro" ? (st.otherDetail ?? {}) : (st.details?.[cat] ?? {});
-          if (cat === "outro") {
-            const txt = st.otherText ?? "";
-            if (!txt.trim()) vazia("outro:texto", 'a descrição da categoria "Outro"');
-            else if (txt.length > OUTRO_MAX_LENGTH) {
-              longas.push("outro:texto");
-              msgsLimite.push(
-                `A descrição de "Outro" deve ter no máximo ${OUTRO_MAX_LENGTH} caracteres (atual: ${txt.length})`,
-              );
-            }
-          }
-          for (const d of detalhes) {
-            if (!(det[d.id] ?? "").trim()) vazia(`det:${cat}:${d.id}`, d.label);
-          }
-
-          // 3) 5 Porquês: opcional; se aberto, de 1 a 15 níveis, cada um completo.
-          const niveis = st.porques?.[cat];
-          if (niveis && niveis.length > PORQUES_MAX_NIVEIS) {
-            add({
-              fieldId,
-              label,
-              message: `O 5 Porquês pode ter no máximo ${PORQUES_MAX_NIVEIS} níveis (atual: ${niveis.length}).`,
-            });
-          }
-          // Mínimo de 1 nível: garantido na tela (o último nível não tem "Remover"; sem níveis o
-          // 5 Porquês fica fechado).
-          (niveis ?? []).forEach((row, i) => {
-            for (const col of porquesCols) {
-              const cell = row[col.id] ?? "";
-              const id = `porq:${cat}:${i}:${col.id}`;
-              if (!cell.trim()) vazia(id, `5 Porquês — ${col.label}`);
-              else if (col.maxLength && cell.length > col.maxLength) {
-                longas.push(id);
-                msgsLimite.push(
-                  `5 Porquês — ${col.label}, nível ${i + 1}: máximo de ${col.maxLength} caracteres (atual: ${cell.length})`,
-                );
-              }
-            }
-          });
-        }
-
-        if (vazias.length > 0) {
-          add({
-            fieldId,
-            label,
-            message: `Preencha ${listar([...new Set(vazias.map((c) => rotulos[c]))])}.`,
-            cells: vazias,
-            cellLabels: rotulos,
-          });
-        }
-        if (longas.length > 0) {
-          add({ fieldId, label, message: `${msgsLimite.join(" · ")}.`, cells: longas });
-        }
+        validarChecklistFatores(
+          add,
+          `${section.id}:${chave}:${f.id}`,
+          `${titulo} — ${f.label}`,
+          f,
+          inst[f.id] as ChecklistState | undefined,
+        );
       }
     }
   }
 
   return pendencias;
+}
+
+/**
+ * Checklist de fatores contribuintes de UM item/PPC. Células com problema usam prefixos próprios:
+ * "det:<categoria>:<campo>", "outro:texto" e "porq:<categoria>:<linha>:<coluna>".
+ */
+function validarChecklistFatores(
+  add: (p: Pendencia) => void,
+  fieldId: string,
+  label: string,
+  f: AnaliseField,
+  estado: ChecklistState | undefined,
+) {
+  const st = estado ?? { checked: {}, details: {} };
+  const detalhes = (f.detailFields ?? []).filter((d) => !d.optional);
+  const porquesCols = FIVE_WHYS_NIVEIS_COLUMNS.filter((c) => c.type !== "auto-index");
+  const marcadas = (f.items ?? []).filter((it) => st.checked?.[it.id]).map((it) => it.id);
+  if (f.allowOther && st.otherChecked) marcadas.push("outro");
+
+  // 1) Pelo menos uma categoria marcada.
+  if (f.required && marcadas.length === 0) {
+    add({ fieldId, label, message: "Marque ao menos um fator contribuinte." });
+    return;
+  }
+
+  const vazias: string[] = [];
+  const rotulos: Record<string, string> = {};
+  const longas: string[] = [];
+  const msgsLimite: string[] = [];
+  const vazia = (cell: string, rotulo: string) => {
+    vazias.push(cell);
+    rotulos[cell] = rotulo;
+  };
+
+  for (const cat of marcadas) {
+    // 2) Campos obrigatórios da categoria marcada (ex.: descrição do fator).
+    const det = cat === "outro" ? (st.otherDetail ?? {}) : (st.details?.[cat] ?? {});
+    if (cat === "outro") {
+      const txt = st.otherText ?? "";
+      if (!txt.trim()) vazia("outro:texto", 'a descrição da categoria "Outro"');
+      else if (txt.length > OUTRO_MAX_LENGTH) {
+        longas.push("outro:texto");
+        msgsLimite.push(
+          `A descrição de "Outro" deve ter no máximo ${OUTRO_MAX_LENGTH} caracteres (atual: ${txt.length})`,
+        );
+      }
+    }
+    for (const d of detalhes) {
+      if (!(det[d.id] ?? "").trim()) vazia(`det:${cat}:${d.id}`, d.label);
+    }
+
+    // 3) 5 Porquês: opcional. Linhas totalmente vazias são ignoradas; as começadas precisam de
+    //    pergunta e resposta.
+    const niveis = st.porques?.[cat];
+    if (niveis && niveis.length > PORQUES_MAX_NIVEIS) {
+      add({
+        fieldId,
+        label,
+        message: `O 5 Porquês pode ter no máximo ${PORQUES_MAX_NIVEIS} níveis (atual: ${niveis.length}).`,
+      });
+    }
+    (niveis ?? []).forEach((row, i) => {
+      if (porquesCols.every((col) => !(row[col.id] ?? "").trim())) return;
+      for (const col of porquesCols) {
+        const cell = row[col.id] ?? "";
+        const id = `porq:${cat}:${i}:${col.id}`;
+        if (!cell.trim()) vazia(id, `5 Porquês — ${col.label}`);
+        else if (col.maxLength && cell.length > col.maxLength) {
+          longas.push(id);
+          msgsLimite.push(
+            `5 Porquês — ${col.label}, nível ${i + 1}: máximo de ${col.maxLength} caracteres (atual: ${cell.length})`,
+          );
+        }
+      }
+    });
+  }
+
+  if (vazias.length > 0) {
+    add({
+      fieldId,
+      label,
+      message: `Preencha ${listar([...new Set(vazias.map((c) => rotulos[c]))])}.`,
+      cells: vazias,
+      cellLabels: rotulos,
+    });
+  }
+  if (longas.length > 0) {
+    add({ fieldId, label, message: `${msgsLimite.join(" · ")}.`, cells: longas });
+  }
 }

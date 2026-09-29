@@ -5,6 +5,7 @@ import { SectionInfoBox } from "../../../../components/analise/SectionInfoBox";
 import analiseStyles from "../../../../components/analise/Analise.module.css";
 import { ModalBase } from "./ModalBase";
 import type { ActionAttachment, ActionEffect, ActionPlan, ActionStatus } from "./ActionPlanModal";
+import { PLANO_LIMITES } from "../../../../types/actionPlan";
 import styles from "../NotificacaoDetalhe.module.css";
 
 type Props = { action: ActionPlan; onClose: () => void; onSave: (action: ActionPlan) => void };
@@ -24,8 +25,19 @@ function Info({ children }: { children: ReactNode }) {
   return <SectionInfoBox className={analiseStyles.sectionInfoBoxField}>{children}</SectionInfoBox>;
 }
 
+/** Limites dos anexos de evidência (US-5.6 CA12 / RN-25). */
+const MAX_ANEXOS = 10;
+const MAX_ANEXO_MB = 10;
+const MAX_ANEXO_BYTES = MAX_ANEXO_MB * 1024 * 1024;
+
+function formatarTamanho(bytes: number) {
+  if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1).replace(".", ",")} MB`;
+}
+
 export function ActionUpdateModal({ action, onClose, onSave }: Props) {
   const [draft, setDraft] = useState(action);
+  const limiteAnexos = draft.attachments.length >= MAX_ANEXOS;
   const [error, setError] = useState("");
   const [erroAnexo, setErroAnexo] = useState("");
   const [tentouSalvar, setTentouSalvar] = useState(false);
@@ -47,12 +59,21 @@ export function ActionUpdateModal({ action, onClose, onSave }: Props) {
     // só filtra a janela de seleção; arrastar ou "Todos os arquivos" ainda deixaria passar).
     const todos = Array.from(files);
     const recusados = todos.filter((f) => !EXTENSOES_ACEITAS.includes(extensao(f.name)));
-    const aceitos = todos.filter((f) => EXTENSOES_ACEITAS.includes(extensao(f.name)));
-    setErroAnexo(
-      recusados.length > 0
-        ? `${recusados.length === 1 ? "O arquivo" : "Os arquivos"} ${recusados.map((f) => `"${f.name}"`).join(", ")} não ${recusados.length === 1 ? "foi anexado" : "foram anexados"}: só são aceitos ${FORMATOS_LABEL}.`
-        : "",
-    );
+    const noFormato = todos.filter((f) => EXTENSOES_ACEITAS.includes(extensao(f.name)));
+    // US-5.6 CA12: no máximo 10 MB por arquivo e 10 anexos por ação (somando os já anexados).
+    const grandes = noFormato.filter((f) => f.size > MAX_ANEXO_BYTES);
+    const noTamanho = noFormato.filter((f) => f.size <= MAX_ANEXO_BYTES);
+    const vagas = Math.max(0, MAX_ANEXOS - draft.attachments.length);
+    const aceitos = noTamanho.slice(0, vagas);
+    const avisos: string[] = [];
+    if (recusados.length > 0)
+      avisos.push(
+        `${recusados.length === 1 ? "O arquivo" : "Os arquivos"} ${recusados.map((f) => `"${f.name}"`).join(", ")} não ${recusados.length === 1 ? "foi anexado" : "foram anexados"}: só são aceitos ${FORMATOS_LABEL}.`,
+      );
+    for (const f of grandes)
+      avisos.push(`O arquivo “${f.name}” não foi anexado: o tamanho máximo é ${MAX_ANEXO_MB} MB.`);
+    if (noTamanho.length > vagas) avisos.push(`Limite de ${MAX_ANEXOS} anexos por ação atingido.`);
+    setErroAnexo(avisos.join(" "));
     if (fileInputRef.current) fileInputRef.current.value = "";
     if (aceitos.length === 0) return;
     const attachments: ActionAttachment[] = await Promise.all(
@@ -82,10 +103,33 @@ export function ActionUpdateModal({ action, onClose, onSave }: Props) {
     }
     if (draft.status === "Cancelada" && vazio(draft.cancellationReason))
       faltando.push("Motivo do cancelamento");
-    if (faltando.length > 0) {
-      setError(
-        `Preencha os campos obrigatórios destacados. Falta${faltando.length > 1 ? "m" : ""}: ${faltando.join(", ")}.`,
-      );
+    // Textos visíveis acima do limite (os campos só aparecem conforme a situação/efeito).
+    const max = PLANO_LIMITES.andamento;
+    const longos = (
+      [
+        ["Resultado observado", draft.observedResult, true],
+        [
+          "Justificativa do efeito",
+          draft.effectivenessReason,
+          ["Parcialmente", "Não"].includes(draft.effectiveness),
+        ],
+        ["O que foi realizado?", draft.completionDescription, draft.status === "Concluído"],
+        ["Motivo do atraso", draft.delayReason, draft.status === "Atrasada"],
+        ["Motivo do cancelamento", draft.cancellationReason, draft.status === "Cancelada"],
+        ["Onde está armazenada a evidência?", draft.evidenceLocation, true],
+      ] as const
+    )
+      .filter(([, v, visivel]) => visivel && (v ?? "").length > max)
+      .map(([rotulo]) => rotulo);
+    if (faltando.length > 0 || longos.length > 0) {
+      const msgs: string[] = [];
+      if (faltando.length > 0)
+        msgs.push(
+          `Preencha os campos obrigatórios destacados. Falta${faltando.length > 1 ? "m" : ""}: ${faltando.join(", ")}.`,
+        );
+      if (longos.length > 0)
+        msgs.push(`Textos acima do limite de ${max} caracteres: ${longos.join(", ")}.`);
+      setError(msgs.join(" "));
       // Leva a pessoa até o primeiro campo pendente.
       setTimeout(() => {
         document
@@ -261,7 +305,9 @@ export function ActionUpdateModal({ action, onClose, onSave }: Props) {
             <p className={styles.formQuestion}>Anexar arquivos</p>
             <Info>
               Anexe documentos ou imagens que comprovem a execução da ação (ex.: lista de presença,
-              fotos, protocolo publicado). Formatos aceitos: <strong>{FORMATOS_LABEL}</strong>.
+              fotos, protocolo publicado). Formatos aceitos: <strong>{FORMATOS_LABEL}</strong>, até{" "}
+              <strong>{MAX_ANEXO_MB} MB</strong> por arquivo e no máximo{" "}
+              <strong>{MAX_ANEXOS} anexos</strong> por ação.
             </Info>
             <input
               ref={fileInputRef}
@@ -270,14 +316,26 @@ export function ActionUpdateModal({ action, onClose, onSave }: Props) {
               type="file"
               multiple
               accept={ACCEPT_ATTR}
+              disabled={limiteAnexos}
               onChange={(event) => void attachFiles(event.target.files)}
               data-testid="input-anexos"
             />
             <div className={styles.attachRow}>
-              <label htmlFor="action-update-attachments" className={styles.attachButton}>
+              <label
+                htmlFor="action-update-attachments"
+                className={`${styles.attachButton} ${limiteAnexos ? styles.attachButtonDisabled : ""}`}
+                aria-disabled={limiteAnexos}
+              >
                 <FiPaperclip size={14} aria-hidden="true" /> Escolher arquivos
               </label>
-              <span className={styles.attachHint}>{FORMATOS_LABEL}</span>
+              <span className={styles.attachHint}>
+                {limiteAnexos
+                  ? `Limite de ${MAX_ANEXOS} anexos por ação atingido.`
+                  : `${FORMATOS_LABEL} · até ${MAX_ANEXO_MB} MB por arquivo`}
+              </span>
+              <span className={styles.attachCount} data-testid="anexos-contador">
+                {draft.attachments.length}/{MAX_ANEXOS}
+              </span>
             </div>
             {erroAnexo && (
               <p className={styles.modalFieldError} role="alert">
@@ -290,6 +348,7 @@ export function ActionUpdateModal({ action, onClose, onSave }: Props) {
                   <li key={`${attachment.name}-${attachment.size}-${i}`}>
                     <FiPaperclip size={13} aria-hidden="true" />
                     <span className={styles.attachName}>{attachment.name}</span>
+                    <span className={styles.attachSize}>{formatarTamanho(attachment.size)}</span>
                     <button
                       type="button"
                       className={styles.attachRemove}
@@ -351,9 +410,15 @@ function UpdateField({
 }) {
   const mostrar = useContext(MostrarPendencias);
   const pendente = mostrar && required && !readOnly && !value.trim();
-  const classe = pendente ? `${styles.modalInput} ${styles.modalInputError}` : styles.modalInput;
+  // Campos de texto (não datas) têm limite de caracteres, com contador abaixo.
+  const max = multiline || type === "text" ? PLANO_LIMITES.andamento : undefined;
+  const acimaDoLimite = !!max && value.length > max;
+  const classe =
+    pendente || acimaDoLimite
+      ? `${styles.modalInput} ${styles.modalInputError}`
+      : styles.modalInput;
   return (
-    <div data-pendencia={pendente ? "true" : undefined}>
+    <div data-pendencia={pendente || acimaDoLimite ? "true" : undefined}>
       <p className={styles.formQuestion}>
         {label}
         {required && <span className={styles.required}>*</span>}
@@ -387,6 +452,13 @@ function UpdateField({
           placeholder={placeholder}
           onChange={(event) => onChange(event.target.value)}
         />
+      )}
+      {max && !readOnly && (
+        <div
+          className={`${styles.modalCharCounter} ${acimaDoLimite ? styles.modalCharCounterOver : ""}`}
+        >
+          {value.length}/{max}
+        </div>
       )}
       {pendente && <CampoObrigatorio />}
     </div>

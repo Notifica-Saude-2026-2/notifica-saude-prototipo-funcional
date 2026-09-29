@@ -23,7 +23,7 @@ export const FATORES_CONTRIBUINTES_ITEMS: ChecklistItemDef[] = [
   {
     id: "fatores_tarefas",
     label: "Fatores das tarefas",
-    example: "clareza do processo, disponibilidade de POP/protocolo, acurácia de exames",
+    example: "clareza do processo, protocolo disponível, acesso à informação necessária",
   },
   {
     id: "fatores_equipe",
@@ -55,15 +55,56 @@ export const FATORES_CONTRIBUINTES_ITEMS: ChecklistItemDef[] = [
 export const FATORES_CONTRIBUINTES_DETAIL_FIELDS: DetailFieldDef[] = [
   {
     id: "achado",
-    label: "O que foi identificado / achado",
+    label: "Descreva o fator identificado e como ele contribuiu para este PPC",
     type: "textarea",
-    placeholder: "Descreva o que foi identificado nesta categoria",
+    placeholder: "Ex.: medicamentos com nomes semelhantes eram armazenados próximos",
   },
   {
     id: "fonte",
-    label: "Fonte / evidência",
-    type: "text",
-    placeholder: "Ex.: prontuário, entrevista, protocolo",
+    label: "Fonte/evidência",
+    type: "checkboxes",
+    optional: true,
+    options: [
+      "Prontuário",
+      "Entrevista",
+      "Observação",
+      "Protocolo/documento",
+      "Sistema eletrônico",
+      "Outro",
+    ],
+  },
+];
+
+/** Colunas da tabela de PPC (Seção 3) — também usadas no "Adicionar PPC" da Seção 4. */
+export const PPC_COLUMNS: TableColumn[] = [
+  // Numeração automática pela posição da linha (1, 2, 3...) — não editável.
+  { id: "numero", label: "Nº", type: "auto-index", tableWidth: "50px" },
+  {
+    id: "problema",
+    label: "Descreva o problema na prestação do cuidado (PPC)",
+    type: "textarea",
+    placeholder: "Ex.: administração de medicamento diferente do prescrito",
+    tableWidth: "300px",
+    maxLength: 500,
+    rows: 3,
+  },
+  {
+    id: "esperado",
+    label: "O que deveria ter acontecido?",
+    type: "textarea",
+    placeholder: "Descreva o que deveria ter acontecido",
+    tableWidth: "300px",
+    maxLength: 500,
+    rows: 3,
+  },
+  {
+    id: "ocorrido",
+    label: "O que aconteceu de diferente?",
+    type: "textarea",
+    placeholder: "Descreva o que aconteceu de diferente",
+    tableWidth: "300px",
+    maxLength: 500,
+    rows: 3,
   },
 ];
 
@@ -167,24 +208,25 @@ const FONTES_CONSULTADAS_OPTIONS = [
 
 const RECOMENDACOES_FIELD = {
   id: "recomendacoes",
-  label: "Recomendações",
+  label: "Recomendações de melhoria",
   type: "table" as const,
   repeatable: true,
   minRows: 1,
   itemLabel: "Recomendação",
   addButtonLabel: "+ Adicionar recomendação",
   helpText:
-    'Registre o que precisa ser feito para tratar as causas identificadas e evitar que o incidente se repita — uma recomendação por vez, de forma concreta e ligada aos fatores levantados na análise. Ao concluir a análise, cada recomendação pode virar uma ação no Plano de ação desta notificação (já com o "O quê" preenchido), onde ganha responsável, prazo e acompanhamento até ser concluída.',
+    "As recomendações devem ter relação clara com os fatores contribuintes identificados e estar direcionadas à redução das fragilidades do processo ou do sistema encontradas na investigação. Após o registro das recomendações, o próximo passo é a elaboração do Plano de Ação. Quando houver mais de uma recomendação, a equipe deve considerar sua priorização, definindo quais medidas exigem implementação imediata e quais poderão ser executadas em prazos maiores.",
   helpTextInline: true,
-  // Coluna única: o rótulo dela não é exibido (o card já se chama "Recomendação N") — ver TableField.
-  // Opcional, mas cada recomendação adicionada precisa ser preenchida (até 300 caracteres).
+  // Uma linha por recomendação: "Recomendação N" + campo + lixeira (ver layout "lista" na
+  // TableField). Opcional, mas cada recomendação adicionada precisa ser preenchida (até 300).
+  layout: "lista" as const,
   requireCompleteRows: true,
   columns: [
     {
       id: "recomendacao",
       label: "Recomendação",
       type: "textarea" as const,
-      placeholder: "Descreva uma ação concreta para evitar que o problema se repita",
+      placeholder: "Descreva a recomendação de melhoria...",
       maxLength: 300,
     },
   ],
@@ -328,10 +370,27 @@ export const ANALISE_FORM: AnaliseFormSchema = {
     },
     {
       id: "secao3",
-      title: "Seção 3 — Cronologia do Incidente",
+      title: "Seção 3 — Cronologia do incidente",
       kind: "form",
       description:
-        "Liste os fatos em ordem cronológica, sempre com a fonte, e registre os problemas na prestação do cuidado (PPC).",
+        "**Construa a cronologia do incidente** em ordem, mostrando os fatos que antecederam o evento, o momento em que ele aconteceu e o que foi feito depois. Registre um fato por linha, sempre com a fonte.",
+      howTo: {
+        title: "Como preencher",
+        items: [
+          {
+            label: "Um fato por linha:",
+            text: "uma ação, um acontecimento ou uma mudança no estado do paciente.",
+          },
+          {
+            label: "Descreva sem julgar:",
+            text: 'identifique as pessoas pela função, não pelo nome, e evite palavras como "erro", "falha" ou "esqueceu".',
+          },
+          {
+            label: "Cruze as fontes:",
+            text: 'compare prontuário, documentos e entrevistas. Se não conferirem, registre cada versão em uma linha e marque "Em análise".',
+          },
+        ],
+      },
       fields: [
         {
           id: "cronologia",
@@ -346,8 +405,62 @@ export const ANALISE_FORM: AnaliseFormSchema = {
           // Linha do tempo em formato de tabela: um evento por linha, todos os campos lado a lado
           // (com rolagem horizontal se não couber), na ordem Data · Hora · Fato · Fonte · Status.
           layout: "table",
-          helpTextInline: true,
-          helpText: "Nunca registrar fatos baseados em suposições — sempre indicar a fonte.",
+          examples: {
+            title: "Exemplo de registro da cronologia",
+            rows: [
+              {
+                data: "14/04/2025",
+                hora: "08:00",
+                fato: "Médico plantonista prescreve ceftriaxona 1 g EV.",
+                fonte: "Prontuário",
+                status: "Confirmado",
+              },
+              {
+                data: "14/04/2025",
+                hora: "08:20",
+                fato: "Técnica de enfermagem separa ampola de cefazolina 1 g para administração.",
+                fonte: "Entrevista",
+                status: "Em análise",
+              },
+              {
+                data: "14/04/2025",
+                hora: "08:30",
+                fato: "Cefazolina 1 g EV é administrada ao paciente.",
+                fonte: "Prontuário",
+                status: "Confirmado",
+              },
+              {
+                data: "14/04/2025",
+                hora: "09:10",
+                fato: "Durante conferência da prescrição, enfermeira identifica que o medicamento prescrito era ceftriaxona 1 g EV.",
+                fonte: "Prontuário",
+                status: "Confirmado",
+              },
+              {
+                data: "14/04/2025",
+                hora: "09:20",
+                fato: "Médico assistente é comunicado e paciente permanece em observação.",
+                fonte: "Prontuário",
+                status: "Confirmado",
+              },
+            ],
+          },
+          reviewChecklist: {
+            title: "Antes de seguir, confira",
+            items: [
+              "A sequência começa antes do incidente",
+              "Inclui o momento em que ele foi percebido e o que foi feito depois",
+              "Os fatos estão descritos sem julgamento",
+              "As divergências entre fontes estão registradas",
+            ],
+          },
+          rowAlert: {
+            columnId: "status",
+            equals: "Em análise",
+            singular: "Há 1 fato em análise.",
+            plural: "Há {n} fatos em análise.",
+            text: "Confirme se a divergência foi registrada.",
+          },
           columns: [
             { id: "data", label: "Data", type: "date" },
             { id: "hora", label: "Hora", type: "time" },
@@ -393,117 +506,80 @@ export const ANALISE_FORM: AnaliseFormSchema = {
           ],
         },
         {
-          id: "tem_ppc",
-          label: "Foi identificado algum Problema na Prestação do Cuidado (PPC)?",
-          type: "choice",
-          options: ["Não", "Sim"],
-          required: true,
-          helpTextInline: true,
-          helpText:
-            "Considere se houve alguma ação ou omissão da equipe que tenha contribuído para o incidente. Exemplos de PPC:",
-          helpTextItems: [
-            { label: "", description: "não ouvir as preocupações dos pacientes e familiares." },
-            { label: "", description: "avaliação inadequada dos riscos." },
-            { label: "", description: "falha em monitorizar, observar ou agir." },
-            { label: "", description: "decisão incorreta." },
-            { label: "", description: "planejamento incorreto, erro de diagnóstico." },
-            { label: "", description: "não procurar ajuda quando necessário, pouca cooperação." },
-            { label: "", description: "falha na comunicação, não passar plantão." },
-            {
-              label: "",
-              description: "violar prática de segurança, por pressão ou conclusão de tarefa.",
-            },
-            {
-              label: "",
-              description:
-                "violar prática de segurança, por não ter consciência do risco ou não acreditar na sua efetividade.",
-            },
-          ],
-        },
-        {
           id: "ppc",
-          label: "Problemas na prestação do cuidado",
+          label: "Problemas na Prestação do Cuidado (PPC)",
           type: "table",
           repeatable: true,
-          // Com "Sim" em "Foi identificado algum PPC?": ao menos 1 PPC, com todos os campos
-          // preenchidos. Já abre com uma linha. Exibido como tabela, um PPC por linha.
-          required: true,
-          minRows: 1,
+          // Sempre visível e opcional nesta seção (pode não haver PPC), mas cada PPC adicionado
+          // precisa estar completo. Exibido como tabela, um PPC por linha. A Seção 4 exige ao menos
+          // 1 PPC (é lá que eles são analisados) e permite adicionar outros.
+          requireCompleteRows: true,
           layout: "table",
           itemLabel: "PPC",
           addButtonLabel: "+ Adicionar PPC",
-          visibleIf: { field: "tem_ppc", equals: "Sim" },
-          columns: [
-            // Numeração automática pela posição da linha (1, 2, 3...) — não editável.
-            { id: "numero", label: "PPC nº", type: "auto-index", tableWidth: "80px" },
-            {
-              id: "ocorrido",
-              label: "O que ocorreu (desvio observável)",
-              type: "textarea",
-              placeholder: "Descreva o desvio observado no cuidado",
-              tableWidth: "340px",
-              maxLength: 500,
-            },
-            {
-              id: "esperado",
-              label: "O esperado",
-              type: "textarea",
-              placeholder: "Descreva o que deveria ter acontecido",
-              tableWidth: "340px",
-              maxLength: 500,
-            },
-            {
-              id: "fonte",
-              label: "Fonte / evidência",
-              type: "choice",
-              // Mesmas opções da Fonte da cronologia; "Outro" abre campo de texto (máx. 30).
-              options: ["Prontuário", "Inspeção no local", "Entrevista"],
-              allowOther: true,
-              tableWidth: "240px",
-            },
-          ],
+          helpTextInline: true,
+          helpText:
+            "Com base na cronologia acima, identifique se houve alguma ação, omissão, decisão ou **falha no processo de cuidado** que foi diferente do que deveria ter acontecido e que teve importância na sequência do incidente. Pode haver mais de um PPC no mesmo incidente.",
+          guidePanels: {
+            title: "Como identificar um PPC",
+            steps: [
+              'Reveja a cronologia e pergunte: "O que aconteceu no cuidado que foi diferente do que deveria ter acontecido?"',
+              "Registre apenas a ação, omissão ou decisão específica.",
+              "O PPC nem sempre é um erro de alguém. Também conta quando um equipamento, sistema ou processo falhou durante o cuidado. *Ex.: a bomba de infusão infundiu mais rápido do que o programado.*",
+              "Não registre aqui as causas do problema; elas serão analisadas na etapa de fatores contribuintes.",
+            ],
+            columns: [
+              {
+                title: "Exemplos de PPC",
+                tone: "positivo",
+                items: [
+                  "administração de medicamento diferente do prescrito;",
+                  "não realizar avaliação ou monitorização prevista;",
+                  "falha de comunicação durante o cuidado (ex.: informação clínica relevante não foi passada no plantão);",
+                  "decisão clínica inadequada;",
+                  "não seguir protocolo de segurança;",
+                  "falha de equipamento durante o cuidado (ex.: bomba de infusão).",
+                ],
+              },
+              {
+                title: "Não são PPC (são fatores contribuintes, analisados depois)",
+                tone: "negativo",
+                items: [
+                  "falta de pessoal;",
+                  "sobrecarga de trabalho;",
+                  "ausência de rotina de comunicação entre setores;",
+                  "falta de treinamento;",
+                  "condições de infraestrutura inadequadas;",
+                  "problemas organizacionais.",
+                ],
+              },
+            ],
+          },
+          columns: PPC_COLUMNS,
         },
       ],
     },
     {
       id: "secao4",
-      title: "Seção 4 — Análise dos fatores contribuintes",
+      title: "Seção 4 — Fatores contribuintes",
       kind: "form",
+      // Uma linha por parágrafo (\n), como no protótipo da proponente.
       description:
-        "Marque os fatos e PPCs que terão os fatores contribuintes analisados na próxima etapa.",
+        "**Nesta seção, vamos investigar por que cada Problema na Prestação do Cuidado (PPC) aconteceu.**\n" +
+        "Para cada PPC identificado, procure entender quais condições estavam presentes e podem ter favorecido sua ocorrência. Essas condições são chamadas de fatores contribuintes e podem estar relacionadas ao paciente, aos profissionais, às tarefas, à equipe, ao ambiente de trabalho, à tecnologia, à organização ou ao contexto institucional.\n" +
+        "**Analise um PPC por vez e registre apenas os fatores que realmente tiveram relação com ele.**\n" +
+        "Clique em um problema abaixo para iniciar a análise.",
       fields: [
         {
-          id: "itens_selecionados",
-          label: "Fatos da Cronologia e PPCs registrados",
-          type: "item_selector",
-          selectorSources: [
-            { fieldId: "cronologia", itemLabel: "Evento", textColumnId: "fato" },
-            { fieldId: "ppc", itemLabel: "PPC", textColumnId: "ocorrido" },
-          ],
-        },
-      ],
-    },
-    {
-      id: "secao4a",
-      title: "Seção 4A — Fatores contribuintes por item selecionado",
-      kind: "form",
-      // Texto que antes ficava no ícone de info do campo — agora direto na caixa da seção (uma vez só,
-      // em vez de repetir em cada item).
-      description:
-        'Para cada item selecionado, marque as categorias de fatores contribuintes que se aplicam a ele. Em qualquer categoria marcada, use "Por que isso aconteceu?" para aprofundar com os 5 Porquês quando fizer sentido — não é obrigatório em todas.',
-      repeatablePerSelectedItemOf: "itens_selecionados",
-      fields: [
-        {
-          id: "fatores_por_item",
-          label: "Fatores contribuintes deste item",
-          type: "checklist_with_detail",
-          // Ao menos 1 categoria marcada; cada categoria marcada exige seus campos (achado e fonte).
-          // O 5 Porquês é opcional, mas cada nível criado precisa estar completo (ver validacao.ts).
+          // Um cartão por PPC da Seção 3; "Identificar fatores contribuintes" abre a análise daquele
+          // PPC na própria linha (ver FatoresPorPpcField). Todo PPC precisa de ao menos 1 fator.
+          id: "fatores_por_ppc",
+          label: "Problemas na Prestação do Cuidado (PPC) identificados neste incidente",
+          type: "ppc_fatores",
           required: true,
+          ppcSourceFieldId: "ppc",
           items: FATORES_CONTRIBUINTES_ITEMS,
           detailFields: FATORES_CONTRIBUINTES_DETAIL_FIELDS,
-          allowOther: true,
-          otherLabel: "Outro / não mapeado nas categorias acima",
           enablePorques: true,
         },
       ],
@@ -513,23 +589,17 @@ export const ANALISE_FORM: AnaliseFormSchema = {
       title: "Seção 5 — Resultado (Ishikawa + Recomendações)",
       kind: "form",
       description:
-        "Revise o diagrama e registre recomendações ligadas aos achados e causas já identificados.",
+        "O resultado da análise está apresentado no Diagrama de Ishikawa abaixo. O diagrama reúne os fatores contribuintes identificados na investigação e os organiza por categoria. Cada fator está vinculado ao respectivo problema na prestação do cuidado ao qual se relaciona. Quando um fator tiver sido aprofundado com os 5 Porquês, o diagrama também apresenta as causas identificadas nesse aprofundamento, preservando a relação entre o fator inicial e as causas subsequentes.",
       fields: [
         {
           id: "diagrama_ishikawa",
           label: "Diagrama de Ishikawa (espinha de peixe)",
           type: "computed",
-          helpText:
-            'O Diagrama de Ishikawa (ou espinha de peixe) reúne numa só imagem os fatores contribuintes registrados na Seção 4A, agrupados por categoria, todos convergindo para o incidente — a "cabeça" do peixe. Ele é montado automaticamente e ajuda a enxergar o quadro completo de uma vez: quais áreas mais contribuíram, como as causas se relacionam e onde concentrar os esforços de melhoria. Também é útil para apresentar o resultado da investigação à equipe e à gestão, e serve de base para as recomendações abaixo.',
-          helpTextInline: true,
+          // A explicação do diagrama fica na caixa de informação da seção (description).
           ishikawaSource: {
-            selectorFieldId: "itens_selecionados",
-            selectorSources: [
-              { fieldId: "cronologia", itemLabel: "Evento", textColumnId: "fato" },
-              { fieldId: "ppc", itemLabel: "PPC", textColumnId: "ocorrido" },
-            ],
-            perItemSectionId: "secao4a",
-            checklistFieldId: "fatores_por_item",
+            // Sem selectorFieldId: entram todos os PPCs (não há mais etapa de seleção).
+            selectorSources: [{ fieldId: "ppc", itemLabel: "PPC", textColumnId: "problema" }],
+            perItemSectionId: "fatores_por_ppc",
           },
         },
         RECOMENDACOES_FIELD,

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { FiEdit2, FiEdit3, FiEye, FiEyeOff, FiRefreshCw, FiTrash2 } from "react-icons/fi";
 import { MdWarningAmber } from "react-icons/md";
 import { camposPendentesPlano, nomesResponsaveis } from "../../../../types/actionPlan";
@@ -71,134 +71,158 @@ export function ActionPlanSection({
                 : "O plano de ação ficará disponível após a conclusão da análise."}
             </span>
           ) : (
-            <div className={styles.actionCardsGrid}>
-              {actions.map((action, index) => {
-                const detailsVisible = visibleActionId === action.id;
-                // Ação pré-criada a partir de uma recomendação da Análise (só com o "O que será
-                // feito"): precisa ser completada antes de ter o andamento acompanhado.
-                const pendentes = camposPendentesPlano(action);
-                const incompleta = pendentes.length > 0;
-                return (
-                  <article
-                    className={`${styles.actionPlanCard} ${incompleta ? styles.actionPlanCardPending : ""}`}
-                    key={action.id}
-                    data-testid={`acao-${index + 1}`}
-                  >
-                    <div className={styles.actionCardHeader}>
-                      <strong>Ação {index + 1}</strong>
-                      <div className={styles.actionCardControls}>
-                        {/* Ação incompleta não mostra status — o aviso de campos obrigatórios
-                            pendentes, logo abaixo, já explica a situação. */}
-                        {!incompleta && (
-                          <span className={`${styles.actionStatus} ${statusClass(action.status)}`}>
-                            {action.status}
-                          </span>
-                        )}
-                        {!readOnly && canEdit && (
-                          <button
-                            className={styles.actionIconButton}
-                            aria-label="Editar ação"
-                            title="Editar ação"
-                            onClick={() => onEdit(action)}
-                            data-testid={`acao-${index + 1}-editar`}
-                          >
-                            <FiEdit2 />
-                          </button>
-                        )}
-                        {!readOnly && !incompleta && (
-                          <button
-                            className={styles.actionIconButton}
-                            aria-label="Atualizar andamento da ação"
-                            title="Atualizar andamento da ação"
-                            onClick={() => onUpdate(action)}
-                          >
-                            <FiRefreshCw />
-                          </button>
-                        )}
-                        <button
-                          className={styles.actionIconButton}
-                          aria-label={detailsVisible ? "Ocultar detalhes" : "Visualizar detalhes"}
-                          title={detailsVisible ? "Ocultar detalhes" : "Visualizar detalhes"}
-                          onClick={() => onToggleDetails(action.id)}
+            // Uma ação por linha; o "olho" abre os demais campos numa linha logo abaixo.
+            <div className={styles.planoTabelaWrap}>
+              <table className={styles.planoTabela}>
+                <thead>
+                  <tr>
+                    <th>Ação</th>
+                    <th>Recomendação</th>
+                    <th>Responsável</th>
+                    <th>Início</th>
+                    <th>Prazo</th>
+                    <th>Status</th>
+                    <th>Acompanhamento</th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {actions.map((action, index) => {
+                    const detailsVisible = visibleActionId === action.id;
+                    // Ação pré-criada a partir de uma recomendação da Análise (só com o "O que
+                    // será feito"): precisa ser completada antes de ter o andamento acompanhado.
+                    const pendentes = camposPendentesPlano(action);
+                    const incompleta = pendentes.length > 0;
+                    return (
+                      <Fragment key={action.id}>
+                        <tr
+                          className={detailsVisible ? styles.planoLinhaAberta : undefined}
+                          data-testid={`acao-${index + 1}`}
                         >
-                          {detailsVisible ? <FiEyeOff /> : <FiEye />}
-                        </button>
-                        {!readOnly && (
-                          <button
-                            className={`${styles.actionIconButton} ${styles.actionIconButtonDanger}`}
-                            aria-label="Excluir ação"
-                            title="Excluir ação"
-                            onClick={() => setPendingDeleteId(action.id)}
-                          >
-                            <FiTrash2 />
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                    {action.origemRecomendacao && (
-                      <p className={styles.actionCardOrigem}>Veio de uma recomendação da análise</p>
-                    )}
-                    <p className={styles.actionCardLabel}>O que será feito</p>
-                    <p className={styles.actionCardValue}>{action.what || "Não informado"}</p>
-                    {incompleta && (
-                      <div className={styles.actionPendingBox}>
-                        <p className={styles.actionPendingText}>
-                          <MdWarningAmber size={15} aria-hidden="true" /> Faltam {pendentes.length}{" "}
-                          campo{pendentes.length > 1 ? "s" : ""} obrigatório
-                          {pendentes.length > 1 ? "s" : ""} para essa ação poder ser acompanhada.
-                        </p>
-                        {!readOnly && canEdit && (
-                          <button
-                            className={styles.actionCompleteBtn}
-                            onClick={() => onEdit(action)}
-                            data-testid={`acao-${index + 1}-completar`}
-                          >
-                            Completar preenchimento
-                          </button>
-                        )}
-                      </div>
-                    )}
-                    <p className={styles.actionCardLabel}>Responsável</p>
-                    <p className={styles.actionCardValue}>
-                      {nomesResponsaveis(action) || "Não informado"}
-                    </p>
-                    <p className={styles.actionCardDates}>
-                      <b>Início:</b> {formatDate(action.startDate)} &nbsp; <b>Fim:</b>{" "}
-                      {formatDate(action.conclusionDate)}
-                    </p>
-                    <p className={styles.actionCardUpdated}>
-                      Atualizada: {formatUpdatedAt(action.updatedAt)}
-                    </p>
-                    {detailsVisible && (
-                      <div className={styles.actionDetails}>
-                        <Detail label="Onde será feito" value={action.where} />
-                        <Detail label="Comprovação" value={action.proof} />
-                        <Detail label="Resultado esperado" value={action.expectedResult} />
-                        <Detail label="Como verificar" value={action.verification} />
-                        <Detail label="Quando verificar" value={action.verificationDate} />
-                        <Detail label="Resultado observado" value={action.observedResult} />
-                        {action.attachments.length > 0 && (
-                          <div className={styles.actionDetailsFull}>
-                            <span>Anexos</span>
-                            <div className={styles.actionAttachmentList}>
-                              {action.attachments.map((attachment) => (
-                                <a
-                                  key={`${attachment.name}-${attachment.size}`}
-                                  href={attachment.dataUrl}
-                                  download={attachment.name}
-                                  className={styles.actionAttachmentLink}
+                          <td className={styles.planoAcaoTexto}>{action.what || "—"}</td>
+                          <td>{action.origemRecomendacao || "—"}</td>
+                          <td>{nomesResponsaveis(action) || "—"}</td>
+                          <td className={styles.planoData}>{formatDate(action.startDate)}</td>
+                          <td className={styles.planoData}>
+                            {formatDate(action.conclusionDate)}
+                            {action.status === "Atrasada" && action.newConclusionDate && (
+                              <span className={styles.planoNovoPrazo}>
+                                Nova: {formatDate(action.newConclusionDate)}
+                              </span>
+                            )}
+                          </td>
+                          <td>
+                            {incompleta ? (
+                              <span
+                                className={`${styles.planoStatus} ${styles.actionStatusPending}`}
+                                title={`Faltam ${pendentes.length} campo(s) obrigatório(s) para essa ação poder ser acompanhada.`}
+                              >
+                                Preenchimento pendente
+                              </span>
+                            ) : (
+                              <span
+                                className={`${styles.planoStatus} ${statusClass(action.status)}`}
+                              >
+                                {action.status}
+                              </span>
+                            )}
+                          </td>
+                          <td>{acompanhamento(action)}</td>
+                          <td>
+                            <div className={styles.planoAcoes}>
+                              {!readOnly && canEdit && (
+                                <button
+                                  className={styles.actionIconButton}
+                                  aria-label={
+                                    incompleta ? "Completar preenchimento" : "Editar ação"
+                                  }
+                                  title={incompleta ? "Completar preenchimento" : "Editar ação"}
+                                  onClick={() => onEdit(action)}
+                                  data-testid={`acao-${index + 1}-editar`}
                                 >
-                                  {attachment.name}
-                                </a>
-                              ))}
+                                  <FiEdit2 />
+                                </button>
+                              )}
+                              {!readOnly && !incompleta && (
+                                <button
+                                  className={styles.actionIconButton}
+                                  aria-label="Atualizar andamento da ação"
+                                  title="Atualizar andamento da ação"
+                                  onClick={() => onUpdate(action)}
+                                >
+                                  <FiRefreshCw />
+                                </button>
+                              )}
+                              <button
+                                className={styles.actionIconButton}
+                                aria-label={
+                                  detailsVisible ? "Ocultar detalhes" : "Visualizar detalhes"
+                                }
+                                title={detailsVisible ? "Ocultar detalhes" : "Visualizar detalhes"}
+                                onClick={() => onToggleDetails(action.id)}
+                              >
+                                {detailsVisible ? <FiEyeOff /> : <FiEye />}
+                              </button>
+                              {!readOnly && (
+                                <button
+                                  className={`${styles.actionIconButton} ${styles.actionIconButtonDanger}`}
+                                  aria-label="Excluir ação"
+                                  title="Excluir ação"
+                                  onClick={() => setPendingDeleteId(action.id)}
+                                >
+                                  <FiTrash2 />
+                                </button>
+                              )}
                             </div>
-                          </div>
+                          </td>
+                        </tr>
+                        {detailsVisible && (
+                          <tr className={styles.planoDetalhesLinha}>
+                            <td colSpan={8}>
+                              {incompleta && (
+                                <p className={styles.actionPendingText}>
+                                  <MdWarningAmber size={15} aria-hidden="true" /> Faltam{" "}
+                                  {pendentes.length} campo{pendentes.length > 1 ? "s" : ""}{" "}
+                                  obrigatório{pendentes.length > 1 ? "s" : ""} para essa ação poder
+                                  ser acompanhada.
+                                </p>
+                              )}
+                              <div className={styles.actionDetails}>
+                                <Detail label="Onde será feito" value={action.where} />
+                                <Detail label="Comprovação" value={action.proof} />
+                                <Detail label="Resultado esperado" value={action.expectedResult} />
+                                <Detail label="Como verificar" value={action.verification} />
+                                <Detail label="Quando verificar" value={action.verificationDate} />
+                                <Detail label="Resultado observado" value={action.observedResult} />
+                                {action.attachments.length > 0 && (
+                                  <div className={styles.actionDetailsFull}>
+                                    <span>Anexos</span>
+                                    <div className={styles.actionAttachmentList}>
+                                      {action.attachments.map((attachment) => (
+                                        <a
+                                          key={`${attachment.name}-${attachment.size}`}
+                                          href={attachment.dataUrl}
+                                          download={attachment.name}
+                                          className={styles.actionAttachmentLink}
+                                        >
+                                          {attachment.name}
+                                        </a>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                              <p className={styles.actionCardUpdated}>
+                                Atualizada: {formatUpdatedAt(action.updatedAt)}
+                              </p>
+                            </td>
+                          </tr>
                         )}
-                      </div>
-                    )}
-                  </article>
-                );
-              })}
+                      </Fragment>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
           )}
           {canRegister && !readOnly && (
@@ -260,6 +284,18 @@ function Detail({ label, value }: { label: string; value: string | undefined }) 
     </div>
   );
 }
+/** Última informação de andamento, conforme a situação da ação (ver ActionUpdateModal). */
+function acompanhamento(action: ActionPlan) {
+  const texto =
+    action.status === "Cancelada"
+      ? action.cancellationReason
+      : action.status === "Atrasada"
+        ? action.delayReason
+        : action.status === "Concluído"
+          ? action.completionDescription || action.observedResult
+          : action.observedResult;
+  return texto?.trim() || "—";
+}
 function statusClass(status: ActionPlan["status"]) {
   if (status === "Concluído") return styles.actionStatusCompleted;
   if (status === "Parcialmente concluído") return styles.actionStatusPartial;
@@ -268,7 +304,7 @@ function statusClass(status: ActionPlan["status"]) {
   return styles.actionStatusInProgress;
 }
 function formatDate(date: string) {
-  if (!date) return "Não informado";
+  if (!date) return "—";
   const [year, month, day] = date.split("-");
   return day && month && year ? `${day}/${month}/${year}` : date;
 }

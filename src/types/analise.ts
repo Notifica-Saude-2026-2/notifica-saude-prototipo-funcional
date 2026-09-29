@@ -41,6 +41,8 @@ export type TableColumnType =
 export type TableColumn = {
   id: string;
   label: string;
+  /** Altura inicial (em linhas) de uma coluna "textarea" no layout de tabela. Padrão: 1. */
+  rows?: number;
   type: TableColumnType;
   /** Texto de exemplo exibido no campo vazio. Sem isso, texto livre usa "Digite aqui...". */
   placeholder?: string;
@@ -77,8 +79,12 @@ export type ChecklistItemDef = { id: string; label: string; example?: string };
 export type DetailFieldDef = {
   id: string;
   label: string;
-  type: "textarea" | "text";
+  /** "checkboxes": várias opções marcáveis, guardadas como texto separado por "; ". */
+  type: "textarea" | "text" | "checkboxes";
   placeholder?: string;
+  options?: string[];
+  /** Não obrigatório (mostra "(opcional)" ao lado do rótulo). */
+  optional?: boolean;
 };
 
 export type ItemCommonFieldDef = { id: string; label: string; type: "text" };
@@ -121,7 +127,18 @@ export type AnaliseFieldType =
   | "computed"
   | "info"
   | "repeatable_choice_group"
-  | "item_selector";
+  | "item_selector"
+  | "ppc_fatores";
+
+/** Lista de orientação com título (ex.: "Como preencher", exemplos). Cada item tem um rótulo em
+    negrito opcional seguido do texto. Exibida recolhível — ver GuiaBlocos.tsx. */
+export type GuiaLista = {
+  title: string;
+  items?: { label?: string; text: string }[];
+  /** Em vez da lista: linhas de exemplo exibidas como mini tabela, com as mesmas colunas da
+      tabela real do campo (chave = id da coluna). */
+  rows?: Record<string, string>[];
+};
 
 export type AnaliseField = {
   id: string;
@@ -133,6 +150,13 @@ export type AnaliseField = {
   /** Mostra o `helpText` como caixa de informação (azul claro, ícone de info) logo abaixo do
       rótulo do campo, em vez de escondido no ícone "i" com tooltip. */
   helpTextInline?: boolean;
+  /** Exemplos exibidos num bloco recolhível logo acima do campo (abre expandido). */
+  examples?: GuiaLista;
+  /** Checklist "Antes de seguir, confira" exibido logo abaixo do campo. */
+  reviewChecklist?: { title: string; items: string[] };
+  /** Aviso ao lado do checklist quando alguma linha da tabela tem `columnId` igual a `equals`.
+      `{n}` em `plural` é trocado pela quantidade de linhas. */
+  rowAlert?: { columnId: string; equals: string; singular: string; plural: string; text: string };
   /** Texto de exemplo exibido no campo vazio (text/textarea). Sem isso, usa "Digite aqui...". */
   placeholder?: string;
   designNote?: string;
@@ -166,7 +190,9 @@ export type AnaliseField = {
       longo — por padrão esses casos viram uma lista de cards (ver TableField.tsx). Usado quando
       o valor de ter tudo alinhado em colunas (ex.: cronologia, 5 Porquês) supera o aperto do
       texto longo, que quebra dentro da célula normalmente. */
-  layout?: "table" | "cards";
+  /** "lista": uma linha por item com o rótulo "<itemLabel> N" + campo + lixeira (tabela de coluna
+      única, ex.: Recomendações de melhoria). */
+  layout?: "table" | "cards" | "lista";
   /** Em telas estreitas (celular), cada linha da tabela vira um bloco empilhado (rótulo acima de
       cada campo) em vez de rolar na horizontal. Usado nas tabelas do plano de ação. */
   stackOnMobile?: boolean;
@@ -201,10 +227,22 @@ export type AnaliseField = {
       `selectorSources` são as mesmas do campo "item_selector" referenciado — duplicadas aqui de
       propósito para o diagrama não precisar de acesso ao schema de outras seções, só aos valores. */
   ishikawaSource?: {
-    selectorFieldId: string;
+    /** Campo "item_selector" com a seleção de itens. Sem ele, entram todos os itens das fontes. */
+    selectorFieldId?: string;
     selectorSources: { fieldId: string; itemLabel: string; textColumnId: string }[];
+    /** Chave em `values` com os dados por item ("<tabela>#<índice>"). */
     perItemSectionId: string;
-    checklistFieldId: string;
+    /** Campo do checklist dentro de cada item. Sem ele, o valor do item já é o checklist. */
+    checklistFieldId?: string;
+  };
+  /** Campo "ppc_fatores": id da tabela de PPC de onde vêm os cartões (ver FatoresPorPpcField). */
+  ppcSourceFieldId?: string;
+  /** Painéis "Como identificar" (passos + colunas de exemplos), recolhíveis, abaixo do rótulo. */
+  guidePanels?: {
+    title: string;
+    /** Passos numerados. Trechos entre *asteriscos* ficam em itálico. */
+    steps: string[];
+    columns: { title: string; tone: "positivo" | "negativo"; items: string[] }[];
   };
 };
 
@@ -226,7 +264,11 @@ export type AnaliseSectionSchema = {
   id: string;
   title: string;
   kind: "form" | "decision";
+  /** Explicação da seção, na caixa de informação do topo. Trechos entre **asteriscos** ficam em
+      negrito. */
   description?: string;
+  /** Passo a passo ("Como preencher") exibido recolhível dentro da caixa de informação da seção. */
+  howTo?: GuiaLista;
   fields: AnaliseField[];
   onSubmitNext?: string;
   onSubmit?: { action: string; next: string };

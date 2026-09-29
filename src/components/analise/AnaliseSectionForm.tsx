@@ -3,6 +3,13 @@ import { evalCondition } from "./condition";
 import { AnaliseFieldRenderer } from "./AnaliseFieldRenderer";
 import { InfoTooltip } from "../common/ui/InfoTooltip";
 import { SectionInfoBox } from "./SectionInfoBox";
+import {
+  ChecklistRevisao,
+  ExemplosCampo,
+  PainelComoIdentificar,
+  TextoComNegrito,
+} from "./GuiaBlocos";
+import { FatoresPorPpcField } from "./FatoresPorPpcField";
 import { MdWarningAmber } from "react-icons/md";
 import { FiChevronDown } from "react-icons/fi";
 import { useEffect, useState } from "react";
@@ -93,7 +100,11 @@ export function AnaliseSectionForm({
             )}
             {field.helpTextInline && (field.helpText || field.helpTextItems) && !readOnly && (
               <SectionInfoBox className={styles.sectionInfoBoxField}>
-                {field.helpText && <p className={styles.sectionInfoParagraph}>{field.helpText}</p>}
+                {field.helpText && (
+                  <p className={styles.sectionInfoParagraph}>
+                    <TextoComNegrito texto={field.helpText} />
+                  </p>
+                )}
                 {field.helpTextItems && field.helpTextItems.length > 0 && (
                   <ul className={styles.sectionInfoList}>
                     {field.helpTextItems.map((item, i) => (
@@ -107,21 +118,46 @@ export function AnaliseSectionForm({
               </SectionInfoBox>
             )}
             {field.description && <p className={styles.helpText}>{field.description}</p>}
-            <AnaliseFieldRenderer
-              field={field}
-              value={values[field.id]}
-              onChange={(v) => onFieldChange(field.id, v)}
-              values={values}
-              siblingFields={section.fields}
-              resumoNotificacao={field.id === "resumo_notificacao" ? resumoNotificacao : undefined}
-              readOnly={readOnly}
-              invalidCells={celulasInvalidas}
-            />
+            {field.examples && !readOnly && (
+              <ExemplosCampo field={field} examples={field.examples} />
+            )}
+            {field.guidePanels && !readOnly && (
+              <PainelComoIdentificar fieldId={field.id} painel={field.guidePanels} />
+            )}
+            {field.type === "ppc_fatores" ? (
+              <FatoresPorPpcField
+                field={field}
+                values={values}
+                onFieldChange={onFieldChange}
+                readOnly={readOnly}
+                pendencias={pendencias}
+              />
+            ) : (
+              <AnaliseFieldRenderer
+                field={field}
+                value={values[field.id]}
+                onChange={(v) => onFieldChange(field.id, v)}
+                values={values}
+                siblingFields={section.fields}
+                resumoNotificacao={
+                  field.id === "resumo_notificacao" ? resumoNotificacao : undefined
+                }
+                readOnly={readOnly}
+                invalidCells={celulasInvalidas}
+              />
+            )}
             {erros?.map((e, i) => (
               <p key={i} className={styles.fieldErrorMessage} role="alert">
                 <MdWarningAmber size={15} aria-hidden="true" /> {e.message}
               </p>
             ))}
+            {field.reviewChecklist && !readOnly && (
+              <ChecklistRevisao
+                checklist={field.reviewChecklist}
+                rowAlert={field.rowAlert}
+                rows={(values[field.id] as TableRow[] | undefined) ?? []}
+              />
+            )}
           </div>
         );
       })}

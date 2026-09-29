@@ -3,12 +3,14 @@ import { MdWarningAmber } from "react-icons/md";
 import { ModalBase } from "./ModalBase";
 import styles from "../NotificacaoDetalhe.module.css";
 import {
+  ONDE_SEPARADOR,
   PLANO_LIMITES,
   camposPendentesPlano,
   createEmptyActionPlan,
   datasPlanoInvalidas,
   limitesExcedidosPlano,
   nomesResponsaveis,
+  separarOnde,
 } from "../../../../types/actionPlan";
 import type { ActionPlan, ActionStatus, ResponsavelRow } from "../../../../types/actionPlan";
 import { TableField } from "../../../../components/analise/TableField";
@@ -40,7 +42,6 @@ type Props = {
 };
 
 const L = PLANO_LIMITES;
-const OUTRO = "__outro__";
 
 /** Colunas da tabela "Quem será responsável?" — mesma lógica do condutor da análise. */
 const RESPONSAVEL_COLUMNS = [
@@ -109,11 +110,27 @@ export function ActionPlanModal({
       ? "Editar plano de ação"
       : "Registrar plano de ação";
   const [plan, setPlan] = useState<ActionPlan>(() => planoInicial(initialPlan, initialWhat));
-  // "Onde será feito?": um dos setores ou "Outro" (texto livre). Começa em "Outro" quando o valor
-  // salvo não é um dos setores da lista.
+  // "Onde será feito?": um ou mais setores e/ou "Outro" (texto livre), guardados juntos em
+  // `where` (ver separarOnde). "Outro" começa marcado quando o valor salvo tem texto fora da lista.
   const [ondeOutro, setOndeOutro] = useState(
-    () => !!initialPlan?.where && !SETOR_HOSPITALAR_OPTIONS.includes(initialPlan.where),
+    () => !!separarOnde(initialPlan?.where ?? "", SETOR_HOSPITALAR_OPTIONS).outro,
   );
+  const [ondeOutroTexto, setOndeOutroTexto] = useState(
+    () => separarOnde(initialPlan?.where ?? "", SETOR_HOSPITALAR_OPTIONS).outro,
+  );
+  const ondeSetores = separarOnde(plan.where, SETOR_HOSPITALAR_OPTIONS).setores;
+
+  function atualizarOnde(setores: string[], outroMarcado: boolean, outroTexto: string) {
+    const outro = outroMarcado && outroTexto.trim() ? [outroTexto] : [];
+    update("where", [...setores, ...outro].join(ONDE_SEPARADOR));
+  }
+
+  function alternarSetor(setor: string) {
+    const setores = ondeSetores.includes(setor)
+      ? ondeSetores.filter((s) => s !== setor)
+      : SETOR_HOSPITALAR_OPTIONS.filter((s) => s === setor || ondeSetores.includes(s));
+    atualizarOnde(setores, ondeOutro, ondeOutroTexto);
+  }
   const [error, setError] = useState("");
   // Só destaca campos vazios depois da 1ª tentativa de salvar (não enquanto a pessoa preenche).
   const [tentouSalvar, setTentouSalvar] = useState(false);
@@ -139,6 +156,9 @@ export function ActionPlanModal({
       problemas.push(
         `Preencha os campos obrigatórios. Falta${faltando.length > 1 ? "m" : ""}: ${faltando.join(", ")}.`,
       );
+    }
+    if (ondeOutro && !ondeOutroTexto.trim()) {
+      problemas.push('Especifique onde a ação será feita em "Outro".');
     }
     if (datasInvalidas) {
       problemas.push("A previsão de início não pode ser posterior à previsão de conclusão.");
@@ -196,34 +216,55 @@ export function ActionPlanModal({
             2. Onde será feito?<span className={styles.required}>*</span>
           </p>
           <Info>
-            Indique o setor ou local em que a ação será executada. Isso ajuda a saber quem precisa
-            ser envolvido e onde acompanhar a execução.
+            Indique o(s) setor(es) ou local(is) em que a ação será executada. Marque um ou mais — se
+            a ação envolver vários setores, selecione todos. Isso ajuda a saber quem precisa ser
+            envolvido e onde acompanhar a execução.
           </Info>
-          <select
-            className={`${styles.modalSelect} ${vazio(plan.where) && !ondeOutro ? styles.modalInputError : ""}`}
-            value={ondeOutro ? OUTRO : plan.where}
-            onChange={(event) => {
-              const v = event.target.value;
-              setOndeOutro(v === OUTRO);
-              update("where", v === OUTRO ? "" : v);
-            }}
+          {/* Um ou mais setores, um abaixo do outro (mesmo padrão da seleção de fatores). */}
+          <div
+            className={`${styles.ondeLista} ${vazio(plan.where) && !ondeOutro ? styles.ondeListaErro : ""}`}
             data-testid="plano-where"
           >
-            <option value="">Selecione o setor</option>
-            {SETOR_HOSPITALAR_OPTIONS.map((s) => (
-              <option key={s} value={s}>
-                {s}
-              </option>
-            ))}
-            <option value={OUTRO}>Outro</option>
-          </select>
+            {SETOR_HOSPITALAR_OPTIONS.map((s) => {
+              const marcado = ondeSetores.includes(s);
+              return (
+                <label
+                  key={s}
+                  className={`${styles.ondeItem} ${marcado ? styles.ondeItemMarcado : ""}`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={marcado}
+                    onChange={() => alternarSetor(s)}
+                    data-testid={`plano-where-${s}`}
+                  />
+                  {s}
+                </label>
+              );
+            })}
+            <label className={`${styles.ondeItem} ${ondeOutro ? styles.ondeItemMarcado : ""}`}>
+              <input
+                type="checkbox"
+                checked={ondeOutro}
+                onChange={() => {
+                  setOndeOutro(!ondeOutro);
+                  atualizarOnde(ondeSetores, !ondeOutro, ondeOutroTexto);
+                }}
+                data-testid="plano-where-outro-check"
+              />
+              Outro
+            </label>
+          </div>
           {ondeOutro && (
             <div style={{ marginTop: 8 }}>
               <LimitedInput
-                value={plan.where}
-                onChange={(v) => update("where", v)}
+                value={ondeOutroTexto}
+                onChange={(v) => {
+                  setOndeOutroTexto(v);
+                  atualizarOnde(ondeSetores, true, v);
+                }}
                 maxLength={L.ondeOutro}
-                invalid={vazio(plan.where)}
+                invalid={tentouSalvar && !ondeOutroTexto.trim()}
                 placeholder="Especifique onde a ação será feita"
                 testId="plano-where-outro"
               />

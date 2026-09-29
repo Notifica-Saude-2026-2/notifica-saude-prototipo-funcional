@@ -1,4 +1,5 @@
 import { useEffect, useState, type CSSProperties } from "react";
+import { FiTrash2 } from "react-icons/fi";
 import type { AnaliseField, ChoiceOption, TableColumn, TableColumnType } from "../../types/analise";
 import { formatCurrencyInput } from "../../utils/currency";
 import { normalizeOption } from "../../types/analise";
@@ -150,6 +151,50 @@ export function TableField({
       )}
     </div>
   );
+
+  if (field.layout === "lista") {
+    const col = columns[0];
+    return (
+      <div data-testid={dataTestId}>
+        {rows.length === 0 && <p className={styles.helpText}>Nenhuma linha adicionada ainda.</p>}
+        <div className={styles.listaLinhas}>
+          {rows.map((row, rowIndex) => (
+            <div key={rowIndex} className={styles.listaLinha}>
+              <span className={styles.listaRotulo}>
+                {field.itemLabel ?? "Item"} {rowIndex + 1}
+              </span>
+              <div className={styles.listaCampo}>
+                <TableCell
+                  type={col.type}
+                  options={col.options}
+                  placeholder={col.placeholder}
+                  maxLength={col.maxLength}
+                  invalid={invalidCells?.includes(`${rowIndex}:${col.id}`)}
+                  rows={1}
+                  value={row[col.id] ?? ""}
+                  onChange={(v) => updateCell(rowIndex, col.id, v)}
+                  readOnly={readOnly}
+                  testId={dataTestId ? `${dataTestId}-row${rowIndex}-${col.id}` : undefined}
+                />
+              </div>
+              {!readOnly && podeRemover && (
+                <button
+                  type="button"
+                  className={styles.listaRemover}
+                  onClick={() => removeRow(rowIndex)}
+                  aria-label={`Remover ${(field.itemLabel ?? "item").toLowerCase()} ${rowIndex + 1}`}
+                  data-testid={dataTestId ? `${dataTestId}-remove-${rowIndex}` : undefined}
+                >
+                  <FiTrash2 size={15} aria-hidden="true" />
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+        {addButton}
+      </div>
+    );
+  }
 
   if (hasLongText) {
     const shortColumns = columns.filter((col) => col.type !== "textarea");
@@ -337,7 +382,7 @@ export function TableField({
                         invalid={invalidCells?.includes(`${rowIndex}:${col.id}`)}
                         // Na tabela, texto longo começa com a mesma altura dos outros campos da linha;
                         // a pessoa expande arrastando o canto se precisar.
-                        rows={1}
+                        rows={col.rows ?? 1}
                         value={row[col.id] ?? ""}
                         onChange={(v) => updateCell(rowIndex, col.id, v)}
                         readOnly={readOnly}
@@ -403,6 +448,13 @@ function TableCell({
       <textarea
         className={inputCls}
         rows={rows}
+        // Com mais de 1 linha, a altura inicial é também a mínima: dá para aumentar arrastando o
+        // canto, mas não diminuir abaixo dela (19px = padding + borda do .cellInput).
+        style={
+          rows && rows > 1
+            ? { lineHeight: 1.5, minHeight: `calc(${rows * 1.5}em + 19px)` }
+            : undefined
+        }
         placeholder={ph}
         value={value}
         onChange={(e) => onChange(e.target.value)}

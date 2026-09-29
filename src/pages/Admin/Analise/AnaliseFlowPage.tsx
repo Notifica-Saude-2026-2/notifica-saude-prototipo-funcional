@@ -5,6 +5,11 @@ import { AdminLayout } from "../../../components/admin/AdminLayout/AdminLayout";
 import { StepForm } from "../../../components/form/StepForm/StepForm";
 import { AnaliseSectionForm } from "../../../components/analise/AnaliseSectionForm";
 import { SectionInfoBox } from "../../../components/analise/SectionInfoBox";
+import { ListaNumerada, Recolhivel, TextoComNegrito } from "../../../components/analise/GuiaBlocos";
+import {
+  GuiaInvestigacao,
+  guiaInvestigacaoOculto,
+} from "../../../components/analise/GuiaInvestigacao";
 import { listar, validarSecao } from "../../../components/analise/validacao";
 import type { MultiChoiceWithOtherValue } from "../../../components/analise/AnaliseFieldRenderer";
 import type { ChecklistState } from "../../../components/analise/ChecklistWithDetailField";
@@ -84,12 +89,12 @@ function ResumoNotificacao({
   const classificacao = detalhe.classificacao;
   return (
     <div>
-      <p style={{ margin: "0 0 4px" }}>
+      <p className={styles.resumoCabecalho} style={{ margin: "0 0 4px" }}>
         <strong>Notificação #{detalhe.codigo}</strong> — {detalhe.unidade} · {detalhe.setor}
       </p>
 
       {incidenteInvestigado && (
-        <p style={{ margin: "0 0 8px" }}>
+        <p className={styles.resumoCabecalho} style={{ margin: "0 0 8px" }}>
           <strong>Incidente em investigação:</strong> {incidenteInvestigado}
         </p>
       )}
@@ -154,6 +159,8 @@ export default function AnaliseFlowPage() {
   const [detalhe, setDetalhe] = useState<NotificacaoDetalheDTO | null>(null);
   const [loading, setLoading] = useState(true);
   const [sectionIndex, setSectionIndex] = useState(0);
+  /** Guia de investigação — tela de apresentação antes da Seção 1 (não é uma seção do formulário). */
+  const [mostrarGuia, setMostrarGuia] = useState(() => !guiaInvestigacaoOculto());
   const [values, setValues] = useState<AnaliseValues>({});
   const [savedHint, setSavedHint] = useState(false);
   const [finishing, setFinishing] = useState(false);
@@ -305,8 +312,11 @@ export default function AnaliseFlowPage() {
     if (depois.length > antes) {
       const novo = depois[depois.length - 1];
       mostrarAvisoLimite(novo.label, novo.max, novo.atual);
-    } else if (section?.repeatablePerSelectedItemOf) {
-      // Seção repetida por item (ex.: 5 Porquês da 4A): usa a validação completa pra detectar o
+    } else if (
+      section?.repeatablePerSelectedItemOf ||
+      section?.fields.some((f) => f.type === "ppc_fatores")
+    ) {
+      // Fatores por PPC (ex.: 5 Porquês da Seção 4): usa a validação completa pra detectar o
       // momento em que algum texto passa do limite.
       const limite = (p: { message: string }) => p.message.includes("máximo de");
       const qtd = (ps: { cells?: string[] }[]) =>
@@ -386,7 +396,8 @@ export default function AnaliseFlowPage() {
   function handlePrev() {
     setPendenciasDoClique(null);
     if (sectionIndex === 0) {
-      if (id) navigate(`/incident/${id}`);
+      if (!guiaInvestigacaoOculto()) setMostrarGuia(true);
+      else if (id) navigate(`/incident/${id}`);
       return;
     }
     setSectionIndex((i) => Math.max(i - 1, 0));
@@ -427,41 +438,66 @@ export default function AnaliseFlowPage() {
 
         {flow.globalNote && <div className={styles.flowNote}>{flow.globalNote}</div>}
 
-        {sectionIndex > 0 && incidenteInvestigado?.trim() && (
-          <div
-            className={styles.flowResumoFixed}
-            data-testid="analise-incidente-investigado"
-            style={{ marginBottom: 12 }}
-          >
-            <BsBellFill className={styles.flowResumoIcon} size={15} aria-hidden="true" />
-            <span>
-              <strong>Incidente em investigação:</strong> {incidenteInvestigado}
-            </span>
-          </div>
-        )}
+        {mostrarGuia ? (
+          <GuiaInvestigacao onComecar={() => setMostrarGuia(false)} />
+        ) : (
+          <>
+            {sectionIndex > 0 && incidenteInvestigado?.trim() && (
+              <div
+                className={styles.flowResumoFixed}
+                data-testid="analise-incidente-investigado"
+                style={{ marginBottom: 12 }}
+              >
+                <BsBellFill className={styles.flowResumoIcon} size={15} aria-hidden="true" />
+                <span>
+                  <strong>Incidente em investigação:</strong> {incidenteInvestigado}
+                </span>
+              </div>
+            )}
 
-        <StepForm
-          currentStep={sectionIndex + 1}
-          totalSteps={flow.sections.length}
-          stepTitle={section.title}
-          onNext={handleNext}
-          onPrev={handlePrev}
-          isLastStep={!!section.onSubmit}
-          // Sempre clicável: com pendências, o clique mostra o que falta em vez de não fazer nada.
-          canAdvance={!finishing}
-          submitLabel="Concluir investigação"
-          compact
-        >
-          {section.description && <SectionInfoBox>{section.description}</SectionInfoBox>}
-          <AnaliseSectionForm
-            section={section}
-            values={values}
-            onFieldChange={updateField}
-            resumoNotificacao={resumoNotificacaoCompleto}
-            allSections={flow.sections}
-            pendencias={pendenciasPorCampo}
-          />
-        </StepForm>
+            <StepForm
+              currentStep={sectionIndex + 1}
+              totalSteps={flow.sections.length}
+              stepTitle={section.title}
+              onNext={handleNext}
+              onPrev={handlePrev}
+              isLastStep={!!section.onSubmit}
+              // Sempre clicável: com pendências, o clique mostra o que falta em vez de não fazer nada.
+              canAdvance={!finishing}
+              submitLabel="Finalizar análise"
+              compact
+            >
+              {section.description && (
+                <SectionInfoBox>
+                  {section.description.split("\n").map((linha, i) => (
+                    <p key={i} className={styles.sectionInfoParagraph}>
+                      <TextoComNegrito texto={linha} />
+                    </p>
+                  ))}
+                  {section.howTo && (
+                    <Recolhivel
+                      key={section.id}
+                      storageKey={`como-preencher-${section.id}`}
+                      titulo={section.howTo.title}
+                      className={styles.comoPreencher}
+                      data-testid="analise-secao-como-preencher-toggle"
+                    >
+                      <ListaNumerada items={section.howTo.items ?? []} />
+                    </Recolhivel>
+                  )}
+                </SectionInfoBox>
+              )}
+              <AnaliseSectionForm
+                section={section}
+                values={values}
+                onFieldChange={updateField}
+                resumoNotificacao={resumoNotificacaoCompleto}
+                allSections={flow.sections}
+                pendencias={pendenciasPorCampo}
+              />
+            </StepForm>
+          </>
+        )}
 
         <Toast message="Rascunho salvo" show={savedHint && !limiteToast} variant="success" />
         <Toast message={limiteToast ?? ""} show={!!limiteToast} variant="warning" />
