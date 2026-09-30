@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { FiChevronDown, FiInfo, FiPlus, FiX } from "react-icons/fi";
+import { MdWarningAmber } from "react-icons/md";
 import type { AnaliseField, DetailFieldDef } from "../../types/analise";
 import { FIVE_WHYS_NIVEIS_COLUMNS } from "../../constants/analiseSchema";
 import { PORQUES_MAX_NIVEIS } from "../../constants/limites";
@@ -254,8 +255,10 @@ function DetalheFator({
 }
 
 /**
- * 5 Porquês do fator — sempre visível com ao menos uma linha. Opcional: linhas totalmente vazias
- * são ignoradas na validação e no Ishikawa; linhas começadas precisam de pergunta e resposta.
+ * 5 Porquês do fator — ferramenta opcional. Começa fechada, com um convite ("Usar os 5 Porquês"),
+ * e só abre quando o usuário escolher usá-la; já abre direto se o fator tiver porquês preenchidos.
+ * Ao remover, o que foi preenchido é apagado (com confirmação). Linhas totalmente vazias são
+ * ignoradas na validação e no Ishikawa; linhas começadas precisam de pergunta e resposta.
  */
 function PorquesLista({
   rows,
@@ -269,6 +272,11 @@ function PorquesLista({
   /** Células no formato "linha:coluna". */
   invalidCells: string[];
 }) {
+  const temConteudo = (rows ?? []).some((r) =>
+    Object.values(r).some((v) => (v ?? "").toString().trim()),
+  );
+  const [aberto, setAberto] = useState(temConteudo);
+  const [confirmando, setConfirmando] = useState(false);
   const linhas = rows && rows.length > 0 ? rows : [{}];
   const classe = (cell: string) =>
     invalidCells.includes(cell) ? `${styles.cellInput} ${styles.cellInputError}` : styles.cellInput;
@@ -285,9 +293,74 @@ function PorquesLista({
     onChange([...linhas, { [COL_PERGUNTA.id]: pergunta }]);
   }
 
+  function remover() {
+    setConfirmando(false);
+    setAberto(false);
+    onChange([]);
+  }
+
+  if (!aberto && !temConteudo) {
+    if (readOnly) return null;
+    return (
+      <div className={styles.porquesConvite}>
+        <FiInfo size={16} aria-hidden="true" className={styles.porquesConviteIcon} />
+        <p className={styles.porquesConviteTexto}>
+          Se você quiser entender melhor por que esse fator existia ou aconteceu, utilize os 5
+          Porquês. Essa ferramenta ajuda a aprofundar a análise de um fator contribuinte já
+          identificado.
+        </p>
+        <button
+          type="button"
+          className={styles.porquesConviteBtn}
+          onClick={() => setAberto(true)}
+          data-testid="porques-usar"
+        >
+          Usar os 5 Porquês
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className={styles.porquesBloco}>
-      <p className={styles.porquesTitulo}>5 Porquês</p>
+      <div className={styles.porquesCabecalho}>
+        <p className={styles.porquesTitulo}>5 Porquês</p>
+        {!readOnly && (
+          <button
+            type="button"
+            className={styles.porquesFechar}
+            onClick={() => (temConteudo ? setConfirmando(true) : setAberto(false))}
+            data-testid="porques-remover"
+          >
+            {temConteudo ? "Remover 5 Porquês" : "Não usar os 5 Porquês"}
+          </button>
+        )}
+      </div>
+      {confirmando && (
+        <div className={styles.porquesConfirm} role="alertdialog" aria-live="polite">
+          <MdWarningAmber size={18} aria-hidden="true" className={styles.porquesConfirmIcon} />
+          <span className={styles.porquesConfirmText}>
+            Remover o 5 Porquês deste fator? Tudo o que foi preenchido nele será apagado.
+          </span>
+          <div className={styles.porquesConfirmActions}>
+            <button
+              type="button"
+              className={styles.porquesConfirmCancel}
+              onClick={() => setConfirmando(false)}
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              className={styles.porquesConfirmRemove}
+              onClick={remover}
+              data-testid="porques-remover-confirmar"
+            >
+              Remover
+            </button>
+          </div>
+        </div>
+      )}
       {!readOnly && (
         <div className={styles.porquesInfo}>
           <FiInfo size={14} aria-hidden="true" className={styles.sectionInfoIcon} />

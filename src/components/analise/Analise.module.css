@@ -1820,6 +1820,71 @@ button.ppcAdicionarBtn:not(:hover) {
   border-top: 1px solid var(--border);
 }
 
+/* Convite do 5 Porquês (ferramenta fechada até o usuário escolher usá-la). */
+.porquesConvite {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 4px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  background: var(--color-primary-wash);
+  color: #26315f;
+  font-size: 12.5px;
+  line-height: 1.6;
+}
+
+.porquesConviteIcon {
+  flex-shrink: 0;
+  color: var(--color-primary);
+}
+
+.porquesConviteTexto {
+  flex: 1 1 auto;
+  margin: 0;
+}
+
+.porquesConviteBtn {
+  flex-shrink: 0;
+  padding: 8px 16px;
+  border: 1.5px solid var(--border-strong);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--color-primary-dark);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.porquesConviteBtn:hover {
+  background: #f7f7f9;
+}
+
+.porquesCabecalho {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.porquesFechar {
+  padding: 4px 0;
+  border: none;
+  background: none;
+  color: #8a8594;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.porquesFechar:hover {
+  color: #b42318;
+  text-decoration: underline;
+}
+
 .porquesTitulo {
   margin: 0;
   font-size: 13px;
@@ -1923,6 +1988,14 @@ button.ppcAdicionarBtn:not(:hover) {
 }
 
 @media (max-width: 760px) {
+  .porquesConvite {
+    flex-wrap: wrap;
+  }
+
+  .porquesConviteBtn {
+    width: 100%;
+  }
+
   .fatorCorpo {
     padding-left: 12px;
   }
