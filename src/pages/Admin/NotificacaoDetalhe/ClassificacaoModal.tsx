@@ -280,8 +280,14 @@ function SelectCardGroup({
         >
           <span className={styles.selectBox}>{isChecked(o.value) ? "✓" : ""}</span>
           <span className={styles.selectLabel}>
-            <strong>{o.label}</strong>
-            {o.desc ? ` - ${o.desc}` : ""}
+            {o.desc ? (
+              <>
+                <strong>{o.label}</strong>
+                {` - ${o.desc}`}
+              </>
+            ) : (
+              o.label
+            )}
           </span>
         </div>
       ))}

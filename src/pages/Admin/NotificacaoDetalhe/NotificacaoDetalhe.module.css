@@ -673,8 +673,13 @@
 .selectLabel {
   font-size: 13.5px;
   color: #222;
-  font-weight: 600;
+  font-weight: 400;
   line-height: 1.4;
+}
+
+/* Nome da opção quando ela vem acompanhada de descrição: destaque leve, sem negrito pesado. */
+.selectLabel strong {
+  font-weight: 500;
 }
 
 .modalFooter {

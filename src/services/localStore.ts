@@ -153,6 +153,28 @@ type Historico = {
   usuario: { nome: string } | null;
 };
 const now = () => new Date().toISOString();
+
+/** RN-14 — dias para análise por grau do dano; sem dano (grau vazio) segue o prazo do dano leve. */
+const PRAZO_ANALISE_DIAS: Record<string, number> = {
+  LEVE: 10,
+  MODERADO: 7,
+  GRAVE: 4,
+  OBITO: 2,
+  NEVER_EVENT: 2,
+};
+const PRAZO_ANALISE_PADRAO_DIAS = 10;
+
+/** Data-limite para análise: data de registro da notificação + dias conforme o grau do dano. */
+export function calcularPrazoAnalise(
+  dataRegistroIso: string | null | undefined,
+  grauDano: string | null | undefined,
+): string {
+  const base = dataRegistroIso ? new Date(dataRegistroIso) : new Date();
+  const inicio = Number.isNaN(base.getTime()) ? new Date() : base;
+  const dias = PRAZO_ANALISE_DIAS[grauDano ?? ""] ?? PRAZO_ANALISE_PADRAO_DIAS;
+  inicio.setDate(inicio.getDate() + dias);
+  return inicio.toISOString();
+}
 const clone = <T>(value: T): T => JSON.parse(JSON.stringify(value)) as T;
 
 /** Funciona também em ambientes HTTP/IP, onde crypto.randomUUID pode não existir. */
@@ -360,7 +382,14 @@ export function getNotificacoes(): NotificacaoRaw[] {
     }
     const saved = localStorage.getItem(NOTIFICACOES_KEY);
     if (!saved) return seed();
-    return clone(JSON.parse(saved)) as NotificacaoRaw[];
+    const itens = clone(JSON.parse(saved)) as NotificacaoRaw[];
+    // Classificações salvas antes do cálculo do prazo (RN-14) ficaram sem data-limite: completa aqui.
+    for (const n of itens) {
+      const c = n.classificacao;
+      if (c && !c.rascunho && !c.data_validade)
+        c.data_validade = calcularPrazoAnalise(n.data_registro, c.grau_dano);
+    }
+    return itens;
   } catch {
     return seed();
   }
@@ -548,7 +577,7 @@ export function classificarLocal(id: string, payload: ClassificarPayload): Class
     observacoes: payload.observacoes ?? null,
     rascunho: false,
     data_classificacao: data,
-    data_validade: null,
+    data_validade: calcularPrazoAnalise(item.data_registro, payload.grau_dano),
     outro_envolvido: payload.outro_envolvido ?? null,
     outro_tipo_incidente: payload.outro_tipo_incidente ?? null,
   };

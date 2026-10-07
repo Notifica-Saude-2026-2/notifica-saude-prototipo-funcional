@@ -15,9 +15,9 @@ import step4Icon from "../../assets/step4.svg";
 
 const SECAO_PACIENTE = "Tela 2 - Informações sobre o Paciente";
 const CAMPO_CONTATO_ID = "55555555-5555-4555-b555-000000000007";
-const CAMPO_NOME_ID    = "55555555-5555-4555-b555-000000000006";
+const CAMPO_NOME_ID = "55555555-5555-4555-b555-000000000006";
 const CAMPO_UNIDADE_ID = "55555555-5555-4555-b555-000000000010";
-const CAMPO_SETOR_ID   = "55555555-5555-4555-b555-000000000003";
+const CAMPO_SETOR_ID = "55555555-5555-4555-b555-000000000003";
 
 const SECAO_CONFIG: Record<string, { label: string; icon: string }> = {
   "Tela 1 - Abertura": { label: "Informações iniciais", icon: step1Icon },
@@ -110,7 +110,7 @@ export default function Notificacao() {
   const camposComSetoresDinamicos = campos.map((c) =>
     c.id === CAMPO_SETOR_ID && setoresDisponiveis.length > 0
       ? { ...c, opcoes: setoresDisponiveis }
-      : c
+      : c,
   );
 
   // Cascade: ao trocar unidade, recarrega setores específicos e limpa seleção anterior
@@ -231,6 +231,7 @@ export default function Notificacao() {
         onPrev={currentStepIndex > 0 ? handlePrev : undefined}
         isLastStep={isLastStep}
         canAdvance={canAdvance}
+        compact
       >
         {isCurrentStepOptional && (
           <p className={styles.optionalNotice}>
