@@ -16,12 +16,12 @@ const SEED_VERSION_KEY = "notifica_saude_prototipo_seed_versao";
 // "4": removida a noção de metodologia da análise (campos metodologia_analise / metodologia /
 // flowAtivo) — o seed é recriado para não sobrar dado antigo com esses campos.
 // "5": análises do seed preenchidas (#1004 e #1005), novos registros concluído (#1003) e
-// arquivado (#1006) e histórico inicial.
+// arquivado (#1006), histórico inicial e instituições com nomes genéricos (Hospital A e B).
 const SEED_VERSION = "5";
 
 export const unidades = [
-  { id: "unidade-hospital-regional", nome: "Hospital Regional de Mato Grosso do Sul" },
-  { id: "unidade-hospital-universitario", nome: "Hospital Universitário" },
+  { id: "unidade-hospital-regional", nome: "Hospital A" },
+  { id: "unidade-hospital-universitario", nome: "Hospital B" },
 ];
 
 export const setores = [

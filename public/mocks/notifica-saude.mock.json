@@ -2,11 +2,11 @@
   "unidades": [
     {
       "id": "unidade-hospital-regional",
-      "nome": "Hospital Regional de Mato Grosso do Sul"
+      "nome": "Hospital A"
     },
     {
       "id": "unidade-hospital-universitario",
-      "nome": "Hospital Universitário"
+      "nome": "Hospital B"
     }
   ],
   "setores": [
