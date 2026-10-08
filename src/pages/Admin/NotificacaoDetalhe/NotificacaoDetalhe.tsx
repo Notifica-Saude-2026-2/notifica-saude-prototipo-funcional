@@ -11,7 +11,8 @@ import {
   type UpdateNotificacaoPayload,
 } from "../../../services/notificacaoDetalheService";
 import styles from "./NotificacaoDetalhe.module.css";
-import { STATUS_EDITAVEIS } from "../../../constants/notificacaoStatus";
+import { STATUS_EDITAVEIS, STATUS_FINAIS } from "../../../constants/notificacaoStatus";
+import { useAuth } from "../../../hooks/useAuth";
 
 // Componentes extraídos
 import { NotificacaoHeader } from "./components/NotificacaoHeader";
@@ -28,6 +29,7 @@ import { ActionUpdateModal } from "./components/ActionUpdateModal";
 
 export default function NotificacaoDetalhe() {
   const navigate = useNavigate();
+  const { usuario } = useAuth();
   const {
     detalhe,
     rawData,
@@ -64,12 +66,17 @@ export default function NotificacaoDetalhe() {
   const [visibleActionId, setVisibleActionId] = useState<string | null>(null);
   const [actionToUpdate, setActionToUpdate] = useState<ActionPlan | null>(null);
   const [actionToEdit, setActionToEdit] = useState<ActionPlan | null>(null);
+  // US-6.4 CA05 — sugestão de conclusão quando todas as ações terminam.
+  const [sugerirConclusao, setSugerirConclusao] = useState(false);
+  const [pedidoConcluir, setPedidoConcluir] = useState(0);
+  const podeConcluirIncidente = usuario?.perfil === "NSP" || usuario?.perfil === "ADMINISTRADOR";
 
   const actionPlans = detalhe?.planosAcao ?? [];
   // O plano de ação só pode ser registrado depois que a análise (núcleo ou setor) foi concluída.
   const analysisCompleted = detalhe?.statusRaw === "ANALISADA" || detalhe?.statusRaw === "EM_ACAO";
-  // Incidente concluído é somente leitura: nada pode mais ser editado, adicionado ou excluído.
-  const incidenteConcluido = detalhe?.statusRaw === "CONCLUIDA";
+  // Incidente concluído ou arquivado é somente leitura (US-6.1 CA06): nada pode mais ser editado,
+  // adicionado ou excluído.
+  const incidenteEncerrado = STATUS_FINAIS.has(detalhe?.statusRaw ?? "");
 
   // Próxima recomendação da análise ainda sem um plano de ação vinculado —
   // usada para pré-preencher o modal de novo plano de ação.
@@ -129,6 +136,7 @@ export default function NotificacaoDetalhe() {
             detalhe={detalhe}
             onArquivarSuccess={onArquivarSuccess}
             onConcluirSuccess={onConcluirSuccess}
+            pedidoConcluir={pedidoConcluir}
           />
 
           <InformacoesGeraisSection
@@ -160,7 +168,7 @@ export default function NotificacaoDetalhe() {
             onRegister={() => setActionPlanOpen(true)}
             canRegister={analysisCompleted}
             canEdit={analysisCompleted || !!detalhe.analise?.concluida}
-            readOnly={incidenteConcluido}
+            readOnly={incidenteEncerrado}
             actions={actionPlans}
             visibleActionId={visibleActionId}
             onToggleDetails={(id) => setVisibleActionId((current) => (current === id ? null : id))}
@@ -287,6 +295,17 @@ export default function NotificacaoDetalhe() {
               try {
                 const raw = await atualizarPlanoAcao(detalhe.id, updatedAction);
                 onPlanoAcaoAtualizado(raw);
+                // US-6.4 CA05/CA06 — só ao salvar uma ação como "Concluído", e se todas as ações
+                // do incidente estiverem finalizadas ("Concluído" ou "Cancelada").
+                const acoes = raw.planos_acao ?? [];
+                if (
+                  podeConcluirIncidente &&
+                  updatedAction.status === "Concluído" &&
+                  (raw.status === "ANALISADA" || raw.status === "EM_ACAO") &&
+                  acoes.every((a) => a.status === "Concluído" || a.status === "Cancelada")
+                ) {
+                  setSugerirConclusao(true);
+                }
               } catch {
                 // A ação continua visível com o valor anterior — o usuário pode tentar novamente.
               } finally {
@@ -294,6 +313,43 @@ export default function NotificacaoDetalhe() {
               }
             }}
           />
+        )}
+
+        {sugerirConclusao && (
+          <div className={styles.overlay}>
+            <div
+              className={styles.confirmModal}
+              role="dialog"
+              aria-modal="true"
+              data-testid="sugestao-conclusao"
+            >
+              <p className={styles.confirmText}>
+                Todas as ações desse incidente já foram concluídas. Deseja concluir o incidente?
+              </p>
+              <div className={styles.confirmActions}>
+                <button
+                  className={styles.cancelBtn}
+                  onClick={() => {
+                    setSugerirConclusao(false);
+                    setActionPlanOpen(true);
+                  }}
+                  data-testid="btn-sugestao-novo-plano"
+                >
+                  Não, criar outro plano de ação
+                </button>
+                <button
+                  className={styles.saveBtn}
+                  onClick={() => {
+                    setSugerirConclusao(false);
+                    setPedidoConcluir((n) => n + 1);
+                  }}
+                  data-testid="btn-sugestao-concluir"
+                >
+                  Sim, concluir incidente
+                </button>
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </AdminLayout>

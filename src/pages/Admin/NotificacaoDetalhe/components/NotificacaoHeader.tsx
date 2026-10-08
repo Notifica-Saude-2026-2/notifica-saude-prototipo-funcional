@@ -16,9 +16,16 @@ type Props = {
   detalhe: NotificacaoDetalheDTO;
   onArquivarSuccess: () => void;
   onConcluirSuccess: () => void;
+  /** Incrementado pela sugestão de conclusão (US-6.4 CA05) para abrir a confirmação do CA03. */
+  pedidoConcluir?: number;
 };
 
-export function NotificacaoHeader({ detalhe, onArquivarSuccess, onConcluirSuccess }: Props) {
+export function NotificacaoHeader({
+  detalhe,
+  onArquivarSuccess,
+  onConcluirSuccess,
+  pedidoConcluir = 0,
+}: Props) {
   const statusColors = getStatusColors(detalhe.statusRaw);
   const { usuario } = useAuth();
 
@@ -56,6 +63,13 @@ export function NotificacaoHeader({ detalhe, onArquivarSuccess, onConcluirSucces
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [dropdownOpen]);
+
+  useEffect(() => {
+    if (pedidoConcluir > 0) {
+      setConfirmError(null);
+      setPendingAction("concluir");
+    }
+  }, [pedidoConcluir]);
 
   async function handleConfirmar() {
     if (!pendingAction) return;

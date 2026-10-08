@@ -34,7 +34,7 @@ import { formatDateOnly, formatDateTime } from "../utils/formatDate";
 
 export const STATUS_LABEL: Record<string, string> = {
   NOVA: "Novo",
-  CLASSIFICADA: "Classificada",
+  CLASSIFICADA: "Classificado",
   ENCAMINHADA_SETOR: "Encaminhado",
   EM_ANALISE: "Em análise",
   ANALISADA: "Analisado",

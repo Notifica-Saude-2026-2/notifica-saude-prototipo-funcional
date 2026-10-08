@@ -4,7 +4,11 @@ import { LockClosedIcon } from "../../../../assets/icons/LockClosedIcon";
 import { useAuth } from "../../../../hooks/useAuth";
 import type { NotificacaoDetalheDTO } from "../../../../types/notificacaoDetalhe";
 import styles from "../NotificacaoDetalhe.module.css";
-import { STATUS_EDITAVEIS, motivoEdicaoBloqueada } from "../../../../constants/notificacaoStatus";
+import {
+  STATUS_COM_PRAZO_ANALISE,
+  STATUS_EDITAVEIS,
+  motivoEdicaoBloqueada,
+} from "../../../../constants/notificacaoStatus";
 const PERFIS_CLASSIFICADORES = new Set(["NSP", "ADMINISTRADOR"]);
 
 type Props = {
@@ -60,11 +64,13 @@ export function ClassificacaoSection({ detalhe, isOpen, onToggle, onClassificar 
                   {detalhe.classificacao.rascunho && (
                     <span className={styles.rascunhoBadge}>Classificação em andamento</span>
                   )}
-                  {!detalhe.classificacao.rascunho && detalhe.classificacao.dataValidade && (
-                    <span className={styles.prazoBadge}>
-                      Prazo para análise: {detalhe.classificacao.dataValidade}
-                    </span>
-                  )}
+                  {!detalhe.classificacao.rascunho &&
+                    detalhe.classificacao.dataValidade &&
+                    STATUS_COM_PRAZO_ANALISE.has(detalhe.statusRaw) && (
+                      <span className={styles.prazoBadge}>
+                        Prazo para análise: {detalhe.classificacao.dataValidade}
+                      </span>
+                    )}
                 </div>
                 {podeEditar && (
                   <button

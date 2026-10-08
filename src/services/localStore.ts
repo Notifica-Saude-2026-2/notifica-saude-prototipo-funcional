@@ -1248,6 +1248,8 @@ export function salvarAnaliseRascunhoLocal(id: string, valores: AnaliseValues): 
     updated_at: now(),
   };
   saveNotificacoes(items);
+  // US-6.2 CA08 — a mudança para "Em análise" fica registrada no histórico.
+  if (novoStatus !== item.status) addHistorico(id, "análise iniciada");
   return clone(analise);
 }
 
