@@ -5,6 +5,7 @@ import OutlinedInput from "@mui/material/OutlinedInput";
 import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
 import FormControl from "@mui/material/FormControl";
+import { ExtrairDadosButton } from "../ExtrairDadosButton";
 import styles from "./FiltersBar.module.css";
 
 function ChevronIcon({ className }: { className?: string }) {
@@ -154,44 +155,108 @@ export function FiltersBar({
         />
 
         <div className={styles.filterRight}>
-          <span className={styles.filterLabel}>FILTRAR POR:</span>
+          <div className={styles.grupo}>
+            <span className={styles.filterLabel}>FILTRAR POR:</span>
 
-          <FormControl size="small" sx={{ flex: { xs: 1, sm: "none" }, minWidth: 0 }}>
-            <Select
-              inputProps={{ "data-testid": "admin-tipo-incidente" }}
-              value={tipoIncidente}
-              onChange={(e) => onTipoIncidenteChange(e.target.value)}
-              displayEmpty
-              IconComponent={ChevronIcon}
-              sx={{
-                backgroundColor: "#fff",
-                borderRadius: "8px",
-                fontSize: "0.875rem",
-                fontFamily: "Inter, sans-serif",
-                width: "100%",
-                minWidth: { xs: 0, sm: 200 },
-                "& fieldset": { borderColor: "#e5e4e7" },
-              }}
-            >
-              {TIPO_INCIDENTE_OPTIONS.map((opt) => (
-                <MenuItem
-                  key={opt.value}
-                  value={opt.value}
-                  sx={{ fontFamily: "Inter, sans-serif", fontSize: "0.875rem" }}
-                >
-                  {opt.label}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-
-          {tipoIncidente === "EVENTO_ADVERSO" && (
             <FormControl size="small" sx={{ flex: { xs: 1, sm: "none" }, minWidth: 0 }}>
               <Select
-                inputProps={{ "data-testid": "admin-grau-dano" }}
-                value={grauDano}
-                onChange={(e) => onGrauDanoChange(e.target.value)}
+                inputProps={{ "data-testid": "admin-tipo-incidente" }}
+                value={tipoIncidente}
+                onChange={(e) => onTipoIncidenteChange(e.target.value)}
                 displayEmpty
+                IconComponent={ChevronIcon}
+                sx={{
+                  backgroundColor: "#fff",
+                  borderRadius: "8px",
+                  fontSize: "0.875rem",
+                  fontFamily: "Inter, sans-serif",
+                  width: "100%",
+                  minWidth: { xs: 0, sm: 200 },
+                  "& fieldset": { borderColor: "#e5e4e7" },
+                }}
+              >
+                {TIPO_INCIDENTE_OPTIONS.map((opt) => (
+                  <MenuItem
+                    key={opt.value}
+                    value={opt.value}
+                    sx={{ fontFamily: "Inter, sans-serif", fontSize: "0.875rem" }}
+                  >
+                    {opt.label}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
+            {tipoIncidente === "EVENTO_ADVERSO" && (
+              <FormControl size="small" sx={{ flex: { xs: 1, sm: "none" }, minWidth: 0 }}>
+                <Select
+                  inputProps={{ "data-testid": "admin-grau-dano" }}
+                  value={grauDano}
+                  onChange={(e) => onGrauDanoChange(e.target.value)}
+                  displayEmpty
+                  IconComponent={ChevronIcon}
+                  sx={{
+                    backgroundColor: "#fff",
+                    borderRadius: "8px",
+                    fontSize: "0.875rem",
+                    fontFamily: "Inter, sans-serif",
+                    width: "100%",
+                    minWidth: { xs: 0, sm: 160 },
+                    "& fieldset": { borderColor: "#e5e4e7" },
+                  }}
+                >
+                  {GRAU_DANO_OPTIONS.map((opt) => (
+                    <MenuItem
+                      key={opt.value}
+                      value={opt.value}
+                      sx={{ fontFamily: "Inter, sans-serif", fontSize: "0.875rem" }}
+                    >
+                      {opt.label}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            )}
+
+            <FormControl size="small" sx={{ flex: { xs: 1, sm: "none" }, minWidth: 0 }}>
+              <Select
+                inputProps={{ "data-testid": "admin-setor" }}
+                value={setorId}
+                onChange={(e) => onSetorChange(e.target.value)}
+                displayEmpty
+                IconComponent={ChevronIcon}
+                sx={{
+                  backgroundColor: "#fff",
+                  borderRadius: "8px",
+                  fontSize: "0.875rem",
+                  fontFamily: "Inter, sans-serif",
+                  width: "100%",
+                  minWidth: { xs: 0, sm: 180 },
+                  "& fieldset": { borderColor: "#e5e4e7" },
+                }}
+              >
+                <MenuItem value="" sx={{ fontFamily: "Inter, sans-serif", fontSize: "0.875rem" }}>
+                  Todos os setores
+                </MenuItem>
+                {setores.map((s) => (
+                  <MenuItem
+                    key={s.id}
+                    value={s.id}
+                    sx={{ fontFamily: "Inter, sans-serif", fontSize: "0.875rem" }}
+                  >
+                    {s.valor}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </div>
+          <div className={styles.grupo}>
+            <span className={styles.filterLabel}>ORDENAR POR:</span>
+            <FormControl size="small" sx={{ flex: { xs: 1, sm: "none" }, minWidth: 0 }}>
+              <Select
+                inputProps={{ "data-testid": "admin-sort" }}
+                value={sort}
+                onChange={(e) => onSortChange(e.target.value as "recente" | "antigo")}
                 IconComponent={ChevronIcon}
                 sx={{
                   backgroundColor: "#fff",
@@ -203,7 +268,7 @@ export function FiltersBar({
                   "& fieldset": { borderColor: "#e5e4e7" },
                 }}
               >
-                {GRAU_DANO_OPTIONS.map((opt) => (
+                {SORT_OPTIONS.map((opt) => (
                   <MenuItem
                     key={opt.value}
                     value={opt.value}
@@ -214,68 +279,8 @@ export function FiltersBar({
                 ))}
               </Select>
             </FormControl>
-          )}
-
-          <FormControl size="small" sx={{ flex: { xs: 1, sm: "none" }, minWidth: 0 }}>
-            <Select
-              inputProps={{ "data-testid": "admin-setor" }}
-              value={setorId}
-              onChange={(e) => onSetorChange(e.target.value)}
-              displayEmpty
-              IconComponent={ChevronIcon}
-              sx={{
-                backgroundColor: "#fff",
-                borderRadius: "8px",
-                fontSize: "0.875rem",
-                fontFamily: "Inter, sans-serif",
-                width: "100%",
-                minWidth: { xs: 0, sm: 180 },
-                "& fieldset": { borderColor: "#e5e4e7" },
-              }}
-            >
-              <MenuItem value="" sx={{ fontFamily: "Inter, sans-serif", fontSize: "0.875rem" }}>
-                Todos os setores
-              </MenuItem>
-              {setores.map((s) => (
-                <MenuItem
-                  key={s.id}
-                  value={s.id}
-                  sx={{ fontFamily: "Inter, sans-serif", fontSize: "0.875rem" }}
-                >
-                  {s.valor}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-
-          <span className={styles.filterLabel}>ORDENAR POR:</span>
-          <FormControl size="small" sx={{ flex: { xs: 1, sm: "none" }, minWidth: 0 }}>
-            <Select
-              inputProps={{ "data-testid": "admin-sort" }}
-              value={sort}
-              onChange={(e) => onSortChange(e.target.value as "recente" | "antigo")}
-              IconComponent={ChevronIcon}
-              sx={{
-                backgroundColor: "#fff",
-                borderRadius: "8px",
-                fontSize: "0.875rem",
-                fontFamily: "Inter, sans-serif",
-                width: "100%",
-                minWidth: { xs: 0, sm: 160 },
-                "& fieldset": { borderColor: "#e5e4e7" },
-              }}
-            >
-              {SORT_OPTIONS.map((opt) => (
-                <MenuItem
-                  key={opt.value}
-                  value={opt.value}
-                  sx={{ fontFamily: "Inter, sans-serif", fontSize: "0.875rem" }}
-                >
-                  {opt.label}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+            <ExtrairDadosButton />
+          </div>
         </div>
       </div>
     </>

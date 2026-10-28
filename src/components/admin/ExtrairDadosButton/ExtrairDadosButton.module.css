@@ -1,0 +1,30 @@
+/* Fica na barra de filtros, à direita do último filtro, com a mesma altura dos campos. */
+.wrapper {
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+/* "button.botao" vence a especificidade de ".button" do Button.module.css (mesma técnica do
+   compactBtn do StepForm). */
+button.botao {
+  height: 40px;
+  padding: 0 16px;
+  font-size: 13px;
+  border-radius: 8px;
+  white-space: nowrap;
+}
+
+button.botao svg {
+  margin-right: 6px;
+}
+
+/* No celular, a barra vira uma grade de duas colunas: o botão ocupa a linha inteira. */
+@media (max-width: 640px) {
+  .wrapper {
+    grid-column: 1 / -1;
+  }
+
+  button.botao {
+    width: 100%;
+  }
+}
