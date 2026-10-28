@@ -11,7 +11,6 @@
   margin: 0;
 }
 
-
 .bar {
   display: flex;
   align-items: center;
@@ -21,12 +20,26 @@
   flex-wrap: wrap;
 }
 
+/* Quando não cabe ao lado da busca, desce para a linha de baixo e quebra os filtros em
+   quantas linhas forem precisas, sem passar da largura da tela. */
 .filterRight {
   display: flex;
   align-items: center;
   gap: 10px;
-  flex-shrink: 0;
+  flex-shrink: 1;
   flex-wrap: wrap;
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* Rótulo e campos andam juntos: ao quebrar a linha, "Ordenar por" não se separa do
+   seu campo nem do botão de extrair. */
+.grupo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  min-width: 0;
 }
 
 @media (max-width: 640px) {
@@ -47,6 +60,11 @@
 
   .filterLabel {
     display: none;
+  }
+
+  /* No celular, os grupos somem e os campos entram direto na grade de duas colunas. */
+  .grupo {
+    display: contents;
   }
 }
 
