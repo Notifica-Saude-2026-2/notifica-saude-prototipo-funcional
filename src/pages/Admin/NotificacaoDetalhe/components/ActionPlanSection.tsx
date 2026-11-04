@@ -1,7 +1,11 @@
 import { Fragment, useState } from "react";
 import { FiEdit2, FiEdit3, FiEye, FiEyeOff, FiRefreshCw, FiTrash2 } from "react-icons/fi";
 import { MdWarningAmber } from "react-icons/md";
-import { camposPendentesPlano, nomesResponsaveis } from "../../../../types/actionPlan";
+import {
+  camposPendentesPlano,
+  nomesResponsaveis,
+  situacaoPlano,
+} from "../../../../types/actionPlan";
 import type { ActionPlan } from "./ActionPlanModal";
 import styles from "../NotificacaoDetalhe.module.css";
 
@@ -72,158 +76,173 @@ export function ActionPlanSection({
             </span>
           ) : (
             // Uma ação por linha; o "olho" abre os demais campos numa linha logo abaixo.
-            <div className={styles.planoTabelaWrap}>
-              <table className={styles.planoTabela}>
-                <thead>
-                  <tr>
-                    <th>Ação</th>
-                    <th>Recomendação</th>
-                    <th>Responsável</th>
-                    <th>Início</th>
-                    <th>Prazo</th>
-                    <th>Status</th>
-                    <th>Acompanhamento</th>
-                    <th>Ações</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {actions.map((action, index) => {
-                    const detailsVisible = visibleActionId === action.id;
-                    // Ação pré-criada a partir de uma recomendação da Análise (só com o "O que
-                    // será feito"): precisa ser completada antes de ter o andamento acompanhado.
-                    const pendentes = camposPendentesPlano(action);
-                    const incompleta = pendentes.length > 0;
-                    return (
-                      <Fragment key={action.id}>
-                        <tr
-                          className={detailsVisible ? styles.planoLinhaAberta : undefined}
-                          data-testid={`acao-${index + 1}`}
-                        >
-                          <td className={styles.planoAcaoTexto}>{action.what || "—"}</td>
-                          <td>{action.origemRecomendacao || "—"}</td>
-                          <td>{nomesResponsaveis(action) || "—"}</td>
-                          <td className={styles.planoData}>{formatDate(action.startDate)}</td>
-                          <td className={styles.planoData}>
-                            {formatDate(action.conclusionDate)}
-                            {action.status === "Atrasada" && action.newConclusionDate && (
-                              <span className={styles.planoNovoPrazo}>
-                                Nova: {formatDate(action.newConclusionDate)}
-                              </span>
-                            )}
-                          </td>
-                          <td>
-                            {incompleta ? (
-                              <span
-                                className={`${styles.planoStatus} ${styles.actionStatusPending}`}
-                                title={`Faltam ${pendentes.length} campo(s) obrigatório(s) para essa ação poder ser acompanhada.`}
-                              >
-                                Preenchimento pendente
-                              </span>
-                            ) : (
-                              <span
-                                className={`${styles.planoStatus} ${statusClass(action.status)}`}
-                              >
-                                {action.status}
-                              </span>
-                            )}
-                          </td>
-                          <td>{acompanhamento(action)}</td>
-                          <td>
-                            <div className={styles.planoAcoes}>
-                              {!readOnly && canEdit && (
+            <>
+              <SituacaoDoPlano actions={actions} />
+              <div className={styles.planoTabelaWrap}>
+                <table className={styles.planoTabela}>
+                  <thead>
+                    <tr>
+                      <th>Ação</th>
+                      <th>Recomendação</th>
+                      <th>Responsável</th>
+                      <th>Início</th>
+                      <th>Prazo</th>
+                      <th>Status</th>
+                      <th>Acompanhamento</th>
+                      <th>Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {actions.map((action, index) => {
+                      const detailsVisible = visibleActionId === action.id;
+                      // Ação pré-criada a partir de uma recomendação da Análise (só com o "O que
+                      // será feito"): precisa ser completada antes de ter o andamento acompanhado.
+                      const pendentes = camposPendentesPlano(action);
+                      const incompleta = pendentes.length > 0;
+                      return (
+                        <Fragment key={action.id}>
+                          <tr
+                            className={detailsVisible ? styles.planoLinhaAberta : undefined}
+                            data-testid={`acao-${index + 1}`}
+                          >
+                            <td className={styles.planoAcaoTexto}>{action.what || "—"}</td>
+                            <td>{action.origemRecomendacao || "—"}</td>
+                            <td>{nomesResponsaveis(action) || "—"}</td>
+                            <td className={styles.planoData}>{formatDate(action.startDate)}</td>
+                            <td className={styles.planoData}>
+                              {formatDate(action.conclusionDate)}
+                              {action.status === "Atrasada" && action.newConclusionDate && (
+                                <span className={styles.planoNovoPrazo}>
+                                  Nova: {formatDate(action.newConclusionDate)}
+                                </span>
+                              )}
+                            </td>
+                            <td>
+                              {incompleta ? (
+                                <span
+                                  className={`${styles.planoStatus} ${styles.actionStatusPending}`}
+                                  title={`Faltam ${pendentes.length} campo(s) obrigatório(s) para essa ação poder ser acompanhada.`}
+                                >
+                                  Preenchimento pendente
+                                </span>
+                              ) : (
+                                <span
+                                  className={`${styles.planoStatus} ${statusClass(action.status)}`}
+                                >
+                                  {action.status}
+                                </span>
+                              )}
+                            </td>
+                            <td>{acompanhamento(action)}</td>
+                            <td>
+                              <div className={styles.planoAcoes}>
+                                {!readOnly && canEdit && (
+                                  <button
+                                    className={styles.actionIconButton}
+                                    aria-label={
+                                      incompleta ? "Completar preenchimento" : "Editar ação"
+                                    }
+                                    title={incompleta ? "Completar preenchimento" : "Editar ação"}
+                                    onClick={() => onEdit(action)}
+                                    data-testid={`acao-${index + 1}-editar`}
+                                  >
+                                    <FiEdit2 />
+                                  </button>
+                                )}
+                                {!readOnly && !incompleta && (
+                                  <button
+                                    className={styles.actionIconButton}
+                                    aria-label="Atualizar andamento da ação"
+                                    title="Atualizar andamento da ação"
+                                    onClick={() => onUpdate(action)}
+                                  >
+                                    <FiRefreshCw />
+                                  </button>
+                                )}
                                 <button
                                   className={styles.actionIconButton}
                                   aria-label={
-                                    incompleta ? "Completar preenchimento" : "Editar ação"
+                                    detailsVisible ? "Ocultar detalhes" : "Visualizar detalhes"
                                   }
-                                  title={incompleta ? "Completar preenchimento" : "Editar ação"}
-                                  onClick={() => onEdit(action)}
-                                  data-testid={`acao-${index + 1}-editar`}
+                                  title={
+                                    detailsVisible ? "Ocultar detalhes" : "Visualizar detalhes"
+                                  }
+                                  onClick={() => onToggleDetails(action.id)}
                                 >
-                                  <FiEdit2 />
+                                  {detailsVisible ? <FiEyeOff /> : <FiEye />}
                                 </button>
-                              )}
-                              {!readOnly && !incompleta && (
-                                <button
-                                  className={styles.actionIconButton}
-                                  aria-label="Atualizar andamento da ação"
-                                  title="Atualizar andamento da ação"
-                                  onClick={() => onUpdate(action)}
-                                >
-                                  <FiRefreshCw />
-                                </button>
-                              )}
-                              <button
-                                className={styles.actionIconButton}
-                                aria-label={
-                                  detailsVisible ? "Ocultar detalhes" : "Visualizar detalhes"
-                                }
-                                title={detailsVisible ? "Ocultar detalhes" : "Visualizar detalhes"}
-                                onClick={() => onToggleDetails(action.id)}
-                              >
-                                {detailsVisible ? <FiEyeOff /> : <FiEye />}
-                              </button>
-                              {!readOnly && (
-                                <button
-                                  className={`${styles.actionIconButton} ${styles.actionIconButtonDanger}`}
-                                  aria-label="Excluir ação"
-                                  title="Excluir ação"
-                                  onClick={() => setPendingDeleteId(action.id)}
-                                >
-                                  <FiTrash2 />
-                                </button>
-                              )}
-                            </div>
-                          </td>
-                        </tr>
-                        {detailsVisible && (
-                          <tr className={styles.planoDetalhesLinha}>
-                            <td colSpan={8}>
-                              {incompleta && (
-                                <p className={styles.actionPendingText}>
-                                  <MdWarningAmber size={15} aria-hidden="true" /> Faltam{" "}
-                                  {pendentes.length} campo{pendentes.length > 1 ? "s" : ""}{" "}
-                                  obrigatório{pendentes.length > 1 ? "s" : ""} para essa ação poder
-                                  ser acompanhada.
-                                </p>
-                              )}
-                              <div className={styles.actionDetails}>
-                                <Detail label="Onde será feito" value={action.where} />
-                                <Detail label="Comprovação" value={action.proof} />
-                                <Detail label="Resultado esperado" value={action.expectedResult} />
-                                <Detail label="Como verificar" value={action.verification} />
-                                <Detail label="Quando verificar" value={action.verificationDate} />
-                                <Detail label="Resultado observado" value={action.observedResult} />
-                                {action.attachments.length > 0 && (
-                                  <div className={styles.actionDetailsFull}>
-                                    <span>Anexos</span>
-                                    <div className={styles.actionAttachmentList}>
-                                      {action.attachments.map((attachment) => (
-                                        <a
-                                          key={`${attachment.name}-${attachment.size}`}
-                                          href={attachment.dataUrl}
-                                          download={attachment.name}
-                                          className={styles.actionAttachmentLink}
-                                        >
-                                          {attachment.name}
-                                        </a>
-                                      ))}
-                                    </div>
-                                  </div>
+                                {!readOnly && (
+                                  <button
+                                    className={`${styles.actionIconButton} ${styles.actionIconButtonDanger}`}
+                                    aria-label="Excluir ação"
+                                    title="Excluir ação"
+                                    onClick={() => setPendingDeleteId(action.id)}
+                                  >
+                                    <FiTrash2 />
+                                  </button>
                                 )}
                               </div>
-                              <p className={styles.actionCardUpdated}>
-                                Atualizada: {formatUpdatedAt(action.updatedAt)}
-                              </p>
                             </td>
                           </tr>
-                        )}
-                      </Fragment>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+                          {detailsVisible && (
+                            <tr className={styles.planoDetalhesLinha}>
+                              <td colSpan={8}>
+                                {incompleta && (
+                                  <p className={styles.actionPendingText}>
+                                    <MdWarningAmber size={15} aria-hidden="true" /> Faltam{" "}
+                                    {pendentes.length} campo{pendentes.length > 1 ? "s" : ""}{" "}
+                                    obrigatório{pendentes.length > 1 ? "s" : ""} para essa ação
+                                    poder ser acompanhada.
+                                  </p>
+                                )}
+                                <div className={styles.actionDetails}>
+                                  <Detail label="Como será realizada" value={action.how} />
+                                  <Detail label="Onde será feito" value={action.where} />
+                                  <Detail label="Comprovação" value={action.proof} />
+                                  <Detail
+                                    label="Resultado esperado"
+                                    value={action.expectedResult}
+                                  />
+                                  <Detail label="Como verificar" value={action.verification} />
+                                  <Detail
+                                    label="Quando verificar"
+                                    value={action.verificationDate}
+                                  />
+                                  <Detail
+                                    label="Resultado observado"
+                                    value={action.observedResult}
+                                  />
+                                  {action.attachments.length > 0 && (
+                                    <div className={styles.actionDetailsFull}>
+                                      <span>Anexos</span>
+                                      <div className={styles.actionAttachmentList}>
+                                        {action.attachments.map((attachment) => (
+                                          <a
+                                            key={`${attachment.name}-${attachment.size}`}
+                                            href={attachment.dataUrl}
+                                            download={attachment.name}
+                                            className={styles.actionAttachmentLink}
+                                          >
+                                            {attachment.name}
+                                          </a>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                                <p className={styles.actionCardUpdated}>
+                                  Atualizada: {formatUpdatedAt(action.updatedAt)}
+                                </p>
+                              </td>
+                            </tr>
+                          )}
+                        </Fragment>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </>
           )}
           {canRegister && !readOnly && (
             <button
@@ -296,6 +315,24 @@ function acompanhamento(action: ActionPlan) {
           : action.observedResult;
   return texto?.trim() || "—";
 }
+/** Situação do plano como um todo, acima da tabela: em dia, com ação atrasada ou concluído. */
+function SituacaoDoPlano({ actions }: { actions: ActionPlan[] }) {
+  const situacao = situacaoPlano(actions);
+  if (!situacao) return null;
+  const classe =
+    situacao === "Concluído"
+      ? styles.planoSituacaoConcluido
+      : situacao === "Com ação atrasada"
+        ? styles.actionStatusLate
+        : styles.actionStatusCompleted;
+  return (
+    <div className={styles.planoSituacao} data-testid="plano-situacao">
+      <span className={styles.planoSituacaoRotulo}>Situação do plano:</span>
+      <span className={`${styles.planoStatus} ${classe}`}>{situacao}</span>
+    </div>
+  );
+}
+
 function statusClass(status: ActionPlan["status"]) {
   if (status === "Concluído") return styles.actionStatusCompleted;
   if (status === "Parcialmente concluído") return styles.actionStatusPartial;

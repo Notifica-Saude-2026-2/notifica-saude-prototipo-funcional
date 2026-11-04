@@ -17,16 +17,6 @@ const TURNO_OPTIONS = [
   { id: "66666666-6666-4666-b666-000000000020", label: "Não sei informar" },
 ];
 
-const FAIXA_ETARIA_OPTIONS = [
-  { id: "66666666-6666-4666-b666-000000000006", label: "Recém-nascido" },
-  { id: "66666666-6666-4666-b666-000000000007", label: "0-1 ano" },
-  { id: "66666666-6666-4666-b666-000000000008", label: "2-12 anos" },
-  { id: "66666666-6666-4666-b666-000000000009", label: "13-17 anos" },
-  { id: "66666666-6666-4666-b666-000000000010", label: "18-59 anos" },
-  { id: "66666666-6666-4666-b666-000000000011", label: "60 anos ou mais" },
-  { id: "66666666-6666-4666-b666-000000000012", label: "Não sei informar" },
-];
-
 const SEXO_OPTIONS = [
   { id: "66666666-6666-4666-b666-000000000013", label: "Feminino" },
   { id: "66666666-6666-4666-b666-000000000014", label: "Masculino" },
@@ -75,7 +65,11 @@ export function EditModal({
   const [setorOutroText, setSetorOutroText] = useState<string>(
     rawData.respostas.find((r) => r.campo_id === CAMPO_IDS.SETOR)?.valor_texto ?? "",
   );
-  const [idadeId, setIdadeId] = useState(findOpcaoId(CAMPO_IDS.IDADE));
+  // Faixa etária em texto livre (US-1.1 CA07). Registros antigos, com opção de lista, aparecem
+  // com o texto da opção para o usuário ajustar.
+  const [idade, setIdade] = useState<string>(detalhe.paciente.idade ?? "");
+  const [prontuario, setProntuario] = useState<string>(detalhe.paciente.prontuario ?? "");
+
   const [sexoId, setSexoId] = useState(findOpcaoId(CAMPO_IDS.SEXO));
   const [sexoOutroText, setSexoOutroText] = useState<string>(
     rawData.respostas.find((r) => r.campo_id === CAMPO_IDS.SEXO)?.valor_texto ?? "",
@@ -124,15 +118,22 @@ export function EditModal({
     }
 
     if (detalhe.paciente.envolvido) {
-      if (!idadeId) {
-        setLocalError("A idade do paciente é obrigatória.");
+      if (!prontuario.trim()) {
+        setLocalError(
+          'O número do prontuário ou do atendimento é obrigatório. Caso não saiba, escreva "Não sei informar".',
+        );
+        return;
+      }
+      if (!idade.trim()) {
+        setLocalError("A faixa etária do paciente é obrigatória.");
         return;
       }
       if (!sexoId) {
         setLocalError("O sexo do paciente é obrigatório.");
         return;
       }
-      respostas.push({ campo_id: CAMPO_IDS.IDADE, valor_opcao_id: idadeId });
+      respostas.push({ campo_id: CAMPO_IDS.PRONTUARIO, valor: prontuario.trim() });
+      respostas.push({ campo_id: CAMPO_IDS.IDADE, valor: idade.trim() });
 
       const isSexoOutro =
         SEXO_OPTIONS.find((s) => s.id === sexoId)?.label.toLowerCase() === "outro";
@@ -296,27 +297,38 @@ export function EditModal({
             </div>
           </div>
 
+          {/* Nº do prontuário (apenas se paciente envolvido) — US-1.1 CA06 */}
+          {detalhe.paciente.envolvido && (
+            <div>
+              <p className={styles.formQuestion}>
+                Número do prontuário do paciente ou número do atendimento
+              </p>
+              <input
+                type="text"
+                className={styles.modalInput}
+                data-testid="field-prontuario"
+                value={prontuario}
+                onChange={(e) => setProntuario(e.target.value)}
+                placeholder='Caso não saiba, escreva "Não sei informar"'
+                disabled={saving}
+              />
+            </div>
+          )}
+
           {/* Faixa etária + Sexo (apenas se paciente envolvido) */}
           {detalhe.paciente.envolvido && (
             <div className={styles.modalGrid}>
               <div>
-                <p className={styles.formQuestion}>Idade do paciente</p>
-                <select
+                <p className={styles.formQuestion}>Faixa etária do paciente</p>
+                <input
+                  type="text"
                   className={styles.modalInput}
                   data-testid="field-idade"
-                  value={idadeId}
-                  onChange={(e) => setIdadeId(e.target.value)}
+                  value={idade}
+                  onChange={(e) => setIdade(e.target.value)}
+                  placeholder="Ex.: 3 meses, 8 anos, 45 anos"
                   disabled={saving}
-                >
-                  <option value="" disabled hidden>
-                    Selecione
-                  </option>
-                  {FAIXA_ETARIA_OPTIONS.map((o) => (
-                    <option key={o.id} value={o.id}>
-                      {o.label}
-                    </option>
-                  ))}
-                </select>
+                />
               </div>
               <div>
                 <p className={styles.formQuestion}>Sexo</p>

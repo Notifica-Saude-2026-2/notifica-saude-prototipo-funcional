@@ -71,3 +71,12 @@
     padding: 12px;
   }
 }
+
+/* Caixa de ajuda entre a pergunta e o campo: no formulário público o texto herdaria a Raleway do
+   layout público (fina); aqui ela usa a mesma fonte e o mesmo peso (Inter regular) das caixas de
+   informação do restante do sistema. */
+.ajuda,
+.ajuda * {
+  font-family: "Inter", sans-serif;
+  font-weight: 400;
+}

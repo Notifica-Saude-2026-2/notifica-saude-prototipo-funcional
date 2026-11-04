@@ -18,6 +18,7 @@ import { evalCondition } from "../../../components/analise/condition";
 import type { TableRow } from "../../../components/analise/TableField";
 import styles from "../../../components/analise/Analise.module.css";
 import { BackButton } from "../../../components/common/ui/BackButton";
+import { registrarConsultaProntuario } from "../../../services/notificacaoDetalheService";
 import { Toast } from "../../../components/common/ui/Toast";
 import { ANALISE_FORM } from "../../../constants/analiseSchema";
 import { getGrauDanoColorByLabel } from "../../../utils/statusColors";
@@ -101,11 +102,22 @@ function ResumoNotificacao({
 
       <div className={styles.resumoGrid}>
         <ResumoItem label="Descrição" value={detalhe.descricao} full />
+        <ResumoItem
+          label="Medidas adotadas imediatamente"
+          value={detalhe.medidasImediatas || "Não informado"}
+          full
+        />
         <ResumoItem label="Data do incidente" value={detalhe.dataIncidente} />
         <ResumoItem label="Horário" value={detalhe.horario} />
         <ResumoItem label="Turno" value={detalhe.turno} />
         {detalhe.paciente.envolvido ? (
           <>
+            {/* US-1.1 CA06 — quem conduz a análise vê o nº (o acesso é registrado no histórico). */}
+            <ResumoItem
+              label="Nº do prontuário ou do atendimento"
+              value={detalhe.paciente.prontuario}
+              full
+            />
             <ResumoItem label="Faixa etária do paciente" value={detalhe.paciente.idade} />
             <ResumoItem label="Sexo do paciente" value={detalhe.paciente.sexo} />
           </>
@@ -183,6 +195,14 @@ export default function AnaliseFlowPage() {
       setLoading(false);
     });
   }, [id]);
+
+  // US-1.1 CA06 — quem conduz a análise vê o nº do prontuário no resumo da Seção 1; o acesso é
+  // registrado no histórico uma vez por abertura do formulário.
+  const detalheId = detalhe?.id;
+  const temProntuario = !!detalhe?.paciente.envolvido && !!detalhe?.paciente.prontuario;
+  useEffect(() => {
+    if (detalheId && temProntuario) registrarConsultaProntuario(detalheId);
+  }, [detalheId, temProntuario]);
 
   // A análise é um formulário único (sem escolha de metodologia) — ver ANALISE_FORM.
   const flow = ANALISE_FORM;

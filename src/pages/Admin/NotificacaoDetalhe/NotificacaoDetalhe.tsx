@@ -46,6 +46,7 @@ export default function NotificacaoDetalhe() {
     onPlanoAcaoRegistrado,
     onPlanoAcaoAtualizado,
     onPlanoAcaoExcluido,
+    recarregarHistorico,
   } = useNotificacaoDetalhe();
 
   type SectionKey = "info" | "classification" | "analysis" | "actionPlan" | "history";
@@ -144,6 +145,8 @@ export default function NotificacaoDetalhe() {
             isOpen={openSections.info}
             onToggle={() => toggleSection("info")}
             onEdit={() => setEditOpen(true)}
+            analiseViaEncaminhamento={rawData?.analise_via_encaminhamento ?? false}
+            onProntuarioConsultado={recarregarHistorico}
           />
 
           <ClassificacaoSection

@@ -17,7 +17,10 @@ const SEED_VERSION_KEY = "notifica_saude_prototipo_seed_versao";
 // flowAtivo) — o seed é recriado para não sobrar dado antigo com esses campos.
 // "5": análises do seed preenchidas (#1004 e #1005), novos registros concluído (#1003) e
 // arquivado (#1006), histórico inicial e instituições com nomes genéricos (Hospital A e B).
-const SEED_VERSION = "5";
+// "6": faixa etária passa a ser texto livre e entra o nº do prontuário/atendimento do paciente.
+// "7": novas opções de "Quem está fazendo esta notificação?" e campo de medidas imediatas.
+// "8": ações do seed com "Como a ação será realizada".
+const SEED_VERSION = "8";
 
 export const unidades = [
   { id: "unidade-hospital-regional", nome: "Hospital A" },
@@ -41,17 +44,24 @@ export const camposFormulario: CampoDinamico[] = [
     secao: "Tela 1 - Abertura",
     opcoes: [option("paciente-sim", "Sim"), option("paciente-nao", "Não")],
   },
+  // Nº do prontuário ou do atendimento. Sigiloso: visível só para o NSP e para quem conduz a
+  // análise, fora de relatórios e exportações, e cada consulta vai para o histórico (US-1.1 CA06).
+  {
+    id: "55555555-5555-4555-b555-000000000013",
+    label: "Informe o número do prontuário do paciente ou o número do atendimento:",
+    tipo: "TEXTO",
+    obrigatorio: true,
+    secao: "Tela 2 - Informações sobre o Paciente",
+    placeholder: 'Caso não saiba, escreva "Não sei informar"',
+  },
+  // Faixa etária em texto livre (antes era lista) — US-1.1 CA07.
   {
     id: "55555555-5555-4555-b555-000000000001",
     label: "Faixa etária do paciente",
-    tipo: "SELECT",
+    tipo: "TEXTO",
     obrigatorio: true,
     secao: "Tela 2 - Informações sobre o Paciente",
-    opcoes: [
-      option("idade-0-17", "0 a 17 anos"),
-      option("idade-18-59", "18 a 59 anos"),
-      option("idade-60", "60 anos ou mais"),
-    ],
+    placeholder: "Ex.: 3 meses, 8 anos, 45 anos",
   },
   {
     id: "55555555-5555-4555-b555-000000000002",
@@ -118,15 +128,29 @@ export const camposFormulario: CampoDinamico[] = [
     secao: "Tela 4 - Descrição do Incidente e Papel do Notificador",
     placeholder: "Descreva o que aconteceu",
   },
+  // Medidas adotadas logo após o incidente — opcional (US-1.1 CA08).
+  {
+    id: "55555555-5555-4555-b555-000000000014",
+    label: "Quais medidas foram adotadas imediatamente após a identificação do incidente?",
+    tipo: "AREA",
+    obrigatorio: false,
+    secao: "Tela 4 - Descrição do Incidente e Papel do Notificador",
+    ajuda:
+      "Informe as medidas de que você tem conhecimento, como atendimento ao paciente, interrupção de procedimento ou comunicação à equipe responsável. Não é necessário ter realizado pessoalmente essas medidas.",
+  },
+  // Antes "Papel do notificante" (lista com 3 opções) — US-1.1 CA09.
   {
     id: "55555555-5555-4555-b555-000000000005",
-    label: "Papel do notificante",
-    tipo: "SELECT",
+    label: "Quem está fazendo esta notificação?",
+    tipo: "RADIO",
     obrigatorio: true,
     secao: "Tela 4 - Descrição do Incidente e Papel do Notificador",
     opcoes: [
+      option("papel-paciente", "Paciente"),
+      option("papel-familiar", "Familiar ou responsável pelo paciente"),
+      option("papel-acompanhante", "Acompanhante"),
       option("papel-profissional", "Profissional de saúde"),
-      option("papel-acompanhante", "Familiar/acompanhante"),
+      option("papel-outro-profissional", "Outro profissional do serviço"),
       option("papel-outro", "Outro"),
     ],
   },
@@ -266,7 +290,16 @@ function seedHistorico(): Record<string, Historico[]> {
   };
 }
 
+/** Seed antigo usava faixas fixas; com o campo livre, cada faixa vira uma idade de exemplo. */
+const IDADE_SEED: Record<string, string> = {
+  "60 anos ou mais": "72 anos",
+  "18 a 59 anos": "45 anos",
+  "0 a 17 anos": "9 anos",
+};
+let seqProntuario = 4580;
+
 function seed(): NotificacaoRaw[] {
+  seqProntuario = 4580;
   const respostasDe = (
     faixaEtaria: string,
     sexo: string,
@@ -277,7 +310,11 @@ function seed(): NotificacaoRaw[] {
     contato?: string,
   ): RespostaItemRaw[] => [
     resposta("55555555-5555-4555-b555-000000000000", null, "Sim"),
-    resposta("55555555-5555-4555-b555-000000000001", null, faixaEtaria),
+    resposta(
+      "55555555-5555-4555-b555-000000000013",
+      `PR-${String(++seqProntuario).padStart(6, "0")}`,
+    ),
+    resposta("55555555-5555-4555-b555-000000000001", IDADE_SEED[faixaEtaria] ?? faixaEtaria),
     resposta("55555555-5555-4555-b555-000000000002", null, sexo),
     resposta("55555555-5555-4555-b555-000000000009", null, turno),
     resposta("55555555-5555-4555-b555-000000000012", horario),
@@ -806,6 +843,7 @@ function seed(): NotificacaoRaw[] {
       planos_acao: [
         plano("plano-3-1", {
           what: REC_3_A,
+          how: "Definir a escala de mudança de decúbito por leito, imprimir o impresso de controle, treinar a equipe de enfermagem dos três turnos e conferir o preenchimento na passagem de plantão.",
           where: "UTI",
           responsible: "Paulo Azevedo",
           responsaveis: [{ nome: "Paulo Azevedo", funcao: "Coordenador(a)", setor: "UTI" }],
@@ -833,6 +871,7 @@ function seed(): NotificacaoRaw[] {
         }),
         plano("plano-3-2", {
           what: REC_3_B,
+          how: "Levantar os leitos de alto risco, solicitar orçamento e aprovação da compra, receber e instalar os colchões e orientar a equipe sobre o uso e a limpeza.",
           where: "UTI",
           responsible: "Paulo Azevedo",
           responsaveis: [{ nome: "Paulo Azevedo", funcao: "Coordenador(a)", setor: "UTI" }],
@@ -900,6 +939,7 @@ function seed(): NotificacaoRaw[] {
       planos_acao: [
         plano("plano-4-1", {
           what: REC_4,
+          how: "Incluir a dupla checagem no checklist de cirurgia segura, treinar as equipes do centro cirúrgico e auditar uma amostra semanal de checklists.",
           where: "Centro Cirúrgico",
           responsible: "Renata Farias",
           responsaveis: [
@@ -978,7 +1018,7 @@ function seed(): NotificacaoRaw[] {
           "Feminino",
           "Tarde",
           "15:30",
-          "Familiar/acompanhante",
+          "Familiar ou responsável pelo paciente",
         ),
       },
     ),
@@ -1142,6 +1182,10 @@ export function atualizarLocal(id: string, payload: UpdateNotificacaoPayload): N
   }
   for (const respostaPayload of payload.respostas ?? []) {
     const existing = updated.respostas.find((r) => r.campo_id === respostaPayload.campo_id);
+    // Campo de texto livre (ex.: faixa etária): o valor digitado substitui qualquer opção antiga.
+    const campoTexto =
+      camposFormulario.find((c) => c.id === respostaPayload.campo_id)?.tipo === "TEXTO" &&
+      !respostaPayload.valor_opcao_id;
     const label = optionLabel(
       respostaPayload.campo_id,
       respostaPayload.valor_opcao_id ?? "",
@@ -1157,12 +1201,16 @@ export function atualizarLocal(id: string, payload: UpdateNotificacaoPayload): N
       valor_texto:
         respostaPayload.valor ??
         (respostaPayload.valor_opcao_id ? null : (existing?.valor_texto ?? null)),
-      valor_opcao_id: respostaPayload.valor_opcao_id ?? existing?.valor_opcao_id ?? null,
+      valor_opcao_id: campoTexto
+        ? null
+        : (respostaPayload.valor_opcao_id ?? existing?.valor_opcao_id ?? null),
       valor_entidade_id: null,
       valor_entidade_label: null,
-      opcao_selecionada: respostaPayload.valor_opcao_id
-        ? { id: respostaPayload.valor_opcao_id, valor: label }
-        : (existing?.opcao_selecionada ?? null),
+      opcao_selecionada: campoTexto
+        ? null
+        : respostaPayload.valor_opcao_id
+          ? { id: respostaPayload.valor_opcao_id, valor: label }
+          : (existing?.opcao_selecionada ?? null),
     };
     if (existing) Object.assign(existing, next);
     else updated.respostas.push(next);

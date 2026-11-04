@@ -232,8 +232,10 @@ export function mapToNotificacaoDetalhe(raw: NotificacaoRaw): NotificacaoDetalhe
     turno: getRespostaValor(respostas, CAMPO_IDS.TURNO),
     horario: getRespostaValor(respostas, CAMPO_IDS.HORARIO),
     papel: getRespostaValor(respostas, CAMPO_IDS.PAPEL),
+    medidasImediatas: getRespostaTexto(respostas, CAMPO_IDS.MEDIDAS_IMEDIATAS),
     paciente: {
       envolvido,
+      prontuario: envolvido ? getRespostaValor(respostas, CAMPO_IDS.PRONTUARIO) : null,
       idade: envolvido ? getRespostaValor(respostas, CAMPO_IDS.IDADE) : null,
       sexo: envolvido
         ? (() => {
@@ -303,6 +305,16 @@ export type HistoricoItemAPI = {
   data_alteracao: string;
   usuario: { nome: string } | null;
 };
+
+/** Registra no histórico que o usuário consultou o nº do prontuário/atendimento do paciente. */
+const ultimaConsultaProntuario = new Map<string, number>();
+export async function registrarConsultaProntuario(id: string): Promise<void> {
+  // Evita registro duplicado quando o React (StrictMode, em dev) executa o efeito duas vezes.
+  const agora = Date.now();
+  if (agora - (ultimaConsultaProntuario.get(id) ?? 0) < 2000) return;
+  ultimaConsultaProntuario.set(id, agora);
+  addHistorico(id, "consultou o número do prontuário/atendimento do paciente");
+}
 
 export async function getNotificacaoHistorico(id: string): Promise<HistoricoItemAPI[]> {
   return getHistorico(id);

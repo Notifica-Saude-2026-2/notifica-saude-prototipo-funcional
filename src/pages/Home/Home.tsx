@@ -13,7 +13,8 @@ export default function Home() {
         <p className={styles.text}>
           O Notifica Saúde é um sistema destinado ao registro de incidentes e eventos adversos
           relacionados à assistência à saúde e ao uso de tecnologias como medicamentos e produtos
-          médico-hospitalares.
+          médico-hospitalares (de todos os níveis de atenção, que possuam Núcleo de Segurança do
+          Paciente (NSP) ou equipe equivalente).
         </p>
 
         <p className={styles.text}>

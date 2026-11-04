@@ -1,5 +1,7 @@
 import React from "react";
 import styles from "./Textarea.module.css";
+import { SectionInfoBox } from "../../../analise/SectionInfoBox";
+import analiseStyles from "../../../analise/Analise.module.css";
 
 type TextareaProps = {
   label?: string;
@@ -9,6 +11,8 @@ type TextareaProps = {
   required?: boolean;
   error?: string;
   maxLength?: number;
+  /** Texto de ajuda exibido entre a pergunta e o campo, na caixa de informação padrão do sistema. */
+  ajuda?: string;
   "data-testid"?: string;
 };
 
@@ -20,6 +24,7 @@ export const Textarea: React.FC<TextareaProps> = ({
   required = false,
   error,
   maxLength,
+  ajuda,
   "data-testid": dataTestId,
 }) => {
   return (
@@ -31,6 +36,11 @@ export const Textarea: React.FC<TextareaProps> = ({
         </label>
       )}
       {required && <span className={styles.requiredHint}>*Preenchimento obrigatório</span>}
+      {ajuda && (
+        <SectionInfoBox className={`${analiseStyles.sectionInfoBoxField} ${styles.ajuda}`}>
+          {ajuda}
+        </SectionInfoBox>
+      )}
       <textarea
         className={[styles.textarea, error ? styles.error : ""].join(" ").trim()}
         value={value}

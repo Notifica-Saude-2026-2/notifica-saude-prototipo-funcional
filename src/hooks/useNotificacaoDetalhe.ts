@@ -46,6 +46,7 @@ type UseNotificacaoDetalheResult = {
   onPlanoAcaoRegistrado: (raw: NotificacaoRaw) => void;
   onPlanoAcaoAtualizado: (raw: NotificacaoRaw) => void;
   onPlanoAcaoExcluido: (raw: NotificacaoRaw) => void;
+  recarregarHistorico: () => void;
 };
 
 export function useNotificacaoDetalhe(): UseNotificacaoDetalheResult {
@@ -172,6 +173,11 @@ export function useNotificacaoDetalhe(): UseNotificacaoDetalheResult {
     getNotificacaoHistorico(raw.id).then((data) => setHistorico((h) => ({ ...h, data })));
   }
 
+  function recarregarHistorico() {
+    if (!rawData) return;
+    getNotificacaoHistorico(rawData.id).then((data) => setHistorico((h) => ({ ...h, data })));
+  }
+
   function onPlanoAcaoAtualizado(raw: NotificacaoRaw) {
     setRawData(raw);
   }
@@ -196,5 +202,6 @@ export function useNotificacaoDetalhe(): UseNotificacaoDetalheResult {
     onPlanoAcaoRegistrado,
     onPlanoAcaoAtualizado,
     onPlanoAcaoExcluido,
+    recarregarHistorico,
   };
 }

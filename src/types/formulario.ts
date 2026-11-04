@@ -30,6 +30,8 @@ export type CampoDinamico = {
   /** Número da etapa — derivado de secao no frontend se não fornecido diretamente */
   etapa?: number;
   entidade_relacional?: string;
+  /** Texto de ajuda exibido logo abaixo do campo. */
+  ajuda?: string;
 };
 
 export type RespostaCampo = {
