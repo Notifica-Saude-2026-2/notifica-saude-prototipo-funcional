@@ -39,6 +39,8 @@ export const PLANO_LIMITES = {
 export type ActionPlan = {
   id: string;
   what: string;
+  /** Como a ação será realizada — principais passos para colocar a ação em prática. */
+  how: string;
   where: string;
   /** Nomes dos responsáveis juntados (derivado de `responsaveis`) — usado nos cards/histórico. */
   responsible: string;
@@ -83,6 +85,7 @@ export function camposPendentesPlano(plan: ActionPlan): string[] {
   const faltando: string[] = [];
   const vazio = (v: string | undefined) => !(v ?? "").trim();
   if (vazio(plan.what)) faltando.push("O que será feito");
+  if (vazio(plan.how)) faltando.push("Como a ação será realizada");
   if (vazio(plan.where)) faltando.push("Onde será feito");
   const responsaveis = plan.responsaveis ?? [];
   const responsaveisOk =
@@ -164,6 +167,7 @@ export function limitesExcedidosPlano(
       checar(`Recurso ${i + 1} — Pedido/item`, item.pedido, L.textoCurto),
     );
   if (plan.approval === "Sim") checar("Qual aprovação", plan.approvalDetail, L.textoCurto);
+  checar("Como a ação será realizada", plan.how, L.textoLongo);
   checar("Como comprovar que foi feito", plan.proof, L.textoLongo);
   checar("Resultado esperado", plan.expectedResult, L.textoLongo);
   checar("Como saber se funcionou", plan.verification, L.textoLongo);
@@ -181,6 +185,7 @@ export function createEmptyActionPlan(): ActionPlan {
   return {
     id: "",
     what: "",
+    how: "",
     where: "",
     responsible: "",
     responsaveis: [],
@@ -210,4 +215,22 @@ export function createEmptyActionPlan(): ActionPlan {
     attachments: [],
     updatedAt: "",
   };
+}
+
+/** Situação do plano de ação como um todo, exibida acima da tabela do plano. */
+export type SituacaoPlano = "Em dia" | "Com ação atrasada" | "Concluído";
+
+/**
+ * - Concluído: todas as ações finalizadas ("Concluído" ou "Cancelada");
+ * - Com ação atrasada: ao menos uma ação com a situação "Atrasada";
+ * - Em dia: nos demais casos (inclusive com ações pendentes de preenchimento).
+ * Sem ações, não há situação (null).
+ */
+export function situacaoPlano(planos: ActionPlan[]): SituacaoPlano | null {
+  if (planos.length === 0) return null;
+  const finalizada = (p: ActionPlan) =>
+    planoCompleto(p) && (p.status === "Concluído" || p.status === "Cancelada");
+  if (planos.every(finalizada)) return "Concluído";
+  if (planos.some((p) => planoCompleto(p) && p.status === "Atrasada")) return "Com ação atrasada";
+  return "Em dia";
 }

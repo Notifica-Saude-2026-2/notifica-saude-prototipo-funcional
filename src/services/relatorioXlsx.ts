@@ -64,6 +64,14 @@ function resposta(n: NotificacaoRaw, campoId: string): string {
   return r.opcao_selecionada?.valor ?? r.valor_entidade_label ?? r.valor_texto ?? "";
 }
 
+/** Opção escolhida; quando é "Outro", junta o texto especificado (ex.: "Outro: Visitante"). */
+function respostaComOutro(n: NotificacaoRaw, campoId: string): string {
+  const r = n.respostas.find((x) => x.campo_id === campoId);
+  const opcao = r?.opcao_selecionada?.valor;
+  if (opcao?.toLowerCase() === "outro" && r?.valor_texto) return `Outro: ${r.valor_texto}`;
+  return opcao ?? r?.valor_texto ?? "";
+}
+
 /** O Excel não tem fuso horário: o ExcelJS grava a data em UTC. Para a planilha mostrar o mesmo
     horário que a pessoa vê no sistema, a data vai com os componentes do horário local. */
 const paraExcel = (d: Date) => new Date(d.getTime() - d.getTimezoneOffset() * 60000);
@@ -361,10 +369,15 @@ function abaIncidentes(wb: Workbook, itens: NotificacaoRaw[], mostrarAnonima: bo
     { titulo: "Instituição", largura: 16, valor: (n) => n.unidade?.nome ?? "" },
     { titulo: "Setor", largura: 16, valor: (n) => n.setor?.nome ?? "" },
     { titulo: "Descrição", largura: 60, valor: (n) => n.descricao ?? "" },
+    {
+      titulo: "Medidas imediatas",
+      largura: 50,
+      valor: (n) => resposta(n, CAMPO_IDS.MEDIDAS_IMEDIATAS),
+    },
     { titulo: "Envolve paciente", largura: 11, valor: (n) => resposta(n, CAMPO_IDS.ENV_PACIENTE) },
     { titulo: "Faixa etária", largura: 15, valor: (n) => resposta(n, CAMPO_IDS.IDADE) },
     { titulo: "Sexo", largura: 11, valor: (n) => resposta(n, CAMPO_IDS.SEXO) },
-    { titulo: "Papel do notificante", largura: 20, valor: (n) => resposta(n, CAMPO_IDS.PAPEL) },
+    { titulo: "Quem notificou", largura: 24, valor: (n) => respostaComOutro(n, CAMPO_IDS.PAPEL) },
     ...(mostrarAnonima
       ? [
           {
@@ -504,6 +517,7 @@ function abaPlanoAcao(wb: Workbook, itens: NotificacaoRaw[]) {
     { header: "Incidente", width: 10 },
     { header: "Nº", width: 5 },
     { header: "O que será feito", width: 50 },
+    { header: "Como será realizada", width: 50 },
     { header: "Onde", width: 20 },
     { header: "Responsáveis", width: 22 },
     { header: "Previsão de início", width: 13 },
@@ -526,6 +540,7 @@ function abaPlanoAcao(wb: Workbook, itens: NotificacaoRaw[]) {
         `#${n.codigo}`,
         i + 1,
         p.what,
+        p.how ?? "",
         p.where,
         nomesResponsaveis(p),
         dataLocal(p.startDate),
@@ -542,7 +557,7 @@ function abaPlanoAcao(wb: Workbook, itens: NotificacaoRaw[]) {
     });
   }
   estilizarCorpo(ws, 2, linhas.length + 1);
-  [6, 7, 9, 10].forEach((c) =>
+  [7, 8, 10, 11].forEach((c) =>
     ws.getColumn(c).eachCell((cell, r) => r > 1 && (cell.numFmt = "dd/mm/yyyy")),
   );
   linhas.forEach(({ pendente }, i) => {
@@ -553,7 +568,7 @@ function abaPlanoAcao(wb: Workbook, itens: NotificacaoRaw[]) {
       bold: true,
       color: { argb: COR.primaria },
     };
-    const c = ws.getCell(r, 8);
+    const c = ws.getCell(r, 9);
     const v = String(c.value ?? "");
     if (pendente) etiqueta(c, "#fff8e1", "#c8850a");
     else if (v === "Concluído") etiqueta(c, "#dcfce7", "#15803d");
@@ -564,7 +579,7 @@ function abaPlanoAcao(wb: Workbook, itens: NotificacaoRaw[]) {
     ws.getCell("A2").value = "Nenhuma ação registrada nos incidentes deste relatório.";
     ws.getCell("A2").font = { name: "Calibri", size: 10, italic: true, color: { argb: COR.suave } };
   } else {
-    ws.autoFilter = { from: { row: 1, column: 1 }, to: { row: 1, column: 14 } };
+    ws.autoFilter = { from: { row: 1, column: 1 }, to: { row: 1, column: 15 } };
   }
 }
 

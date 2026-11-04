@@ -4,6 +4,10 @@
   align-items: center;
   padding: 24px 16px 48px;
   gap: 20px;
+  /* Fundo cinza da página, ocupando toda a área entre o cabeçalho e o rodapé; o formulário
+     (StepForm) continua com fundo branco. */
+  flex: 1;
+  background: #f4f4f4;
 }
 
 .pageHeader {

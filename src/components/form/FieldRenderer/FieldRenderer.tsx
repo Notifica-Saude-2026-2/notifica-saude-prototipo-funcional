@@ -29,6 +29,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
   outroValue,
   onOutroChange,
   entidade_relacional,
+  ajuda,
 }) => {
   const effectiveTipo =
     entidade_relacional && tipo === "SELECT" && opcoes.length <= 12 ? "RADIO" : tipo;
@@ -113,6 +114,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
           required={obrigatorio}
           error={error}
           maxLength={2000}
+          ajuda={ajuda}
           data-testid={`field-${id}`}
         />
       );

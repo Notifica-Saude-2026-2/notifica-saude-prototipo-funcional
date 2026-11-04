@@ -142,6 +142,8 @@ const FORMACAO_OPTIONS = [
   "Odontologia",
   "Psicologia",
   "Serviço Social",
+  "Terapia Ocupacional",
+  "Fonoaudiologia",
   "Administração",
 ];
 

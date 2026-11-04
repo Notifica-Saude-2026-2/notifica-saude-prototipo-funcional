@@ -210,10 +210,30 @@ export function ActionPlanModal({
           placeholder="Descreva a ação de forma concreta"
           testId="plano-what"
         />
+        <TextField
+          label="2. Como a ação será realizada?"
+          value={plan.how ?? ""}
+          onChange={(value) => update("how", value)}
+          required
+          multiline
+          maxLength={L.textoLongo}
+          invalid={vazio(plan.how)}
+          info={
+            <>
+              Explique os principais passos para colocar a ação em prática, sem apenas repetir o que
+              será feito. Exemplo: para a ação “Instalar sinalização de piso molhado nos
+              corredores”: “Verificar a quantidade de placas necessárias, providenciar sua aquisição
+              e orientar a equipe de limpeza a posicioná-las antes de iniciar a lavagem, mantendo-as
+              no local até que o piso esteja seco.”
+            </>
+          }
+          placeholder="Descreva os principais passos da ação"
+          testId="plano-how"
+        />
 
         <div>
           <p className={styles.formQuestion}>
-            2. Onde será feito?<span className={styles.required}>*</span>
+            3. Onde será feito?<span className={styles.required}>*</span>
           </p>
           <Info>
             Indique o(s) setor(es) ou local(is) em que a ação será executada. Marque um ou mais — se
@@ -274,7 +294,7 @@ export function ActionPlanModal({
 
         <div>
           <p className={styles.formQuestion}>
-            3. Quem será o(s) responsável(eis)?<span className={styles.required}>*</span>
+            4. Quem será o(s) responsável(eis)?<span className={styles.required}>*</span>
           </p>
           <Info>
             Informe quem vai garantir que a ação aconteça. Toda ação precisa de ao menos um
@@ -310,7 +330,7 @@ export function ActionPlanModal({
           </Info>
           <div className={styles.modalGrid}>
             <TextField
-              label="4. Previsão de início"
+              label="5. Previsão de início"
               value={plan.startDate}
               onChange={(value) => update("startDate", value)}
               required
@@ -320,7 +340,7 @@ export function ActionPlanModal({
               testId="plano-start"
             />
             <TextField
-              label="5. Previsão de conclusão"
+              label="6. Previsão de conclusão"
               value={plan.conclusionDate}
               onChange={(value) => update("conclusionDate", value)}
               required
@@ -357,7 +377,7 @@ export function ActionPlanModal({
           </div>
         )}
         <ChoiceField
-          label="6. Precisa de recurso para executar essa ação?"
+          label="7. Precisa de recurso para executar essa ação?"
           value={plan.resource}
           onChange={(value) => {
             update("resource", value);
@@ -404,7 +424,7 @@ export function ActionPlanModal({
           </div>
         )}
         <ChoiceField
-          label="7. Depende da aprovação da Alta Gestão?"
+          label="8. Depende da aprovação da Alta Gestão?"
           value={plan.approval}
           onChange={(value) => update("approval", value)}
           info="Marque “Sim” se a ação só pode acontecer com autorização da Alta Gestão (ex.: investimento, contratação, mudança de processo institucional) e informe qual aprovação é necessária. Isso sinaliza que o prazo pode depender de uma decisão superior."
@@ -420,7 +440,7 @@ export function ActionPlanModal({
           />
         )}
         <TextField
-          label="8. Como vamos comprovar que foi feito?"
+          label="9. Como vamos comprovar que foi feito?"
           value={plan.proof}
           onChange={(value) => update("proof", value)}
           required
@@ -430,7 +450,7 @@ export function ActionPlanModal({
           info="Diga qual evidência vai mostrar que a ação foi realmente executada (ex.: lista de presença do treinamento, foto da sinalização instalada, protocolo publicado)."
         />
         <TextField
-          label="9. Qual resultado esperamos?"
+          label="10. Qual resultado esperamos?"
           value={plan.expectedResult}
           onChange={(value) => update("expectedResult", value)}
           required
@@ -440,7 +460,7 @@ export function ActionPlanModal({
           info="Descreva o efeito que a ação deve produzir (ex.: “reduzir as quedas no corredor”, “nenhum paciente sem pulseira de identificação”). É com base nisso que a eficácia da ação será avaliada depois."
         />
         <TextField
-          label="10. Como vamos saber se funcionou?"
+          label="11. Como vamos saber se funcionou?"
           value={plan.verification}
           onChange={(value) => update("verification", value)}
           required
@@ -450,7 +470,7 @@ export function ActionPlanModal({
           info="Explique como o resultado será medido ou conferido (ex.: auditoria mensal, acompanhamento do número de notificações de queda do setor)."
         />
         <TextField
-          label="11. Quando verificar o resultado?"
+          label="12. Quando verificar o resultado?"
           value={plan.verificationDate}
           onChange={(value) => update("verificationDate", value)}
           required
@@ -459,7 +479,7 @@ export function ActionPlanModal({
           info="Indique quando a eficácia será avaliada (ex.: 30 dias após a conclusão, na auditoria de dezembro) — é preciso dar tempo para a ação surtir efeito antes de avaliar."
         />
         <ChoiceField
-          label="12. Esta ação irá gerar um indicador de acompanhamento?"
+          label="13. Esta ação irá gerar um indicador de acompanhamento?"
           value={plan.indicator}
           onChange={(value) => update("indicator", value)}
           info="Marque “Sim” se a ação vai gerar um indicador para acompanhar ao longo do tempo (ex.: taxa de quedas por 1.000 pacientes-dia) e informe qual. Indicadores mostram se a melhoria se mantém depois que a ação termina."

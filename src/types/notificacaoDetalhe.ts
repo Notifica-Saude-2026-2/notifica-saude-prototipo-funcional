@@ -69,6 +69,9 @@ export type NotificacaoRaw = {
 
 export type PacienteDTO = {
   envolvido: boolean;
+  /** Nº do prontuário ou do atendimento. Sigiloso: só NSP e quem conduz a análise; fora de
+      relatórios e exportações; cada consulta é registrada no histórico. */
+  prontuario: string | null;
   idade: string | null;
   sexo: string | null;
 };
@@ -101,6 +104,8 @@ export type NotificacaoDetalheDTO = {
   dataCadastroCompleto: string;
   dataAtualizacao: string; // Nova propriedade para incluir hora
   descricao: string | null;
+  /** Medidas adotadas imediatamente após a identificação do incidente (opcional). */
+  medidasImediatas: string | null;
   anonima: boolean;
   unidade: string;
   setor: string;
@@ -130,10 +135,16 @@ export const CAMPO_IDS = {
   SETOR: "55555555-5555-4555-b555-000000000003",
   DESCRICAO: "55555555-5555-4555-b555-000000000004",
   PAPEL: "55555555-5555-4555-b555-000000000005",
+  // Campo novo (ajuste pontual de 03/11/2026): medidas adotadas logo após o incidente.
+  // ID provisório, a confirmar com o backend.
+  MEDIDAS_IMEDIATAS: "55555555-5555-4555-b555-000000000014",
   NOME_OPC: "55555555-5555-4555-b555-000000000006",
   CONTATO_OPC: "55555555-5555-4555-b555-000000000007",
   // ⚠️ PROVISÓRIO — não existe no seed.ts do backend ainda. Campo novo pedido pela proponente
   // (fluxo de Investigação ajustado). Confirmar com o backend o ID definitivo antes de integrar
   // de verdade; por ora serve só para o protótipo front-end funcionar de ponta a ponta.
   HORARIO: "55555555-5555-4555-b555-000000000012",
+  // Campo novo (ajuste pontual de 03/11/2026): nº do prontuário ou do atendimento do paciente.
+  // ID provisório, a confirmar com o backend.
+  PRONTUARIO: "55555555-5555-4555-b555-000000000013",
 } as const;
